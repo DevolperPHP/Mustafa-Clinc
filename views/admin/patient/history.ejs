@@ -1,0 +1,27 @@
+<%- include('../../layout/navbar') -%>
+<div class="history"><br>
+    <p class="title">سجل المرضى</p>
+
+    <div class="container">
+        <table class="table table-stripped table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>الاسم</th>
+                <th>تاريخ التسجيل</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% for (let i = 0; i < data.length; i++) {%>
+                <tr onclick="window.location.href='/patient/get-by-id/<%= data[i]._id%>'">
+                    <td><%= i+1%></td>
+                    <td><%= data[i].name%></td>
+                    <td><%= data[i].dateAdded%></td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+    </div>
+</div>
+<%- include('../../layout/footer') -%>
