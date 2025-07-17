@@ -1,0 +1,32 @@
+<%- include('../../layout/navbar') -%>
+
+<div class="bills"><br>
+    <p class="title">الحسابات</p>
+    <div class="container"><br>
+        <div class="tools">
+            <p class="text-danger">الرصيد المطلوب : <%= negativeBalance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></p>
+            <p class="text-success">الرصيد المدفوع : <%= user.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></p>
+        </div>
+        <table class="table table-stripped table-hover">
+            <thead>
+                <th>الاسم</th>
+                <th>الرصيد</th>
+            </thead>
+
+            <tbody>
+                <% patients.forEach(data => {%>
+                    <tr onclick="window.location.href = '/bills/get/<%= data._id%>'">
+                        <td><%= data.name%></td>
+                        <% if(data.balance < 0){%>
+                            <td class="text-danger"><%= data.balance%></td>
+                        <%} else {%>
+                            <td class="text-success"><%= data.balance%></td>
+                        <%} %>
+                    </tr>
+                <%}) %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../../layout/footer') -%>

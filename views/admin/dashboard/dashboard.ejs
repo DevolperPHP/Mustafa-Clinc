@@ -1,0 +1,58 @@
+<%- include('../../layout/navbar') -%>
+
+    <div class="dashboard">
+        <br>
+        <p class="title">لوحة التحكم</p>
+        <div class="dash-cards">
+            <div class="container">
+            <div class="dash-card" onclick="window.location.href='/patient/history'">
+                <div class="symbol">
+                    <p><ion-icon name="folder"></ion-icon></p>
+                </div>
+                <p class="text">سجل المرضى</p>
+            </div>
+            <div class="dash-card" onclick="window.location.href='/patient/add'">
+                <div class="symbol">
+                    <p><ion-icon name="person-add"></ion-icon></p>
+                </div>
+                <p class="text">اضافة مريض</p>
+            </div>
+
+            <div class="dash-card" onclick="window.location.href='/course'">
+                <div class="symbol">
+                    <p><ion-icon name="layers"></ion-icon></p>
+                </div>
+                <p class="text">الكورسات</p>
+            </div>
+
+            <div class="dash-card" onclick="window.location.href='/tests'">
+                <div class="symbol">
+                    <p><ion-icon name="extension-puzzle"></ion-icon></p>
+                </div>
+                <p class="text">الاختبارات</p>
+            </div>
+            <div class="dash-card" onclick="window.location.href='/tests'">
+                <div class="symbol">
+                    <p><ion-icon name="analytics"></ion-icon></p>
+                </div>
+                <p class="text">التحليل</p>
+            </div>
+
+            <div class="dash-card" onclick="window.location.href='/exercise'">
+                <div class="symbol">
+                    <p><ion-icon name="barbell"></ion-icon></p>
+                </div>
+                <p class="text">التمارين</p>
+            </div>
+
+            <div class="dash-card" onclick="window.location.href='/bills'">
+                <div class="symbol">
+                    <p><ion-icon name="wallet"></ion-icon></p>
+                </div>
+                <p class="text">الحسابات</p>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <%- include('../../layout/footer') -%>

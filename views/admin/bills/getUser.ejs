@@ -1,0 +1,98 @@
+<%- include('../../layout/navbar') -%>
+<% if(suc.length > 0){%>
+    <script>
+        Swal.fire({
+            icon: 'success',
+            text: `<%= suc%>`
+        })
+    </script>
+<%} %>
+<div class="user-bills"><br>
+    <p class="title"><%= data.name%></p><br>
+    <% if(data.balance < 0){%>
+            <p class="balance text-danger">الرصيد : <%= data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></p>
+    <%} else {%>
+            <p class="balance text-success">الرصيد : <%= data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></p>
+    <%} %>
+    <div class="container">
+        <p class="table-title text-danger">الغير مدفوعة</p>
+        <table class="table table-stripped table-hover">
+            <tr>
+                <th>الكورس</th>
+                <th>التاريخ</th>
+                <th>السعر</th>
+                <th>المتبقي</th>
+                <th>دفع</th>
+            </tr>
+
+            <% if(notPaid.length > 0){%>
+                <% notPaid.forEach(course => {%>
+                <tr>
+                    <td><%= course.sessions%></td>
+                    <td><%= course.Date%></td>
+                    <td><%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></td>
+                    <td class="text-danger"><%= course.left%></td>
+                    <td><button class="btn btn-success" onclick="window.location.href='/bills/pay/<%= data._id%>/<%= course.code%>'">دفع</button></td>
+                </tr>
+            <%}) %>
+            <%} else {%>
+                <tr>
+                    <td colspan="5">لا توجد كورسات غير مدفوعة</td>
+                </tr>
+            <%}%>
+        </table>
+<br><hr><br>
+        <p class="table-title text-success">المدفوعة</p>
+        <table class="table table-stripped table-hover">
+            <tr>
+                <th>الكورس</th>
+                <th>التاريخ</th>
+                <th>السعر</th>
+                <th>المتبقي</th>
+            </tr>
+
+            <% if(paid.length > 0){%>
+                <% paid.forEach(course => {%>
+                <tr>
+                    <td><%= course.sessions%></td>
+                    <td><%= course.Date%></td>
+                    <td><%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></td>
+                    <td class="text-success"><%= course.left.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></td>
+                </tr>
+            <%}) %>
+            <%} else {%>
+                <tr>
+                    <td colspan="4">لا توجد كورسات مدفوعة</td>
+                </tr>
+            <%} %>
+        </table>
+        <br>
+        <hr>
+<br>
+        <p class="table-title">سجل الدفع</p>
+        <table class="table table-stripped table-hover">
+            <tr>
+                <th>الكورس</th>
+                <th>تاريخ تسجيل الكورس</th>
+                <th>تاريخ الدفع</th>
+                <th>المبلغ المدفوع</th>
+            </tr>
+
+            <% if(data.purchase.length > 0){%>
+                <% data.purchase.forEach(purchase => {%>
+                <tr>
+                    <td><%= purchase.course%></td>
+                    <td><%= purchase.courseDate%></td>
+                    <td><%= purchase.payDate%></td>
+                    <td><%= purchase.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></td>
+                </tr>
+            <%}) %>
+            <%} else {%>
+                <tr>
+                    <td colspan="4">لا يوجد سجل دفع</td>
+                </tr>
+            <%} %>
+        </table>
+    </div>
+</div><br><br><br>
+<%- include('../../layout/footer') -%>
