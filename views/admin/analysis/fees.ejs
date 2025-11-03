@@ -1,0 +1,35 @@
+<%- include('../../layout/navbar') -%>
+
+    <div class="fees"><br>
+        <p class="title">المصاريف اليومية - <%= startDate%> - <%= endDate%></p>
+        <div class="container">
+            <table class="table table-strippted">
+                <thead>
+                    <tr>
+                        <th>العوان</th>
+                        <th>المبلغ</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% fees.forEach(data=> {%>
+                        <tr>
+                            <td>
+                                <%= data.name%>
+                            </td>
+                            <td>
+                                <%= data.price%>
+                            </td>
+                            <td>
+                                <%= data.Date%>
+                            </td>
+                        </tr>
+                        <%}) %>
+                        <tr>
+                            <td colspan="3">المجموع <%= total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%> دينار عراقي</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <%- include('../../layout/footer') -%>

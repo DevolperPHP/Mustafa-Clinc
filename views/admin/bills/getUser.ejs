@@ -1,0 +1,288 @@
+<%- include('../../layout/navbar') -%>
+    <% if(suc.length> 0){%>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                html: `<%- suc[0].replace(/\n/g, '<br>') %>`,
+                customClass: {
+                    popup: 'swal-wide'
+                }
+            });
+        </script>
+        <style>
+            .swal-wide {
+                width: 600px !important;
+                /* make it wider */
+                text-align: right;
+                /* align text to the right */
+                direction: rtl;
+                /* right-to-left text */
+                font-family: 'Arial', sans-serif;
+                font-size: 18px;
+            }
+        </style>
+        <%} %>
+            <div class="user-bills"><br>
+                <p class="title">
+                    <%= data.name%>
+                </p><br>
+                <% if(data.balance < 0){%>
+                    <p class="balance text-danger">الرصيد : <%=
+                            data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
+                    </p>
+                    <%} else {%>
+                        <p class="balance text-success">الرصيد : <%=
+                                data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
+                        </p>
+                        <%} %>
+                            <div class="container">
+                                <p class="table-title text-danger">الغير مدفوعة</p>
+                                <table class="table table-stripped table-hover">
+                                    <tr>
+                                        <th>الكورس</th>
+                                        <th>التاريخ</th>
+                                        <th>السعر</th>
+                                        <th>المتبقي</th>
+                                        <th>دفع</th>
+                                    </tr>
+
+                                    <% if(notPaid.length> 0){%>
+                                        <% notPaid.forEach(course=> {%>
+                                            <tr>
+                                                <td>
+                                                    <%= course.sessions%>
+                                                    <% if(course.discountType){ %>
+                                                        <br><small class="text-success">
+                                                            خصم: <%= course.discountType === 'percentage' ? course.discountValue + '%' : course.discountValue.toLocaleString() + ' د.ك' %>
+                                                            (<%= course.discountAmount.toLocaleString() %> د.ك)
+                                                        </small>
+                                                        <% if(course.originalPrice){ %>
+                                                            <br><small class="text-muted">
+                                                                السعر الأصلي: <%= course.originalPrice.toLocaleString() %> د.ك
+                                                            </small>
+                                                        <% } %>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <%= course.Date%>
+                                                </td>
+                                                <td>
+                                                    <%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
+                                                    <% if(course.discountType){ %>
+                                                        <br><small class="text-success">
+                                                            بعد الخصم
+                                                        </small>
+                                                    <% } %>
+                                                </td>
+                                                <td class="text-danger">
+                                                    <%= course.left%>
+                                                </td>
+                                                <td>
+                                                    <% if(!course.discountType){ %>
+                                                        <button class="btn btn-info btn-sm mb-1"
+                                                                onclick="showDiscountModal('<%= course.code%>')">تطبيق خصم</button><br>
+                                                    <% } else { %>
+                                                        <form action="/bills/remove-discount/<%= data._id%>/<%= course.code%>" method="post" style="display: inline;">
+                                                            <button type="submit" class="btn btn-warning btn-sm mb-1">إلغاء الخصم</button>
+                                                        </form><br>
+                                                    <% } %>
+                                                    <button class="btn btn-success"
+                                                            onclick="window.location.href='/bills/pay/<%= data._id%>/<%= course.code%>'">دفع</button>
+                                                </td>
+                                            </tr>
+                                            <%}) %>
+                                                <%} else {%>
+                                                    <tr>
+                                                        <td colspan="5">لا توجد كورسات غير مدفوعة</td>
+                                                    </tr>
+                                                    <%}%>
+                                </table>
+                                <br>
+                                <hr><br>
+                                <p class="table-title text-success">المدفوعة</p>
+                                <table class="table table-stripped table-hover">
+                                    <tr>
+                                        <th>الكورس</th>
+                                        <th>التاريخ</th>
+                                        <th>السعر</th>
+                                        <th>المتبقي</th>
+                                    </tr>
+
+                                    <% if(paid.length> 0){%>
+                                        <% paid.forEach(course=> {%>
+                                            <tr>
+                                                <td>
+                                                    <%= course.sessions%>
+                                                </td>
+                                                <td>
+                                                    <%= course.Date%>
+                                                </td>
+                                                <td>
+                                                    <%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
+                                                </td>
+                                                <td class="text-success">
+                                                    <%= course.left.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
+                                                </td>
+                                            </tr>
+                                            <%}) %>
+                                                <%} else {%>
+                                                    <tr>
+                                                        <td colspan="4">لا توجد كورسات مدفوعة</td>
+                                                    </tr>
+                                                    <%} %>
+                                </table>
+                                <br>
+                                <hr>
+                                <br>
+                                <p class="table-title">سجل الدفع</p>
+                                <table class="table table-stripped table-hover">
+                                    <tr>
+                                        <th>الكورس</th>
+                                        <th>تاريخ تسجيل الكورس</th>
+                                        <th>تاريخ الدفع</th>
+                                        <th>المبلغ المدفوع</th>
+                                        <th>الفاتورة</th>
+                                    </tr>
+
+                                    <% if(data.purchase.length> 0){%>
+                                        <% purchases.forEach(purchase=> {%>
+                                            <form action="/bills/download/<%= purchase.code%>" method="get">
+                                                <tr>
+                                                    <td>
+                                                        <%= purchase.course%>
+                                                    </td>
+                                                    <td>
+                                                        <%= purchase.courseDate%>
+                                                    </td>
+                                                    <td>
+                                                        <%= purchase.payDate%>
+                                                    </td>
+                                                    <td>
+                                                        <%= purchase.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","
+                                                            )%>
+                                                    </td>
+                                                    <td>
+                                                        <button class="btn btn-success" type="submit">تحميل</button>
+                                                    </td>
+                                                </tr>
+                                            </form>
+                                            <%}) %>
+                                                <%} else {%>
+                                                    <tr>
+                                                        <td colspan="4">لا يوجد سجل دفع</td>
+                                                    </tr>
+                                                    <%} %>
+                                </table>
+
+                                <!-- Discount History Section -->
+                                <% if(data.discounts && data.discounts.length > 0) { %>
+                                    <br>
+                                    <hr>
+                                    <br>
+                                    <p class="table-title">سجل الخصومات</p>
+                                    <table class="table table-stripped table-hover">
+                                        <tr>
+                                            <th>الكورس</th>
+                                            <th>نوع الخصم</th>
+                                            <th>قيمة الخصم</th>
+                                            <th>مبلغ الخصم</th>
+                                            <th>تاريخ التطبيق</th>
+                                            <th>طبق بواسطة</th>
+                                        </tr>
+                                        <% data.discounts.slice().reverse().forEach(discount => { %>
+                                            <tr>
+                                                <td><%= discount.billCode %></td>
+                                                <td><%= discount.discountType === 'percentage' ? 'نسبة مئوية' : 'مبلغ ثابت' %></td>
+                                                <td>
+                                                    <%= discount.discountType === 'percentage'
+                                                        ? discount.discountValue + '%'
+                                                        : discount.discountValue.toLocaleString() + ' د.ك' %>
+                                                </td>
+                                                <td class="text-success">
+                                                    <%= discount.discountAmount.toLocaleString() %> د.ك
+                                                </td>
+                                                <td><%= discount.date %></td>
+                                                <td><%= discount.appliedBy %></td>
+                                            </tr>
+                                        <% }) %>
+                                    </table>
+                                <% } %>
+                            </div>
+            </div>
+
+<!-- Discount Modal -->
+<div id="discountModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: white; margin: 10% auto; padding: 20px; width: 500px; border-radius: 10px; direction: rtl;">
+        <h3 style="text-align: center;">تطبيق خصم</h3>
+        <form id="discountForm" method="post">
+            <div style="margin: 15px 0;">
+                <label>نوع الخصم:</label><br>
+                <input type="radio" name="discountType" value="percentage" id="percentage" checked> نسبة مئوية
+                <input type="radio" name="discountType" value="fixed" id="fixed" style="margin-right: 20px;"> مبلغ ثابت
+            </div>
+            <div style="margin: 15px 0;">
+                <label id="discountValueLabel" for="discountValue">قيمة الخصم (%) :</label><br>
+                <input type="number" name="discountValue" id="discountValue" required style="width: 100%; padding: 8px; direction: rtl;" min="1" max="100">
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit" class="btn btn-success">تطبيق الخصم</button>
+                <button type="button" class="btn btn-secondary" onclick="hideDiscountModal()" style="margin-right: 10px;">إلغاء</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let currentBillCode = '';
+
+function showDiscountModal(code) {
+    currentBillCode = code;
+    document.getElementById('discountModal').style.display = 'block';
+}
+
+function hideDiscountModal() {
+    document.getElementById('discountModal').style.display = 'none';
+    currentBillCode = '';
+}
+
+// Update label based on discount type
+document.addEventListener('change', function(e) {
+    if (e.target.name === 'discountType') {
+        const label = document.getElementById('discountValueLabel');
+        const input = document.getElementById('discountValue');
+        if (e.target.value === 'percentage') {
+            label.textContent = 'قيمة الخصم (%) :';
+            input.max = '100';
+            input.placeholder = 'أدخل النسبة (1-100)';
+        } else {
+            label.textContent = 'قيمة الخصم (د.ك) :';
+            input.max = '';
+            input.placeholder = 'أدخل المبلغ';
+        }
+    }
+});
+
+// Handle form submission
+document.getElementById('discountForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const discountType = formData.get('discountType');
+    const discountValue = formData.get('discountValue');
+
+    // Update form action to include the bill code
+    this.action = `/bills/apply-discount/<%= data._id%>/${currentBillCode}`;
+
+    this.submit();
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('discountModal');
+    if (event.target == modal) {
+        hideDiscountModal();
+    }
+}
+</script>
+
+<br><br><br>
+            <%- include('../../layout/footer') -%>

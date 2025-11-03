@@ -1,0 +1,114 @@
+<%- include('../../layout/navbar') -%>
+    <div class="history"><br>
+        <p class="title">سجل المرضى</p>
+        <div class="container">
+            <div class="autocomplete" style="width:300px;">
+                <input autocomplete="off" id="myInput" type="text" placeholder="بحث">
+            </div>
+            <table class="table table-stripped table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>الاسم</th>
+                        <th>تاريخ التسجيل</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <% for (let i=0; i < data.length; i++) {%>
+                        <tr onclick="window.location.href='/patient/get-by-id/<%= data[i]._id%>'">
+                            <td>
+                                <%= i+1%>
+                            </td>
+                            <td>
+                                <%= data[i].name%>
+                            </td>
+                            <td>
+                                <%= data[i].dateAdded%>
+                            </td>
+                        </tr>
+                        <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+    <script>
+        function autocomplete(inp, arr) {
+            let currentFocus;
+            const fuse = new Fuse(arr, {
+                threshold: 0.4,
+            });
+
+            inp.addEventListener("input", function () {
+                let a, b, val = this.value;
+                closeAllLists();
+                if (!val) return false;
+                currentFocus = -1;
+
+                a = document.createElement("DIV");
+                a.setAttribute("id", this.id + "autocomplete-list");
+                a.setAttribute("class", "autocomplete-items");
+                this.parentNode.appendChild(a);
+
+                const results = fuse.search(val);
+                results.forEach(({ item }) => {
+                    b = document.createElement("DIV");
+                    b.innerHTML = `<strong>${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
+                    b.innerHTML += `<input type='hidden' value='${item}'>`;
+                    b.addEventListener("click", function () {
+                        window.location.href = `/patient/search/${String(this.getElementsByTagName("input")[0].value)}`
+                        closeAllLists();
+                    });
+                    a.appendChild(b);
+                });
+            });
+
+            inp.addEventListener("keydown", function (e) {
+                let x = document.getElementById(this.id + "autocomplete-list");
+                if (x) x = x.getElementsByTagName("div");
+                if (e.keyCode == 40) {
+                    currentFocus++;
+                    addActive(x);
+                } else if (e.keyCode == 38) {
+                    currentFocus--;
+                    addActive(x);
+                } else if (e.keyCode == 13) {
+                    e.preventDefault();
+                    if (currentFocus > -1 && x) x[currentFocus].click();
+                }
+            });
+
+            function addActive(x) {
+                if (!x) return false;
+                removeActive(x);
+                if (currentFocus >= x.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = x.length - 1;
+                x[currentFocus].classList.add("autocomplete-active");
+            }
+
+            function removeActive(x) {
+                for (let i = 0; i < x.length; i++) {
+                    x[i].classList.remove("autocomplete-active");
+                }
+            }
+
+            function closeAllLists(elmnt) {
+                const x = document.getElementsByClassName("autocomplete-items");
+                for (let i = 0; i < x.length; i++) {
+                    if (elmnt != x[i] && elmnt != inp) {
+                        x[i].parentNode.removeChild(x[i]);
+                    }
+                }
+            }
+
+            document.addEventListener("click", function (e) {
+                closeAllLists(e.target);
+            });
+        }
+
+        const data = "<%= names %>".split(",");
+        autocomplete(document.getElementById("myInput"), data);
+    </script>
+    <%- include('../../layout/footer') -%>

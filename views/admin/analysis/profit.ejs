@@ -1,0 +1,113 @@
+<%- include('../../layout/navbar') -%>
+
+    <div class="fees"><br>
+        <p class="title">تحليل اموال عام - <%= startDate%> - <%= endDate%>
+        </p>
+        <div class="container">
+            <br>
+            <div class="report">
+                <p>مجموع الارباح : <% if(totalProfit > 0){%><span class="text-success"><%= totalProfit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} else {%><span class="text-danger"><%= totalProfit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} %></p>
+                <p>مجموع المدفوعات : <% if(totalPaid > 0){%><span class="text-success"><%= totalPaid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} else {%><span class="text-danger"><%= totalPaid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} %></p>
+                <p>مجموع المصاريف : <% if(totalFees < 0){%><span class="text-success"><%= totalFees.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} else {%><span class="text-danger"><%= totalFees.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} %></p>
+                <p>مجموع الديون : <% if(totalUnpaid < 0){%><span class="text-success"><%= totalUnpaid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} else {%><span class="text-danger"><%= totalUnpaid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")%></span><%} %></p>
+            </div>
+            <p class="mini-title">المدفوعات</p>
+            <table class="table table-strippted">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>المبلغ</th>
+                        <th>الكورس</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% paidBills.forEach(data=> {%>
+                        <tr>
+                            <td>
+                                <%= data.patientName%>
+                            </td>
+                            <td>
+                                <%= data.price%>
+                            </td>
+                            <td>
+                                <%= data.sessions%>
+                            </td>
+                            <td>
+                                <%= data.Date%>
+                            </td>
+                        </tr>
+                        <%}) %>
+                            <tr>
+                                <td colspan="4">المجموع <%= totalPaid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","
+                                        )%> دينار عراقي</td>
+                            </tr>
+                </tbody>
+            </table>
+            <br>
+            <p class="mini-title">الديون</p>
+            <table class="table table-strippted">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>المبلغ</th>
+                        <th>الكورس</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% unpaidBills.forEach(data=> {%>
+                        <tr>
+                            <td>
+                                <%= data.patientName%>
+                            </td>
+                            <td>
+                                <%= data.left%>
+                            </td>
+                            <td>
+                                <%= data.sessions%>
+                            </td>
+                            <td>
+                                <%= data.Date%>
+                            </td>
+                        </tr>
+                        <%}) %>
+                            <tr>
+                                <td colspan="4">المجموع <%= totalUnpaid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","
+                                        )%> دينار عراقي</td>
+                            </tr>
+                </tbody>
+            </table>
+            <br>
+            <p class="mini-title">المصاريف</p>
+            <table class="table table-strippted">
+                <thead>
+                    <tr>
+                        <th>العوان</th>
+                        <th>المبلغ</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% filteredFees.forEach(data=> {%>
+                        <tr>
+                            <td>
+                                <%= data.name%>
+                            </td>
+                            <td>
+                                <%= data.price%>
+                            </td>
+                            <td>
+                                <%= data.Date%>
+                            </td>
+                        </tr>
+                        <%}) %>
+                            <tr>
+                                <td colspan="3">المجموع <%= totalFees.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
+                                        دينار عراقي</td>
+                            </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <%- include('../../layout/footer') -%>

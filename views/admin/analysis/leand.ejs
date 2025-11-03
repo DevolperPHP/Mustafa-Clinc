@@ -1,0 +1,39 @@
+<%- include('../../layout/navbar') -%>
+
+    <div class="fees"><br>
+        <p class="title">الديون - <%= startDate%> - <%= endDate%></p>
+        <div class="container">
+            <table class="table table-strippted">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>المبلغ</th>
+                        <th>الكورس</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% bills.forEach(data=> {%>
+                        <tr>
+                            <td>
+                                <%= data.patientName%>
+                            </td>
+                            <td>
+                                <%= data.left%>
+                            </td>
+                            <td>
+                                <%= data.sessions%>
+                            </td>
+                            <td>
+                                <%= data.Date%>
+                            </td>
+                        </tr>
+                        <%}) %>
+                        <tr>
+                            <td colspan="4">المجموع <%= total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%> دينار عراقي</td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <%- include('../../layout/footer') -%>

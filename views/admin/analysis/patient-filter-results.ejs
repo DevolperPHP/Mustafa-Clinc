@@ -1,0 +1,330 @@
+<%- include('../../layout/navbar') -%>
+
+<div class="dashboard" dir="rtl">
+    <br>
+    <p class="title">نتائج البحث - تحليل المراجعين</p>
+    <br>
+
+    <div class="container-fluid">
+        <!-- Summary Header -->
+        <div class="results-header">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4><ion-icon name="people"></ion-icon> إجمالي النتائج: <span class="badge bg-success"><%= totalCount %></span></h4>
+                            <p class="text-muted mb-0">
+                                <% if (totalCount > 0) { %>
+                                    تم العثور على <strong><%= totalCount %></strong> مريض يطابق المعايير المحددة
+                                <% } else { %>
+                                    لم يتم العثور على أي مرضى يطابقون المعايير المحددة
+                                <% } %>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="/analysis/patients" class="btn btn-success">
+                                <ion-icon name="search"></ion-icon> بحث جديد
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applied Filters -->
+        <% if (totalCount > 0) { %>
+        <div class="applied-filters-section">
+            <div class="card">
+                <div class="card-header">
+                    <h5><ion-icon name="filter"></ion-icon> الفلاتر المطبقة</h5>
+                </div>
+                <div class="card-body">
+                    <div class="filters-list">
+                        <% if (filters.gender) { %>
+                            <span class="filter-badge"><strong>الجنس:</strong> <%= filters.gender %></span>
+                        <% } %>
+                        <% if (filters.study) { %>
+                            <span class="filter-badge"><strong>التحصيل:</strong> <%= filters.study %></span>
+                        <% } %>
+                        <% if (filters.address) { %>
+                            <span class="filter-badge"><strong>العنوان:</strong> <%= filters.address %></span>
+                        <% } %>
+                        <% if (filters.relationship) { %>
+                            <span class="filter-badge"><strong>الحالة الاجتماعية:</strong> <%= filters.relationship %></span>
+                        <% } %>
+                        <% if (filters.childrenMin || filters.childrenMax) { %>
+                            <span class="filter-badge"><strong>عدد الأطفال:</strong> <%= filters.childrenMin || '0' %> - <%= filters.childrenMax || '∞' %></span>
+                        <% } %>
+                        <% if (filters.familyRankMin || filters.familyRankMax) { %>
+                            <span class="filter-badge"><strong>التسلسل:</strong> <%= filters.familyRankMin || '0' %> - <%= filters.familyRankMax || '∞' %></span>
+                        <% } %>
+                        <% if (filters.health) { %>
+                            <span class="filter-badge"><strong>الجانب الصحي:</strong> <%= filters.health %></span>
+                        <% } %>
+                        <% if (filters.psycho) { %>
+                            <span class="filter-badge"><strong>الجانب النفسي:</strong> <%= filters.psycho %></span>
+                        <% } %>
+                        <% if (filters.familyStatus) { %>
+                            <span class="filter-badge"><strong>الجانب الاجتماعي:</strong> <%= filters.familyStatus %></span>
+                        <% } %>
+                        <% if (filters.job) { %>
+                            <span class="filter-badge"><strong>الوظيفة:</strong> <%= filters.job %></span>
+                        <% } %>
+                        <% if (filters.doctorDiagnose) { %>
+                            <span class="filter-badge"><strong>تشخيص الطبيب:</strong> <%= filters.doctorDiagnose %></span>
+                        <% } %>
+                        <% if (filters.therapistDiagnose) { %>
+                            <span class="filter-badge"><strong>تشخيص الأخصائي:</strong> <%= filters.therapistDiagnose %></span>
+                        <% } %>
+                        <% if (filters.sessionsMin || filters.sessionsMax) { %>
+                            <span class="filter-badge"><strong>عدد الجلسات:</strong> <%= filters.sessionsMin || '0' %> - <%= filters.sessionsMax || '∞' %></span>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+        <!-- Patients Table -->
+        <div class="results-table-section">
+            <div class="card">
+                <div class="card-body p-0">
+                    <% if (patients.length === 0) { %>
+                        <div class="no-results">
+                            <ion-icon name="search-outline" style="font-size: 80px; color: #ccc;"></ion-icon>
+                            <h4>لا توجد نتائج</h4>
+                            <p>جرب تغيير المعايير والبحث مرة أخرى</p>
+                        </div>
+                    <% } else { %>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم</th>
+                                        <th>الجنس</th>
+                                        <th>التحصيل</th>
+                                        <th>العنوان</th>
+                                        <th>الحالة الاجتماعية</th>
+                                        <th>عدد الأطفال</th>
+                                        <th>التسلسل</th>
+                                        <th>الوظيفة</th>
+                                        <th>الصحة</th>
+                                        <th>النفسية</th>
+                                        <th>الاجتماعية</th>
+                                        <th>عدد الجلسات</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% patients.forEach((patient) => {
+                                        let totalSessions = 0;
+                                        if (patient.course && patient.course.length > 0) {
+                                            totalSessions = patient.course.reduce((total, course) => {
+                                                if (course.sessions && typeof course.sessions === 'object') {
+                                                    return total + Object.keys(course.sessions).length;
+                                                }
+                                                return total;
+                                            }, 0);
+                                        }
+                                    %>
+                                        <tr>
+                                            <td><strong><%= patient.name %></strong></td>
+                                            <td><%= patient.gender || '-' %></td>
+                                            <td><%= patient.study || '-' %></td>
+                                            <td><%= patient.address || '-' %></td>
+                                            <td><%= patient.relationship || '-' %></td>
+                                            <td><%= patient.children || '-' %></td>
+                                            <td><%= patient.familyRank || '-' %></td>
+                                            <td><%= patient.job || '-' %></td>
+                                            <td>
+                                                <% if (patient.health) { %>
+                                                    <span class="status-badge status-<%= patient.health === 'جيد' ? 'good' : patient.health === 'متوسط' ? 'medium' : 'weak' %>">
+                                                        <%= patient.health %>
+                                                    </span>
+                                                <% } else { %> - <% } %>
+                                            </td>
+                                            <td>
+                                                <% if (patient.psycho) { %>
+                                                    <span class="status-badge status-<%= patient.psycho === 'جيد' ? 'good' : patient.psycho === 'متوسط' ? 'medium' : 'weak' %>">
+                                                        <%= patient.psycho %>
+                                                    </span>
+                                                <% } else { %> - <% } %>
+                                            </td>
+                                            <td>
+                                                <% if (patient.RelationshipAndFamily) { %>
+                                                    <span class="status-badge status-<%= patient.RelationshipAndFamily === 'جيد' ? 'good' : patient.RelationshipAndFamily === 'متوسط' ? 'medium' : 'weak' %>">
+                                                        <%= patient.RelationshipAndFamily %>
+                                                    </span>
+                                                <% } else { %> - <% } %>
+                                            </td>
+                                            <td><strong><%= totalSessions %></strong></td>
+                                            <td>
+                                                <a href="/patient/get-by-id/<%= patient._id %>" class="btn btn-sm btn-primary">
+                                                    <ion-icon name="eye"></ion-icon> عرض
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.results-header {
+    margin-bottom: 25px;
+}
+
+.badge {
+    font-size: 18px;
+    padding: 8px 15px;
+}
+
+.applied-filters-section {
+    margin-bottom: 25px;
+}
+
+.filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.filter-badge {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #c8e6c9;
+    direction: rtl;
+    text-align: right;
+}
+
+.results-table-section .card {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+@media (min-width: 1200px) {
+    .table th, .table td {
+        padding: 15px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .table th, .table td {
+        padding: 18px 12px;
+        font-size: 14px;
+    }
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #a4c842;
+    font-weight: 600;
+    color: #333;
+    padding: 15px 12px;
+    font-size: 13px;
+    text-align: center;
+    white-space: nowrap;
+    direction: rtl;
+}
+
+.table td {
+    padding: 12px;
+    vertical-align: middle;
+    text-align: center;
+    font-size: 13px;
+    white-space: nowrap;
+    direction: rtl;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(164, 200, 66, 0.08);
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status-good {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-weak {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.no-results {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+.no-results h4 {
+    color: #666;
+    margin: 20px 0 10px 0;
+}
+
+.no-results p {
+    color: #999;
+    font-size: 16px;
+}
+
+.btn-primary {
+    background: #a4c842;
+    border: none;
+    direction: rtl;
+}
+
+.btn-primary:hover {
+    background: #8fb235;
+}
+
+@media (max-width: 768px) {
+    .table {
+        font-size: 11px;
+    }
+
+    .table th, .table td {
+        padding: 8px 6px;
+    }
+
+    .filters-list {
+        flex-direction: column;
+    }
+
+    .filter-badge {
+        width: 100%;
+    }
+}
+</style>
+
+<%- include('../../layout/footer') -%>

@@ -1,0 +1,57 @@
+<%- include('../../layout/navbar') -%>
+    <div class="notes"><br>
+        <p class="title">المتابعة</p><br>
+        <div class="container">
+            <form style="display: none;" action="/patient/notes/add/<%= data._id%>?_method=PUT" method="post">
+                <div class="form-group">
+                    <input name="title" type="text" class="form-control" id="exampleFormControlInput1"
+                        placeholder="عنوان الملاحظة" value="الملاحظات النفسة" required>
+                </div>
+                <br>
+                <div class="form-group">
+                    <textarea name="note" class="form-control" placeholder="الملاحظات النفسية" id="exampleFormControlTextarea1" rows="3">
+                        <%= data.psychoNote%>
+                    </textarea>
+                </div>
+                <br>
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-success">اضافة</button>
+                </div>
+            </form>
+            
+
+            <% data.otherNotes.forEach(note => {%>
+                <br><div class="card">
+                <div class="card-header">
+                    <%= note.title %> - <%= note.Date%>
+                </div>
+                <div class="card-body">
+                    <figure>
+                        <blockquote class="blockquote">
+                            <p>
+                                <%= note.note%>
+                            </p>
+                        </blockquote>
+                    </figure>
+                </div>
+            </div>
+            <%}) %>
+<br>
+
+            <form action="/patient/notes/add/<%= data._id%>?_method=PUT" method="post">
+                <div class="form-group">
+                    <input name="title" type="text" class="form-control" id="exampleFormControlInput1"
+                        placeholder="عنوان الملاحظة" required>
+                </div>
+                <br>
+                <div class="form-group">
+                    <textarea name="note" class="form-control" placeholder="الملاحظة" id="exampleFormControlTextarea1" rows="3"></textarea>
+                </div>
+                <br>
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-success">اضافة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <%- include('../../layout/footer') -%>

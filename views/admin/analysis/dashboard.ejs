@@ -1,0 +1,75 @@
+<%- include('../../layout/navbar') -%>
+
+    <div class="dashboard">
+        <br>
+        <p class="title">التحليل</p>
+        <br>
+        <div class="container">
+            <div class="tools">
+                <div>
+                    <label for="">التاريخ الابتدائي</label>
+                    <input type="date" id="stratDate">
+                </div>
+                <div>
+                    <label for="">التاريخ النهائي</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-cards">
+            <div class="container">
+                <div class="dash-card" onclick="analysisSearch('fees')">
+                    <div class="symbol">
+                        <p><ion-icon name="card"></ion-icon></p>
+                    </div>
+                    <p class="text">تحليل مصاريف</p>
+                </div>
+
+                <div class="dash-card" onclick="analysisSearch('bills')">
+                    <div class="symbol">
+                        <p><ion-icon name="wallet"></ion-icon></p>
+                    </div>
+                    <p class="text">تحليل مدفوعات</p>
+                </div>
+
+                <div class="dash-card" onclick="analysisSearch('leand')">
+                    <div class="symbol">
+                        <p><ion-icon name="remove-circle"></ion-icon></p>
+                    </div>
+                    <p class="text">تحليل ديون</p>
+                </div>
+
+                <div class="dash-card" onclick="analysisSearch('profit')">
+                    <div class="symbol">
+                        <p><ion-icon name="cash"></ion-icon></p>
+                    </div>
+                    <p class="text">تحليل اموال عام</p>
+                </div>
+
+                <div class="dash-card" onclick="window.location.href='/analysis/patients'">
+                    <div class="symbol">
+                        <p><ion-icon name="people"></ion-icon></p>
+                    </div>
+                    <p class="text">تحليل المراجعين</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function analysisSearch(x) {
+            var stratDate = document.getElementById("stratDate")
+            var endDate = document.getElementById("endDate")
+            if ((stratDate.value == null || stratDate.value == "") || (endDate.value == null || endDate.value == "")) {
+                Swal.fire({
+                    icon: 'error',
+                    text: 'لم يتم ادخال تاريخ التحليل'
+                })
+            } else {
+                window.location.href = `/analysis/${x}/${stratDate.value}/${endDate.value}`
+            }
+
+        }
+    </script>
+    <%- include('../../layout/footer') -%>

@@ -1,0 +1,49 @@
+<%- include('../../layout/navbar') -%>
+
+    <div class="fees"><br>
+        <p class="title">تحليل المرضى</p>
+        <div class="container">
+            <select id="mySelect" onchange="redirectToPage(this)">
+                <option value="/analysis/patients/gender/:startDate/:endDate/">فلتر</option>
+                <option value="/analysis/patients/gender/:startDate/:endDate/ذكر">ذكر</option>
+                <option value="/analysis/patients/gender/:startDate/:endDate/انثى">انثى</option>
+            </select>
+            <table class="table table-strippted">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>الجنس</th>
+                        <th>العمر</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% patients.forEach(data=> {%>
+                        <tr>
+                            <td>
+                                <%= data.name%>
+                            </td>
+                            <td>
+                                <%= data.gender%>
+                            </td>
+                            <td>
+                                <%= data.birthDate%>
+                            </td>
+                        </tr>
+                        <%}) %>
+                        <tr>
+                            <td colspan="3">المجموع : <%= patients.length%></td>
+                        </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function redirectToPage(selectElement) {
+            const selectedOption = selectElement.value;
+            if (selectedOption) {
+                window.location.href = selectedOption;
+            }
+        }
+    </script>
+    <%- include('../../layout/footer') -%>

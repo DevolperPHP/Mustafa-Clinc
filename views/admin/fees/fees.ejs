@@ -1,0 +1,155 @@
+<%- include('../../layout/navbar') -%>
+
+    <% if(suc.length> 0){%>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                text: `<%= suc%>`
+            })
+        </script>
+        <%} %>
+
+            <div class="fees"><br>
+                <p class="title">المصاريف اليومية - <%= nowDate%>
+                </p>
+                <div class="container">
+                    <div class="tools">
+                        <div class="autocomplete" style="width:200px;">
+                            <input autocomplete="off" id="myInput" type="text" placeholder="بحث بالعنوان">
+                        </div>
+                        <input type="date" id="datePicker"/>
+                    </div>
+                    <table class="table table-strippted">
+                        <thead>
+                            <tr>
+                                <th>العوان</th>
+                                <th>المبلغ</th>
+                                <th>التاريخ</th>
+                                <th>حذف</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if(showForm==true){%>
+                                <tr>
+                                    <form action="/fees/new" method="post">
+                                        <td><input type="text" placeholder="العنوان" name="name"></td>
+                                        <td><input type="number" placeholder="المبلغ" name="price"></td>
+                                        <td><input type="date" name="Date"></td>
+                                        <td><button class="btn btn-success">اضافة</button></td>
+                                    </form>
+                                </tr>
+                                <%} %>
+                                    <% fees.forEach(data=> {%>
+                                        <tr>
+                                            <td>
+                                                <%= data.name%>
+                                            </td>
+                                            <td>
+                                                <%= data.price%>
+                                            </td>
+                                            <td>
+                                                <%= data.Date%>
+                                            </td>
+                                            <td>
+                                                <form action="/fees/delete/<%= data._id%>?_method=DELETE" method="post">
+                                                    <button class="btn btn-danger">حذف</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <%}) %>
+                                            <tr>
+                                                <td colspan="4">المجموع : <%=
+                                                        total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%> دينار
+                                                        عراقي</td>
+                                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <script>
+                document.getElementById("datePicker").addEventListener("change", function () {
+                    const selectedDate = this.value; // YYYY-MM-DD
+                    if (selectedDate) {
+                        window.location.href = `/fees/filter/date/${selectedDate}`;
+                    }
+                });
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+            <script>
+                function autocomplete(inp, arr) {
+                    let currentFocus;
+                    const fuse = new Fuse(arr, {
+                        threshold: 0.4,
+                    });
+
+                    inp.addEventListener("input", function () {
+                        let a, b, val = this.value;
+                        closeAllLists();
+                        if (!val) return false;
+                        currentFocus = -1;
+
+                        a = document.createElement("DIV");
+                        a.setAttribute("id", this.id + "autocomplete-list");
+                        a.setAttribute("class", "autocomplete-items");
+                        this.parentNode.appendChild(a);
+
+                        const results = fuse.search(val);
+                        results.forEach(({ item }) => {
+                            b = document.createElement("DIV");
+                            b.innerHTML = `<strong>${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
+                            b.innerHTML += `<input type='hidden' value='${item}'>`;
+                            b.addEventListener("click", function () {
+                                window.location.href = `/fees/filter/name/${String(this.getElementsByTagName("input")[0].value)}`
+                                closeAllLists();
+                            });
+                            a.appendChild(b);
+                        });
+                    });
+
+                    inp.addEventListener("keydown", function (e) {
+                        let x = document.getElementById(this.id + "autocomplete-list");
+                        if (x) x = x.getElementsByTagName("div");
+                        if (e.keyCode == 40) {
+                            currentFocus++;
+                            addActive(x);
+                        } else if (e.keyCode == 38) {
+                            currentFocus--;
+                            addActive(x);
+                        } else if (e.keyCode == 13) {
+                            e.preventDefault();
+                            if (currentFocus > -1 && x) x[currentFocus].click();
+                        }
+                    });
+
+                    function addActive(x) {
+                        if (!x) return false;
+                        removeActive(x);
+                        if (currentFocus >= x.length) currentFocus = 0;
+                        if (currentFocus < 0) currentFocus = x.length - 1;
+                        x[currentFocus].classList.add("autocomplete-active");
+                    }
+
+                    function removeActive(x) {
+                        for (let i = 0; i < x.length; i++) {
+                            x[i].classList.remove("autocomplete-active");
+                        }
+                    }
+
+                    function closeAllLists(elmnt) {
+                        const x = document.getElementsByClassName("autocomplete-items");
+                        for (let i = 0; i < x.length; i++) {
+                            if (elmnt != x[i] && elmnt != inp) {
+                                x[i].parentNode.removeChild(x[i]);
+                            }
+                        }
+                    }
+
+                    document.addEventListener("click", function (e) {
+                        closeAllLists(e.target);
+                    });
+                }
+
+                const data = "<%= names %>".split(",");
+                autocomplete(document.getElementById("myInput"), data);
+            </script>
+            <%- include('../../layout/footer') -%>

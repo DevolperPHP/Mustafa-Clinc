@@ -1,0 +1,35 @@
+<%- include('../../layout/navbar') -%>
+    <div class="notes"><br>
+        <p class="title">حالات الحساب</p><br>
+        <div class="container">
+            <% if(data.statusReasons.length> 0){%>
+                <% data.statusReasons.forEach(note=> {%>
+                    <br>
+                    <div class="card">
+                        <% if(note.type=="close" ){%>
+                            <div class="card-header text-danger">
+                                اغلاق - <%= note.Date%>
+                            </div>
+                            <%} else {%>
+                                 <div class="card-header text-success">
+                                فتح - <%= note.Date%>
+                            </div>
+                            <%} %>
+                                <div class="card-body">
+                                    <figure>
+                                        <blockquote class="blockquote">
+                                            <p>
+                                                <%= note.text%>
+                                            </p>
+                                        </blockquote>
+                                    </figure>
+                                </div>
+                    </div>
+                    <%}) %>
+                        <%} else {%>
+                            <p>لم يتم اغلاق الحساب من قبل</p>
+                            <%} %>
+                                <br>
+        </div>
+    </div>
+    <%- include('../../layout/footer') -%>

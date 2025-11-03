@@ -1,0 +1,58 @@
+<%- include('../../layout/navbar') -%>
+
+    <div class="fees daily"><br>
+        <p class="title">الزيارات اليومية - <%= targetDate%>
+        </p>
+        <div class="container">
+            <input type="date" id="dateInput">
+            <script>
+                document.getElementById('dateInput').addEventListener('change', function () {
+                    if (this.value) {
+                        // redirect with the selected date
+                        window.location.href = '/analysis/daily/' + this.value;
+                    }
+                });
+            </script>
+            <table class="table table-strippted">
+                <thead>
+                    <tr>
+                        <th>الاسم</th>
+                        <th>نوع الكورس</th>
+                        <th>الجنس</th>
+                        <th>رقم الهاتف</th>
+                        <th>تشخيص المعالج</th>
+                        <th>تشخيص الطبيب</th>
+                        <th>تاريخ التسجيل</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% visits.forEach(data=> {%>
+                        <tr onclick="window.location.href='/patient/get-by-id/<%= data.id%>'">
+                            <td>
+                                <%= data.patientName%>
+                            </td>
+                            <td>
+                                <%= data.courseType%>
+                            </td>
+                            <td>
+                                <%= data.gender%>
+                            </td>
+                            <td>
+                                <%= data.phone%>
+                            </td>
+                            <td>
+                                <%= data.therapist_diagnose%>
+                            </td>
+                            <td>
+                                <%= data.doctor_diagnose%>
+                            </td>
+                            <td>
+                                <%= data.dateAdded%>
+                            </td>
+                        </tr>
+                        <%}) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <%- include('../../layout/footer') -%>

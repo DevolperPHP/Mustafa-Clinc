@@ -1,0 +1,48 @@
+<%- include('../../layout/navbar') -%>
+    <script>
+
+        // Check if course has discount
+        <% if(course.discountType) { %>
+            Swal.fire({
+                icon: 'info',
+                title: 'فاتورة مخصومة',
+                html: `    <div style="text-align: center; direction: rtl;">
+                    <p style="margin: 10px 0;">
+                        <strong>السعر الأصلي:</strong> <%= course.originalPrice.toLocaleString() %> د.ك
+                    </p>
+                    <p style="margin: 10px 0; color: #5cb85c;">
+                        <strong>قيمة الخصم:</strong> <%= course.discountAmount.toLocaleString() %> د.ك
+                        (<%= course.discountType === 'percentage' ? course.discountValue + '%' : course.discountValue.toLocaleString() + ' د.ك' %>)
+                    </p>
+                    <p style="margin: 10px 0; font-size: 18px;">
+                        <strong>المبلغ المطلوب دفعه:</strong> <%= (course.price + course.left).toLocaleString() %> د.ك
+                    </p>
+        `,
+                showConfirmButton: false
+            });
+        <% } %>
+
+        Swal.fire({
+            icon: 'question',
+            showConfirmButton: false,
+            html: `    <div style="text-align: center;">
+        <form action="/bills/pay/<%= data._id%>/<%= course.code%>?_method=PUT" method="post">
+            <% if(course.discountType) { %>
+                <p style="margin-bottom: 10px; color: #5cb85c;">
+                    <strong>السعر بعد الخصم:</strong> <%= (course.price + course.left).toLocaleString() %> د.ك
+                </p>
+            <% } %>
+            <input name="amount" type="number" placeholder="المبلغ المدفوع"
+                style="width: 300px; direction: rtl; border-radius: 5px; border-style: solid; border-width: 1px;"
+                value="<%= course.price + course.left %>">
+            <br><br>
+            <button
+                style="border: none; width: 120px; background-color: #5cb85c; color: #fff; border-radius: 5px; padding: 2px; box-shadow: 0 0 10px #00000044;">دفع</button>
+        </form>
+        <br>
+<button onclick="window.location.href='/bills/get/<%= data._id%>'"
+                style="border: none; width: 120px; background-color: #f0ad4e; color: #000; border-radius: 5px; padding: 2px; box-shadow: 0 0 10px #00000044;">الغاء</button>
+    </div>`
+        })
+    </script>
+    <%- include('../../layout/footer') -%>
