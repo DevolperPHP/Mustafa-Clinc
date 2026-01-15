@@ -1,75 +1,424 @@
 <%- include('../../layout/navbar') -%>
 
-    <div class="dashboard">
-        <br>
-        <p class="title">التحليل</p>
-        <br>
-        <div class="container">
-            <div class="tools">
-                <div>
-                    <label for="">التاريخ الابتدائي</label>
-                    <input type="date" id="stratDate">
-                </div>
-                <div>
-                    <label for="">التاريخ النهائي</label>
-                    <input type="date" id="endDate">
-                </div>
-            </div>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --purple: #8b5cf6;
+        --orange: #f97316;
+        --teal: #14b8a6;
+        --pink: #ec4899;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
+
+    .analysis-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .analysis-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .analysis-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .analysis-header p {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Date Range Card */
+    .date-range-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        padding: 28px 32px;
+        margin-bottom: 40px;
+        border: 1px solid var(--gray-light);
+    }
+
+    .date-range-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .date-range-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .date-range-header ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .date-range-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .date-input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .date-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .date-label ion-icon {
+        font-size: 18px;
+        color: var(--primary);
+    }
+
+    .date-input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+        transition: all 0.3s ease;
+        background: white;
+        cursor: pointer;
+    }
+
+    .date-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    /* Analysis Cards Grid */
+    .analysis-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .analysis-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .analysis-card:hover {
+        box-shadow: 0 8px 30px var(--shadow-lg);
+        transform: translateY(-6px);
+    }
+
+    .analysis-card-icon-wrapper {
+        padding: 32px 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .analysis-card-icon-wrapper::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+        background: currentColor;
+    }
+
+    .analysis-card-icon-wrapper ion-icon {
+        font-size: 56px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .analysis-card.fees .analysis-card-icon-wrapper {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: #dc2626;
+    }
+
+    .analysis-card.bills .analysis-card-icon-wrapper {
+        background: linear-gradient(135deg, var(--info), #2563eb);
+        color: #2563eb;
+    }
+
+    .analysis-card.debts .analysis-card-icon-wrapper {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+        color: #d97706;
+    }
+
+    .analysis-card.profit .analysis-card-icon-wrapper {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: #059669;
+    }
+
+    .analysis-card.patients .analysis-card-icon-wrapper {
+        background: linear-gradient(135deg, var(--purple), #7c3aed);
+        color: #7c3aed;
+    }
+
+    .analysis-card-body {
+        padding: 24px;
+        text-align: center;
+    }
+
+    .analysis-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .analysis-card-description {
+        font-size: 13px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    .analysis-card-arrow {
+        margin-top: 16px;
+        color: var(--primary);
+        font-size: 20px;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.3s ease;
+    }
+
+    .analysis-card:hover .analysis-card-arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* Special styles for patients card (no date range needed) */
+    .analysis-card.patients {
+        grid-column: span 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .analysis-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .analysis-header h1 {
+            font-size: 22px;
+        }
+
+        .date-range-card {
+            padding: 20px;
+        }
+
+        .date-range-form {
+            grid-template-columns: 1fr;
+        }
+
+        .analysis-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .analysis-card-icon-wrapper {
+            padding: 28px 20px;
+        }
+
+        .analysis-card-icon-wrapper ion-icon {
+            font-size: 48px;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .analysis-card {
+        animation: fadeIn 0.5s ease;
+    }
+
+    .analysis-card:nth-child(1) { animation-delay: 0s; }
+    .analysis-card:nth-child(2) { animation-delay: 0.1s; }
+    .analysis-card:nth-child(3) { animation-delay: 0.2s; }
+    .analysis-card:nth-child(4) { animation-delay: 0.3s; }
+    .analysis-card:nth-child(5) { animation-delay: 0.4s; }
+</style>
+
+<div class="analysis-container">
+    <!-- Header -->
+    <div class="analysis-header">
+        <h1>مركز التحليلات</h1>
+        <p>احصل على تقارير مفصلة عن أداء العيادة</p>
+    </div>
+
+    <!-- Date Range Card -->
+    <div class="date-range-card">
+        <div class="date-range-header">
+            <h3>
+                <ion-icon name="calendar-outline"></ion-icon>
+                تحديد نطاق التاريخ
+            </h3>
         </div>
-
-        <div class="dash-cards">
-            <div class="container">
-                <div class="dash-card" onclick="analysisSearch('fees')">
-                    <div class="symbol">
-                        <p><ion-icon name="card"></ion-icon></p>
-                    </div>
-                    <p class="text">تحليل مصاريف</p>
-                </div>
-
-                <div class="dash-card" onclick="analysisSearch('bills')">
-                    <div class="symbol">
-                        <p><ion-icon name="wallet"></ion-icon></p>
-                    </div>
-                    <p class="text">تحليل مدفوعات</p>
-                </div>
-
-                <div class="dash-card" onclick="analysisSearch('leand')">
-                    <div class="symbol">
-                        <p><ion-icon name="remove-circle"></ion-icon></p>
-                    </div>
-                    <p class="text">تحليل ديون</p>
-                </div>
-
-                <div class="dash-card" onclick="analysisSearch('profit')">
-                    <div class="symbol">
-                        <p><ion-icon name="cash"></ion-icon></p>
-                    </div>
-                    <p class="text">تحليل اموال عام</p>
-                </div>
-
-                <div class="dash-card" onclick="window.location.href='/analysis/patients'">
-                    <div class="symbol">
-                        <p><ion-icon name="people"></ion-icon></p>
-                    </div>
-                    <p class="text">تحليل المراجعين</p>
-                </div>
+        <div class="date-range-form">
+            <div class="date-input-group">
+                <label class="date-label" for="startDate">
+                    <ion-icon name="arrow-back"></ion-icon>
+                    تاريخ البداية
+                </label>
+                <input type="date" id="startDate" class="date-input">
+            </div>
+            <div class="date-input-group">
+                <label class="date-label" for="endDate">
+                    <ion-icon name="arrow-forward"></ion-icon>
+                    تاريخ النهاية
+                </label>
+                <input type="date" id="endDate" class="date-input">
             </div>
         </div>
     </div>
 
-    <script>
-        function analysisSearch(x) {
-            var stratDate = document.getElementById("stratDate")
-            var endDate = document.getElementById("endDate")
-            if ((stratDate.value == null || stratDate.value == "") || (endDate.value == null || endDate.value == "")) {
-                Swal.fire({
-                    icon: 'error',
-                    text: 'لم يتم ادخال تاريخ التحليل'
-                })
-            } else {
-                window.location.href = `/analysis/${x}/${stratDate.value}/${endDate.value}`
-            }
+    <!-- Analysis Cards Grid -->
+    <div class="analysis-grid">
+        <!-- Fees Analysis -->
+        <div class="analysis-card fees" onclick="analysisSearch('fees')">
+            <div class="analysis-card-icon-wrapper">
+                <ion-icon name="card"></ion-icon>
+            </div>
+            <div class="analysis-card-body">
+                <h3 class="analysis-card-title">تحليل المصاريف</h3>
+                <p class="analysis-card-description">عرض جميع المصاريف والنفقات</p>
+                <div class="analysis-card-arrow">
+                    <ion-icon name="arrow-back"></ion-icon>
+                </div>
+            </div>
+        </div>
 
+        <!-- Bills/Payments Analysis -->
+        <div class="analysis-card bills" onclick="analysisSearch('bills')">
+            <div class="analysis-card-icon-wrapper">
+                <ion-icon name="wallet"></ion-icon>
+            </div>
+            <div class="analysis-card-body">
+                <h3 class="analysis-card-title">تحليل المدفوعات</h3>
+                <p class="analysis-card-description">تقرير المبالغ المدفوعة</p>
+                <div class="analysis-card-arrow">
+                    <ion-icon name="arrow-back"></ion-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debts Analysis -->
+        <div class="analysis-card debts" onclick="analysisSearch('leand')">
+            <div class="analysis-card-icon-wrapper">
+                <ion-icon name="trending-down"></ion-icon>
+            </div>
+            <div class="analysis-card-body">
+                <h3 class="analysis-card-title">تحليل الديون</h3>
+                <p class="analysis-card-description">تقرير الديون المتبقية</p>
+                <div class="analysis-card-arrow">
+                    <ion-icon name="arrow-back"></ion-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profit Analysis -->
+        <div class="analysis-card profit" onclick="analysisSearch('profit')">
+            <div class="analysis-card-icon-wrapper">
+                <ion-icon name="cash"></ion-icon>
+            </div>
+            <div class="analysis-card-body">
+                <h3 class="analysis-card-title">تحليل الأرباح</h3>
+                <p class="analysis-card-description">تقرير الأرباح العامة</p>
+                <div class="analysis-card-arrow">
+                    <ion-icon name="arrow-back"></ion-icon>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patients Analysis -->
+        <div class="analysis-card patients" onclick="window.location.href='/analysis/patients'">
+            <div class="analysis-card-icon-wrapper">
+                <ion-icon name="people"></ion-icon>
+            </div>
+            <div class="analysis-card-body">
+                <h3 class="analysis-card-title">تحليل المراجعين</h3>
+                <p class="analysis-card-description">تقارير وإحصائيات المرضى</p>
+                <div class="analysis-card-arrow">
+                    <ion-icon name="arrow-back"></ion-icon>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function analysisSearch(type) {
+        const startDate = document.getElementById("startDate");
+        const endDate = document.getElementById("endDate");
+
+        if (!startDate.value || !endDate.value) {
+            Swal.fire({
+                icon: 'error',
+                text: 'الرجاء تحديد تاريخ البداية والنهاية',
+                confirmButtonColor: '#ef4444'
+            });
+            return;
         }
-    </script>
-    <%- include('../../layout/footer') -%>
+
+        window.location.href = `/analysis/${type}/${startDate.value}/${endDate.value}`;
+    }
+
+    // Set default dates (current month)
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+        document.getElementById('startDate').value = firstDay.toISOString().split('T')[0];
+        document.getElementById('endDate').value = lastDay.toISOString().split('T')[0];
+    });
+</script>
+
+<%- include('../../layout/footer') -%>

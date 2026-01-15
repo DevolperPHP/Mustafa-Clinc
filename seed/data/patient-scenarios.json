@@ -1,0 +1,48 @@
+{
+  "scenarios": [
+    {
+      "type": "new_patient",
+      "weight": 30,
+      "description": "New patient, no course yet",
+      "inCourse": false,
+      "hasTests": false,
+      "hasExercises": false
+    },
+    {
+      "type": "active_course_start",
+      "weight": 25,
+      "description": "Active course, just started (0-3 sessions done)",
+      "inCourse": true,
+      "sessionsProgress": "early",
+      "hasTests": true,
+      "hasExercises": true
+    },
+    {
+      "type": "active_course_mid",
+      "weight": 20,
+      "description": "Active course, midway (30-70% sessions done)",
+      "inCourse": true,
+      "sessionsProgress": "mid",
+      "hasTests": true,
+      "hasExercises": true
+    },
+    {
+      "type": "completing_course",
+      "weight": 15,
+      "description": "Almost done with course (80-100% sessions done)",
+      "inCourse": true,
+      "sessionsProgress": "late",
+      "hasTests": true,
+      "hasExercises": true
+    },
+    {
+      "type": "completed_course",
+      "weight": 10,
+      "description": "Completed course, may start new one",
+      "inCourse": false,
+      "completedCourses": true,
+      "hasTests": true,
+      "hasExercises": true
+    }
+  ]
+}

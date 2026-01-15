@@ -1,380 +1,610 @@
 <%- include('../../layout/navbar') -%>
 
-<div class="dashboard" dir="rtl">
-    <br>
-    <p class="title">تحليل المراجعين</p>
-    <br>
-
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="analysis-card">
-                    <div class="card-header-custom">
-                        <h3><ion-icon name="people"></ion-icon> فلاتر تحليل المراجعين</h3>
-                        <p>اختر المعايير للتصفية والبحث</p>
-                    </div>
-
-                    <form action="/analysis/patients/filter" method="POST" id="filterForm">
-                        <div class="filters-grid">
-                            <!-- Row 1: Gender & Study -->
-                            <div class="filter-group">
-                                <label>الجنس</label>
-                                <select name="gender" class="form-control">
-                                    <option value="">الكل</option>
-                                    <option value="ذكر">ذكر</option>
-                                    <option value="انثى">انثى</option>
-                                </select>
-                            </div>
-
-                            <div class="filter-group">
-                                <label>التحصيل الدراسي</label>
-                                <select name="study" class="form-control">
-                                    <option value="">الكل</option>
-                                    <option>يقرا و يكتب</option>
-                                    <option>ابتدائي</option>
-                                    <option>متوسط</option>
-                                    <option>ثانوي</option>
-                                    <option>دبلوم</option>
-                                    <option>بكلوريوس</option>
-                                    <option>ماجستير</option>
-                                    <option>دكتوراة</option>
-                                </select>
-                            </div>
-
-                            <!-- Row 2: Address & Relationship -->
-                            <div class="filter-group">
-                                <label>العنوان</label>
-                                <input type="text" name="address" class="form-control" placeholder="أدخل العنوان">
-                            </div>
-
-                            <div class="filter-group">
-                                <label>الحالة الاجتماعية</label>
-                                <select name="relationship" class="form-control">
-                                    <option value="">الكل</option>
-                                    <option>اعزب</option>
-                                    <option>متزوج</option>
-                                    <option>ارمل/ة</option>
-                                    <option>مطلق/ة</option>
-                                    
-                                </select>
-                            </div>
-
-                            <!-- Row 3: Children & Family Rank -->
-                            <div class="filter-group">
-                                <label>عدد الأطفال (من)</label>
-                                <input type="number" name="childrenMin" class="form-control" placeholder="الحد الأدنى">
-                            </div>
-
-                            <div class="filter-group">
-                                <label>عدد الأطفال (إلى)</label>
-                                <input type="number" name="childrenMax" class="form-control" placeholder="الحد الأقصى">
-                            </div>
-
-                            <div class="filter-group">
-                                <label>التسلسل في العائلة (من)</label>
-                                <input type="number" name="familyRankMin" class="form-control" placeholder="الحد الأدنى">
-                            </div>
-
-                            <div class="filter-group">
-                                <label>التسلسل في العائلة (إلى)</label>
-                                <input type="number" name="familyRankMax" class="form-control" placeholder="الحد الأقصى">
-                            </div>
-
-                            <!-- Row 4: Health & Psycho -->
-                            <div class="filter-group">
-                                <label>الجانب الصحي</label>
-                                <select name="health" class="form-control">
-                                    <option value="">الكل</option>
-                                    <option>جيد</option>
-                                    <option>متوسط</option>
-                                    <option>ضعيف</option>
-                                </select>
-                            </div>
-
-                            <div class="filter-group">
-                                <label>الجانب النفسي</label>
-                                <select name="psycho" class="form-control">
-                                    <option value="">الكل</option>
-                                    <option>جيد</option>
-                                    <option>متوسط</option>
-                                    <option>ضعيف</option>
-                                </select>
-                            </div>
-
-                            <div class="filter-group">
-                                <label>الجانب الاجتماعي</label>
-                                <select name="familyStatus" class="form-control">
-                                    <option value="">الكل</option>
-                                    <option>جيد</option>
-                                    <option>متوسط</option>
-                                    <option>ضعيف</option>
-                                </select>
-                            </div>
-
-                            <div class="filter-group">
-                                <label>الوظيفة</label>
-                                <input type="text" name="job" class="form-control" placeholder="أدخل الوظيفة">
-                            </div>
-
-                            <!-- Row 5: Diagnoses -->
-                            <div class="filter-group full-width">
-                                <label>تشخيص الطبيب</label>
-                                <div class="autocomplete">
-                                    <input type="text" name="doctorDiagnose" id="doctorDiagnose" class="form-control" placeholder="ابحث أو اكتب تشخيص الطبيب" autocomplete="off">
-                                </div>
-                            </div>
-
-                            <div class="filter-group full-width">
-                                <label>تشخيص الأخصائي</label>
-                                <div class="autocomplete">
-                                    <input type="text" name="therapistDiagnose" id="therapistDiagnose" class="form-control" placeholder="ابحث أو اكتب تشخيص الأخصائي" autocomplete="off">
-                                </div>
-                            </div>
-
-                            <!-- Row 6: Sessions -->
-                            <div class="filter-group">
-                                <label>عدد الجلسات (من)</label>
-                                <input type="number" name="sessionsMin" class="form-control" placeholder="الحد الأدنى">
-                            </div>
-
-                            <div class="filter-group">
-                                <label>عدد الجلسات (إلى)</label>
-                                <input type="number" name="sessionsMax" class="form-control" placeholder="الحد الأقصى">
-                            </div>
-                        </div>
-
-                        <div class="actions-row">
-                            <button type="submit" class="btn btn-success">
-                                <ion-icon name="search"></ion-icon> بحث وتصفية
-                            </button>
-                            <button type="reset" class="btn btn-secondary" onclick="resetForm()">
-                                <ion-icon name="refresh"></ion-icon> إعادة تعيين
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
-.analysis-card {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-.card-header-custom {
-    background: linear-gradient(to right, #a4c842, #8fb235);
-    color: white;
-    padding: 20px 30px;
-    border-bottom: 3px solid #7a9c2d;
-}
-
-.card-header-custom h3 {
-    margin: 0 0 5px 0;
-    font-size: 22px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    direction: rtl;
-}
-
-.card-header-custom p {
-    margin: 0;
-    opacity: 0.9;
-    font-size: 14px;
-}
-
-.filters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    padding: 30px;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-group.full-width {
-    grid-column: 1 / -1;
-}
-
-.filter-group label {
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #333;
-    font-size: 14px;
-    text-align: right;
-    display: block;
-}
-
-.form-control {
-    padding: 10px 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 14px;
-    transition: all 0.3s;
-    direction: rtl;
-    text-align: right;
-}
-
-.form-control:focus {
-    border-color: #a4c842;
-    box-shadow: 0 0 0 0.2rem rgba(164, 200, 66, 0.25);
-    outline: none;
-}
-
-.actions-row {
-    padding: 20px 30px;
-    background: #f8f9fa;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-}
-
-/* Autocomplete Styles */
-.autocomplete {
-    position: relative;
-}
-
-.autocomplete-items {
-    position: absolute;
-    border: 2px solid #a4c842;
-    border-top: none;
-    z-index: 9999;
-    top: 100%;
-    left: 0;
-    right: 0;
-    max-height: 300px;
-    overflow-y: auto;
-    background: white;
-    box-shadow: 0 8px 16px rgba(164, 200, 66, 0.3);
-    border-radius: 0 0 8px 8px;
-    direction: rtl;
-}
-
-.autocomplete-items div {
-    padding: 12px 20px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    direction: rtl;
-    text-align: right;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-.autocomplete-items div:last-child {
-    border-bottom: none;
-    border-radius: 0 0 6px 6px;
-}
-
-.autocomplete-items div:hover {
-    background-color: #a4c842;
-    color: white;
-    padding-right: 25px;
-}
-
-.autocomplete-items .autocomplete-active {
-    background-color: #8fb235;
-    color: white;
-    padding-right: 25px;
-    font-weight: 600;
-}
-
-.autocomplete-items div strong {
-    font-weight: 700;
-    color: #a4c842;
-}
-
-.autocomplete-items div:hover strong,
-.autocomplete-items .autocomplete-active strong {
-    color: white;
-    text-decoration: underline;
-}
-
-/* Input focus state */
-.form-control:focus + .autocomplete-items,
-.autocomplete .form-control:focus {
-    border-color: #a4c842;
-}
-
-/* Scrollbar styling for webkit browsers */
-.autocomplete-items::-webkit-scrollbar {
-    width: 8px;
-}
-
-.autocomplete-items::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 0 0 8px 0;
-}
-
-.autocomplete-items::-webkit-scrollbar-thumb {
-    background: #a4c842;
-    border-radius: 4px;
-}
-
-.autocomplete-items::-webkit-scrollbar-thumb:hover {
-    background: #8fb235;
-}
-
-.btn {
-    padding: 12px 35px;
-    font-size: 15px;
-    border-radius: 6px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s;
-    direction: rtl;
-}
-
-.btn-success {
-    background: #a4c842;
-    color: white;
-}
-
-.btn-success:hover {
-    background: #8fb235;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(164, 200, 66, 0.4);
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #5a6268;
-    transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-    .filters-grid {
-        grid-template-columns: 1fr;
-        padding: 20px;
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: #86efac;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
     }
 
-    .actions-row {
+    .patients-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .patients-header {
+        margin-bottom: 30px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: var(--gray-light);
+        color: var(--dark);
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: #d1d5db;
+        transform: translateX(4px);
+    }
+
+    .patients-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .patients-header h1 ion-icon {
+        font-size: 32px;
+        color: var(--primary);
+    }
+
+    .patients-header p {
+        font-size: 15px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Filter Card */
+    .filter-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 4px 24px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+    }
+
+    .filter-card-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 24px 32px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .filter-card-header ion-icon {
+        font-size: 32px;
+    }
+
+    .filter-card-header div h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+    }
+
+    .filter-card-header div p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* Filter Groups */
+    .filter-section {
+        padding: 32px;
+    }
+
+    .filter-section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .filter-section-title ion-icon {
+        color: var(--primary);
+        font-size: 20px;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .filter-group {
+        display: flex;
         flex-direction: column;
-        padding: 15px;
+    }
+
+    .filter-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: var(--dark);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .filter-group label ion-icon {
+        color: var(--primary);
+        font-size: 16px;
+    }
+
+    .form-control {
+        padding: 12px 16px;
+        border: 2px solid var(--gray-light);
+        border-radius: 10px;
+        font-size: 14px;
+        font-family: 'Tajawal', sans-serif;
+        transition: all 0.3s;
+        direction: rtl;
+        text-align: right;
+        background: white;
+    }
+
+    .form-control:hover {
+        border-color: #d1d5db;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+        outline: none;
+    }
+
+    .form-control::placeholder {
+        color: var(--gray);
+    }
+
+    /* Autocomplete Styles */
+    .autocomplete {
+        position: relative;
+    }
+
+    .autocomplete-items {
+        position: absolute;
+        border: 2px solid var(--primary);
+        border-top: none;
+        z-index: 9999;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        background: white;
+        box-shadow: 0 8px 24px var(--shadow-lg);
+        border-radius: 0 0 12px 12px;
+        direction: rtl;
+    }
+
+    .autocomplete-items div {
+        padding: 14px 20px;
+        cursor: pointer;
+        border-bottom: 1px solid var(--gray-light);
+        direction: rtl;
+        text-align: right;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+    .autocomplete-items div:last-child {
+        border-bottom: none;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .autocomplete-items div:hover {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding-right: 28px;
+    }
+
+    .autocomplete-items .autocomplete-active {
+        background: var(--primary-dark);
+        color: white;
+        padding-right: 28px;
+        font-weight: 600;
+    }
+
+    .autocomplete-items div strong {
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .autocomplete-items div:hover strong,
+    .autocomplete-items .autocomplete-active strong {
+        color: white;
+        text-decoration: underline;
+    }
+
+    /* Scrollbar styling */
+    .autocomplete-items::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .autocomplete-items::-webkit-scrollbar-track {
+        background: var(--gray-light);
+        border-radius: 0 0 10px 0;
+    }
+
+    .autocomplete-items::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 4px;
+    }
+
+    .autocomplete-items::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-dark);
+    }
+
+    /* Actions Row */
+    .actions-row {
+        padding: 24px 32px;
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border-top: 1px solid var(--gray-light);
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
     .btn {
-        width: 100%;
-        justify-content: center;
+        padding: 14px 40px;
+        font-size: 15px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        direction: rtl;
+        font-family: 'Tajawal', sans-serif;
     }
-}
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: var(--gray);
+        border: 2px solid var(--gray-light);
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-light);
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .patients-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .patients-header h1 {
+            font-size: 22px;
+        }
+
+        .patients-header h1 ion-icon {
+            font-size: 26px;
+        }
+
+        .filter-card-header {
+            padding: 20px;
+        }
+
+        .filter-card-header ion-icon {
+            font-size: 26px;
+        }
+
+        .filter-section {
+            padding: 24px 20px;
+        }
+
+        .filters-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .actions-row {
+            padding: 20px;
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
+
+<div class="patients-container">
+    <!-- Back Button -->
+    <a href="/analysis" class="back-btn">
+        <ion-icon name="arrow-forward"></ion-icon>
+        العودة للتحليلات
+    </a>
+
+    <!-- Header -->
+    <div class="patients-header">
+        <h1>
+            <ion-icon name="people"></ion-icon>
+            تحليل المراجعين
+        </h1>
+        <p>استخدم الفلاتر أدناه للبحث والتصفية حسب معايير متعددة</p>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card">
+        <!-- Filter Card Header -->
+        <div class="filter-card-header">
+            <ion-icon name="funnel"></ion-icon>
+            <div>
+                <h2>فلاتر البحث المتقدم</h2>
+                <p>اختر المعايير المطلوبة للبحث والتصفية</p>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <form action="/analysis/patients/filter" method="POST" id="filterForm">
+            <div class="filter-section">
+                <!-- Personal Information Section -->
+                <div class="filter-section-title">
+                    <ion-icon name="person"></ion-icon>
+                    المعلومات الشخصية
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="male-female"></ion-icon>
+                            الجنس
+                        </label>
+                        <select name="gender" class="form-control">
+                            <option value="">الكل</option>
+                            <option value="ذكر">ذكر</option>
+                            <option value="انثى">انثى</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="book"></ion-icon>
+                            التحصيل الدراسي
+                        </label>
+                        <select name="study" class="form-control">
+                            <option value="">الكل</option>
+                            <option>يقرا و يكتب</option>
+                            <option>ابتدائي</option>
+                            <option>متوسط</option>
+                            <option>ثانوي</option>
+                            <option>دبلوم</option>
+                            <option>بكلوريوس</option>
+                            <option>ماجستير</option>
+                            <option>دكتوراة</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="home"></ion-icon>
+                            العنوان
+                        </label>
+                        <input type="text" name="address" class="form-control" placeholder="أدخل العنوان">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="heart"></ion-icon>
+                            الحالة الاجتماعية
+                        </label>
+                        <select name="relationship" class="form-control">
+                            <option value="">الكل</option>
+                            <option>اعزب</option>
+                            <option>متزوج</option>
+                            <option>ارمل</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <!-- Family Information Section -->
+                <div class="filter-section-title">
+                    <ion-icon name="people-circle"></ion-icon>
+                    معلومات العائلة
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="child"></ion-icon>
+                            عدد الأطفال (من)
+                        </label>
+                        <input type="number" name="childrenMin" class="form-control" placeholder="الحد الأدنى" min="0">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="child"></ion-icon>
+                            عدد الأطفال (إلى)
+                        </label>
+                        <input type="number" name="childrenMax" class="form-control" placeholder="الحد الأقصى" min="0">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="list-number"></ion-icon>
+                            التسلسل في العائلة (من)
+                        </label>
+                        <input type="number" name="familyRankMin" class="form-control" placeholder="الحد الأدنى" min="1">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="list-number"></ion-icon>
+                            التسلسل في العائلة (إلى)
+                        </label>
+                        <input type="number" name="familyRankMax" class="form-control" placeholder="الحد الأقصى" min="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <!-- Health & Social Section -->
+                <div class="filter-section-title">
+                    <ion-icon name="medical"></ion-icon>
+                    الجوانب الصحية والاجتماعية
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="pulse"></ion-icon>
+                            الجانب الصحي
+                        </label>
+                        <select name="health" class="form-control">
+                            <option value="">الكل</option>
+                            <option>جيد</option>
+                            <option>متوسط</option>
+                            <option>ضعيف</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="psychology"></ion-icon>
+                            الجانب النفسي
+                        </label>
+                        <select name="psycho" class="form-control">
+                            <option value="">الكل</option>
+                            <option>جيد</option>
+                            <option>متوسط</option>
+                            <option>ضعيف</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="people"></ion-icon>
+                            الجانب الاجتماعي
+                        </label>
+                        <select name="familyStatus" class="form-control">
+                            <option value="">الكل</option>
+                            <option>جيد</option>
+                            <option>متوسط</option>
+                            <option>ضعيف</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="briefcase"></ion-icon>
+                            الوظيفة
+                        </label>
+                        <input type="text" name="job" class="form-control" placeholder="أدخل الوظيفة">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <!-- Diagnosis Section -->
+                <div class="filter-section-title">
+                    <ion-icon name="medkit"></ion-icon>
+                    التشخيص الطبي
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-group full-width">
+                        <label>
+                            <ion-icon name="stethoscope"></ion-icon>
+                            تشخيص الطبيب
+                        </label>
+                        <div class="autocomplete">
+                            <input type="text" name="doctorDiagnose" id="doctorDiagnose" class="form-control" placeholder="ابحث أو اكتب تشخيص الطبيب" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="filter-group full-width">
+                        <label>
+                            <ion-icon name="person-circle"></ion-icon>
+                            تشخيص الأخصائي
+                        </label>
+                        <div class="autocomplete">
+                            <input type="text" name="therapistDiagnose" id="therapistDiagnose" class="form-control" placeholder="ابحث أو اكتب تشخيص الأخصائي" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <!-- Sessions Section -->
+                <div class="filter-section-title">
+                    <ion-icon name="calendar"></ion-icon>
+                    معلومات الجلسات
+                </div>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="remove"></ion-icon>
+                            عدد الجلسات (من)
+                        </label>
+                        <input type="number" name="sessionsMin" class="form-control" placeholder="الحد الأدنى" min="1">
+                    </div>
+
+                    <div class="filter-group">
+                        <label>
+                            <ion-icon name="remove"></ion-icon>
+                            عدد الجلسات (إلى)
+                        </label>
+                        <input type="number" name="sessionsMax" class="form-control" placeholder="الحد الأقصى" min="1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions-row">
+                <button type="submit" class="btn btn-success">
+                    <ion-icon name="search"></ion-icon>
+                    بحث وتصفية
+                </button>
+                <button type="reset" class="btn btn-secondary" onclick="resetForm()">
+                    <ion-icon name="refresh"></ion-icon>
+                    إعادة تعيين
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 <script>
@@ -402,7 +632,6 @@ function autocomplete(inp, arr) {
         const results = fuse.search(val);
         results.slice(0, 10).forEach(({ item }) => {
             b = document.createElement("DIV");
-            // RTL-friendly highlighting - find the matched portion and highlight it
             const matchIndex = item.indexOf(val);
             if (matchIndex >= 0) {
                 b.innerHTML = `${item.substring(0, matchIndex)}<strong>${item.substring(matchIndex, matchIndex + val.length)}</strong>${item.substring(matchIndex + val.length)}`;
@@ -422,27 +651,26 @@ function autocomplete(inp, arr) {
     inp.addEventListener("keydown", function (e) {
         let x = document.getElementById(this.id + "autocomplete-list");
         if (!x) return;
-
         x = x.getElementsByTagName("div");
 
-        if (e.keyCode == 40) { // Down arrow
+        if (e.keyCode == 40) {
             e.preventDefault();
             if (currentFocus < x.length - 1) {
                 currentFocus++;
                 addActive(x);
             }
-        } else if (e.keyCode == 38) { // Up arrow
+        } else if (e.keyCode == 38) {
             e.preventDefault();
             if (currentFocus > 0) {
                 currentFocus--;
                 addActive(x);
             }
-        } else if (e.keyCode == 13) { // Enter
+        } else if (e.keyCode == 13) {
             e.preventDefault();
             if (currentFocus > -1 && x[currentFocus]) {
                 x[currentFocus].click();
             }
-        } else if (e.keyCode == 27) { // Escape
+        } else if (e.keyCode == 27) {
             closeAllLists();
         }
     });

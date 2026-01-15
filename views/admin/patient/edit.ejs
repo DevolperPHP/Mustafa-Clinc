@@ -1,470 +1,1058 @@
 <%- include('../../layout/navbar') -%>
 
-    <div class="add-patient">
-        <div class="container flex">
-            <form action="/patient/edit-profile/<%= data._id%>?_method=PUT" method="post">
-                <input type="text" placeholder="الاسم الكامل" name="name" value="<%= data.name%>">
-                <input type="date" placeholder="تاريخ الميلاة" name="birthDate" value="<%= data.birthDate%>">
-                <select name="gender" id="">
-                    <option selected><%= data.gender%></option>
-                    <option>ذكر</option>
-                    <option>انثى</option>
-                </select>
-                <select name="study" id="">
-                    <option selected><%= data.study%></option>
-                    <option>يقرا و يكتب</option>
-                    <option>ابتدائي</option>
-                    <option>متوسط</option>
-                    <option>ثانوي</option>
-                    <option>دبلوم</option>
-                    <option>بكلوريوس</option>
-                    <option>ماجستير</option>
-                    <option>دكتوراة</option>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
 
-                </select>
-                <input type="text" placeholder="العنوان" name="address" value="<%= data.address%>">
-                <input type="text" placeholder="رقم الهاتف" name="phone" value="<%= data.phone%>">
-                <select name="relationship" id="">
-                    <option selected><%= data.relationship%></option>
-                    <option>اعزب</option>
-                    <option>متزوج</option>
-                    <option>ارمل/ة</option>
-                    <option>مطلق/ة</option>
+    .edit-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
 
-                </select>
-                <input type="number" placeholder="عدد افراد العائلة" name="familyMembers" value="<%= data.familyMembers%>">
-                <input type="number" placeholder="تسلسله في العائلة" name="familyRank" value="<%= data.familyRank%>">
-                <input type="text" name="sendTo" placeholder="الاحالة الى" value="<%= data.sendTo%>">
-                <select name="health" id="">
-                    <option selected><%= data.health%></option>
-                    <option>جيد</option>
-                    <option>متوسط</option>
-                    <option>ضعيف</option>
-                </select>
+    /* Header */
+    .edit-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
 
-                <select name="psycho" id="">
-                    <option selected><%= data.psycho%></option>
-                    <option>جيد</option>
-                    <option>متوسط</option>
-                    <option>ضعيف</option>
-                </select>
+    .edit-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
 
-                <select name="RelationshipAndFamily" id="">
-                    <option selected><%= data.RelationshipAndFamily%></option>
-                    <option>جيد</option>
-                    <option>متوسط</option>
-                    <option>ضعيف</option>
-                </select>
+    .edit-header p {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
 
-                <br>
-                <textarea type="text" name="psychoNote" placeholder="ملاحظات "><%= data.psychoNote%></textarea>
-                <textarea type="text" name="Notes" placeholder="الادوية المستخدمة"><%= data.Notes%></textarea>
-                <br>
-                <div class="auto-inputs">
-                    <div class="autocomplete">
-                        <input name="therapist_diagnose" id="myInput" type="text" placeholder="تشخيص المعالج"
-                            autocomplete="off" value="<%= data.therapist_diagnose%>">
-                    </div>
-                    <div class="autocomplete">
-                        <input name="doctor_diagnose" id="myInput2" type="text" placeholder="تشخيص الطبيب"
-                            autocomplete="off" value="<%= data.doctor_diagnose%>">
-                    </div>
-                </div>
-                <button class="btn btn-success">اضافة</button>
-            </form>
-        </div>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-    <script>
-        function autocomplete(inp, arr) {
-            let currentFocus;
-            const fuse = new Fuse(arr, {
-                threshold: 0.4,
-            });
+    /* Patient Summary Card */
+    .patient-summary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 24px 32px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
 
-            inp.addEventListener("input", function () {
-                let a, b, val = this.value;
-                closeAllLists();
-                if (!val) return false;
-                currentFocus = -1;
+    .patient-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
 
-                a = document.createElement("DIV");
-                a.setAttribute("id", this.id + "autocomplete-list");
-                a.setAttribute("class", "autocomplete-items");
-                this.parentNode.appendChild(a);
+    .patient-summary-info h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 6px 0;
+    }
 
-                const results = fuse.search(val);
-                results.forEach(({ item }) => {
-                    b = document.createElement("DIV");
-                    b.innerHTML = `<strong>${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
-                    b.innerHTML += `<input type='hidden' value='${item}'>`;
-                    b.addEventListener("click", function () {
-                        inp.value = this.getElementsByTagName("input")[0].value;
-                        closeAllLists();
-                    });
-                    a.appendChild(b);
-                });
-            });
+    .patient-summary-info p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+    }
 
-            inp.addEventListener("keydown", function (e) {
-                let x = document.getElementById(this.id + "autocomplete-list");
-                if (x) x = x.getElementsByTagName("div");
-                if (e.keyCode == 40) {
-                    currentFocus++;
-                    addActive(x);
-                } else if (e.keyCode == 38) {
-                    currentFocus--;
-                    addActive(x);
-                } else if (e.keyCode == 13) {
-                    e.preventDefault();
-                    if (currentFocus > -1 && x) x[currentFocus].click();
-                }
-            });
+    /* Form Card */
+    .form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        margin-bottom: 24px;
+    }
 
-            function addActive(x) {
-                if (!x) return false;
-                removeActive(x);
-                if (currentFocus >= x.length) currentFocus = 0;
-                if (currentFocus < 0) currentFocus = x.length - 1;
-                x[currentFocus].classList.add("autocomplete-active");
-            }
+    .form-card-header {
+        padding: 20px 28px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid var(--gray-light);
+    }
 
-            function removeActive(x) {
-                for (let i = 0; i < x.length; i++) {
-                    x[i].classList.remove("autocomplete-active");
-                }
-            }
+    .form-card-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-            function closeAllLists(elmnt) {
-                const x = document.getElementsByClassName("autocomplete-items");
-                for (let i = 0; i < x.length; i++) {
-                    if (elmnt != x[i] && elmnt != inp) {
-                        x[i].parentNode.removeChild(x[i]);
-                    }
-                }
-            }
+    .form-card-header h3 ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
 
-            document.addEventListener("click", function (e) {
-                closeAllLists(e.target);
-            });
+    .form-card-body {
+        padding: 28px;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .form-grid.full-width {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-label ion-icon {
+        font-size: 18px;
+        color: var(--primary);
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Autocomplete Styles */
+    .autocomplete {
+        position: relative;
+    }
+
+    .autocomplete-items {
+        position: absolute;
+        border: 1px solid var(--gray-light);
+        border-radius: 8px;
+        z-index: 99;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 300px;
+        overflow-y: auto;
+        background: white;
+        box-shadow: 0 4px 20px var(--shadow-lg);
+        margin-top: 4px;
+    }
+
+    .autocomplete-items div {
+        padding: 12px 16px;
+        cursor: pointer;
+        border-bottom: 1px solid var(--gray-light);
+        font-size: 14px;
+        direction: rtl;
+    }
+
+    .autocomplete-items div:last-child {
+        border-bottom: none;
+    }
+
+    .autocomplete-items div:hover,
+    .autocomplete-active {
+        background: #f0fdf4;
+    }
+
+    .autocomplete-items strong {
+        color: var(--primary);
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 16px 32px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        direction: rtl;
+    }
+
+    .btn ion-icon {
+        font-size: 24px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+        background: var(--gray-light);
+        color: var(--dark);
+    }
+
+    .btn-secondary:hover {
+        background: #d1d5db;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .edit-container {
+            padding: 20px 16px 80px 16px;
         }
 
-        const data = [
-            "الإعاقات الذهنية",
-            "اضطراب النمو الذهني",
-            "تأخر النمو الشامل",
-            "الإعاقة الذهنية غير المحددة",
-            "اضطرابات التواصل",
-            "اضطراب النطق",
-            "اضطراب صوت الكلام",
-            "البدء المتأخر لاضطراب الطلاقة (التأتأة)",
-            "اضطراب التواصل الاجتماعي (العملي)",
-            "اضطراب التواصل غير المحدد",
-            "اضطراب طيف التوحد",
-            "اضطراب نقص الانتباه/فرط الحركة المحدد الآخر",
-            "اضطراب نقص الانتباه/فرط الحركة غير المحدد",
-            "اضطرابات التعلم المحددة",
-            "الاضطرابات الحركية",
-            "اضطراب التناسق التطوري",
-            "الحركات النمطية المتكررة",
-            "اضطراب العرة (اللزمات)",
-            "اضطراب توريت",
-            "اضطراب العرة الحركية أو الصوتية المستمر (المزمن)",
-            "اضطراب العرة التمهيدي",
-            "الاضطراب الذهاني",
-            "الاضطراب الذهاني الوجيز",
-            "الاضطراب الذهاني المشيمي الشكل",
-            "الفصام",
-            "الفصام الوجداني",
-            "الاضطراب الذهاني الناتج عن استخدام المواد",
-            "الاضطراب الذهاني بسبب حالة طبية أخرى",
-            "الفصام العاطفي الفاقـد للتمايز عن طيف آخر (محدد الكاتاتونيا)",
-            "الكاتاتونيا بسبب حالة طبية أخرى",
-            "الكاتاتونيا غير المحددة",
-            "اضطرابات طيف الفصام والاضطرابات الذهانية المحددة الأخرى",
-            "اضطرابات طيف الفصام والاضطرابات الذهانية غير المحددة",
-            "اضطراب ثنائي القطب I",
-            "اضطراب ثنائي القطب II",
-            "اضطراب المزاج الدوراني",
-            "الاضطراب ثنائي القطب والاضطرابات ذات الصلة الناتجة بمادة/دواء",
-            "الاضطراب ثنائي القطب والاضطرابات ذات الصلة بسبب حالة طبية أخرى",
-            "الاضطراب ثنائي القطب والاضطرابات ذات الصلة المحددة الأخرى",
-            "ثنائي القطب والاضطرابات ذات الصلة غير المحددة",
-            "اضطراب المزاج غير المحدد",
-            "محددات ثنائي القطب والاضطرابات ذات الصلة",
-            "اضطراب المزاج المتقلب المتشوش",
-            "الاضطراب الاكتئابي الجسيم",
-            "اضطراب اكتئابي مستمر (سوء المزاج)",
-            "اضطراب سوء المزاج ما قبل الطمث",
-            "الاضطراب الاكتئابي المحدد بمدى/شدّة",
-            "الاضطراب الاكتئابي بسبب حالة طبية أخرى",
-            "الاضطراب الاكتئابي محدد آخر",
-            "الاضطراب الاكتئابي غير المحدد",
-            "محددات الاضطرابات الاكتئابية",
-            "اضطراب قلق الانفصال",
-            "الهلع الانتقائي",
-            "الرهاب النوعي",
-            "اضطراب القلق الاجتماعي",
-            "اضطراب الهلع",
-            "اضطراب القلق المعمم",
-            "اضطراب القلق الناتج بمادة/دواء",
-            "اضطراب القلق بسبب حالة طبية أخرى",
-            "اضطراب قلق محدد آخر",
-            "اضطراب قلق غير محدد",
-            "اضطراب الوسواس القهري",
-            "اضطراب تشوه صورة الجسد",
-            "اضطراب الاكتناز",
-            "هوس نتف الشعر (اضطراب نتف الأشعار)",
-            "نزع الجلد (اضطراب نزع الجلد)",
-            "الوسواس القهري والاضطرابات ذات الصلة المحدث بمادة/دواء",
-            "الوسواس القهري والاضطرابات ذات الصلة بسبب حالة طبية أخرى",
-            "الوسواس القهري والاضطرابات ذات الصلة المحددة الأخرى",
-            "الوسواس القهري والاضطرابات ذات الصلة غير المحددة",
-            "اضطراب التعلق التفاعلي",
-            "اضطراب المشاركة الاجتماعية المتخلخل",
-            "اضطراب الكرب ما بعد الصدمة",
-            "اضطراب الكرب ما بعد الصدمة للأطفال بعمر ست سنوات والأصغر سنا",
-            "اضطراب الكرب الحاد",
-            "اضطرابات التأقلم",
-            "اضطراب الحداد المطول",
-            "الاضطرابات المتعلقة بالصدمة والإجهاد المحددة الأخرى",
-            "الاضطرابات المتعلقة بالصدمة والإجهاد غير المحددة",
-            "اضطراب الهوية التفارقية",
-            "النسيان التفارقي",
-            "اضطراب تبدد الشخصية/تبدد الواقع",
-            "اضطراب تفارقي محدد آخر",
-            "اضطراب تفارقي غير محدد",
-            "اضطراب العرض الجسدي",
-            "اضطراب قلق المرض",
-            "اضطراب العرض العصبي الوظيفي (اضطراب التحويل)",
-            "العوامل النفسية المؤثرة في الحالات الطبية الأخرى",
-            "الاضطراب المفتعل",
-            "اضطراب العرض الجسدي والاضطرابات ذات الصلة المحددة الأخرى",
-            "اضطراب العرض الجسدي والاضطرابات ذات الصلة غير المحددة",
-            "شهوة الطين",
-            "اضطراب الاجترار",
-            "اضطراب تناول الطعام التجنبي/المقيد",
-            "فقدان الشهية العصبي (القمه العصبي)",
-            "النهم العصبي",
-            "اضطراب الشراهة للطعام",
-            "اضطراب التغذية أو الأكل المحدد الآخر",
-            "اضطراب التغذية أو الأكل غير المحدد",
-            "سلس البول",
-            "سلس الغائط",
-            "اضطراب الإفراغ المحدد الآخر",
-            "اضطراب الإفراغ غير المحدد",
-            "اضطراب الأرق",
-            "اضطراب فرط النعاس",
-            "النوم الانتيابي",
-            "اضطرابات النوم ذات الصلة بالتنفس",
-            "توقف التنفس أو قصور التنفس الانسدادي أثناء النوم",
-            "اضطراب الأرق",
-            "اضطراب فرط النعاس",
-            "النوم الانتيابي",
-            "اضطرابات النوم ذات الصلة بالتنفس",
-            "توقف التنفس أو قصور التنفس الانسدادي أثناء النوم",
-            "توقف التنفس وسط النوم",
-            "نقص التهوية المتعلق بالنوم",
-            "اضطراب وتيرة النوم - اليقظة اليومي",
-            "حالات النوم المضطرب",
-            "اضطرابات الاستثارة خلال نوم حركة العين السريعة",
-            "اضطراب الكابوس",
-            "اضطراب السلوك خلال نوم حركة العين السريعة",
-            "متلازمة الساقين المتململتين",
-            "اضطراب النوم المحدث بمادة/دواء",
-            "اضطراب الأرق المحدد الآخر",
-            "اضطراب أرق غير محدد",
-            "اضطراب فرط النعاس المحدد الآخر",
-            "اضطراب فرط النعاس غير المحدد",
-            "اضطراب نوم - يقظة محدد آخر",
-            "اضطراب نوم - يقظة غير محدد",
-            "تأخر القذف",
-            "اضطراب الانتصاب",
-            "اضطراب النشوة الجنسية الأنثوي",
-            "اضطراب الاهتمام/الاستثارة الجنسي الأنثوي",
-            "اضطراب ألم الإيلاج الحوضي التناسلي",
-            "اضطراب نقص النشاط والرغبة الجنسية الذكري",
-            "القذف المبكر",
-            "خلل جنسي محدد بمادة/دواء",
-            "خلل وظيفة جنسية محدد آخر",
-            "خلل وظيفة جنسية غير محدد",
-            "الانزعاج من الجندر",
-            "الانزعاج من الجندر عند الأطفال",
-            "الانزعاج من الجندر لدى المراهقين والبالغين",
-            "انزعاج من الجندر محدد آخر",
-            "انزعاج من الجندر غير محدد",
-            "اضطراب التحدي الاعتراضي",
-            "الاضطراب الانفصالي المتقطع",
-            "اضطراب المسلك",
-            "اضطراب الشخصية المضادة للمجتمع",
-            "هوس إشعال الحرائق",
-            "هوس السرقة",
-            "اضطراب التشوش والتحكم بالاندفاع والمسلك محدد آخر",
-            "اضطراب التشوش والتحكم بالاندفاع والمسلك غير محدد",
-            "اضطرابات استعمال المادة",
-            "اضطرابات المتعلقة بالكحول",
-            "اضطراب استعمال الكحول",
-            "الاتسام بالكحول",
-            "سحب الكحول",
-            "الاضطرابات العقلية المحدثة بالكحول",
-            "اضطراب متعلق بالكحول غير محدد",
-            "الاضطرابات المتعلقة بالكافيين",
-            "الاتسام بالكافيين",
-            "سحب الكافيين",
-            "الاضطرابات العقلية المحدثة بالكافيين",
-            "اضطراب متعلق بالكافيين غير محدد",
-            "الاضطرابات المتعلقة بالحشيش",
-            "اضطراب استعمال الحشيش",
-            "الاتسام بالحشيش",
-            "سحب الحشيش",
-            "الاضطرابات العقلية المحدثة بالحشيش",
-            "اضطراب متعلق بالحشيش غير محدد",
-            "الاضطرابات المتعلقة بالمهلوسات",
-            "اضطراب استعمال الفينسيكليدين",
-            "اضطراب استعمال المهلوسات الأخرى",
-            "الاتسام بفينسيكليدين",
-            "الاتسام بمهلوس آخر",
-            "اضطراب الإدراكي المستمر بالمهلوسات",
-            "الاضطرابات العقلية المحدثة بفينسيكليدين",
-            "الاضطرابات العقلية المحدثة بمهلوس آخر",
-            "اضطراب متعلق بفينسيكليدين غير محدد",
-            "اضطراب متعلق بمهلوس غير محدد",
-            "الاضطرابات المتعلقة بالمنشطات",
-            "اضطراب استعمال المستنشقات",
-            "الاتسام بالمستنشقات",
-            "الاضطرابات العقلية المحدثة بالمستنشقات",
-            "اضطراب متعلق بالمستنشقات غير محدد",
-            "الاضطرابات المتعلقة بالأفيون",
-            "اضطراب استعمال الأفيون",
-            "الاتسام بالأفيون",
-            "سحب الأفيون",
-            "الاضطرابات العقلية المحدثة بالأفيون",
-            "اضطراب متعلق بالأفيون غير محدد",
-            "الاضطرابات المتعلقة بالمهدئات والمنومات ومضادات القلق",
-            "اضطراب استعمال المهدئات والمنومات ومضادات القلق",
-            "الاتسام بالمهدئات والمنومات ومضادات القلق",
-            "سحب المهدئات والمنومات ومضادات القلق",
-            "الاضطرابات العقلية المحدثة بالمهدئات والمنومات ومضادات القلق",
-            "اضطراب متعلق بالمهدئات والمنومات ومضادات القلق غير محدد",
-            "الاضطرابات المتعلقة بالمنشطات",
-            "اضطراب استعمال المنشطات",
-            "الاتسام بالمنشطات",
-            "سحب المنشطات",
-            "الاضطرابات العقلية المحدثة بالمنشطات",
-            "اضطراب متعلق بالمنشطات غير محدد",
-            "الاضطرابات المتعلقة بالتبغ",
-            "اضطراب استعمال التبغ",
-            "سحب التبغ",
-            "الاضطرابات العقلية المحدثة بالتبغ",
-            "اضطراب متعلق بالتبغ غير محدد",
-            "الاضطرابات المتعلقة بمادة أخرى (أو غير معروفة)",
-            "اضطراب استعمال مادة أخرى (أو غير معروفة)",
-            "الاتسام بمادة أخرى (أو غير معروفة)",
-            "سحب مادة أخرى (أو غير معروفة)",
-            "الاضطرابات العقلية المحدثة بمادة أخرى (أو غير معروفة)",
-            "اضطراب متعلق بمادة أخرى (أو غير معروفة) غير محدد",
-            "الاضطرابات غير المتعلقة بالمواد",
-            "اضطراب المقامرة",
-            "الاضطرابات العصبية المعرفية",
-            "الهذيان",
-            "هذيان محدد آخر",
-            "هذيان غير محدد",
-            "الاضطراب العصبي المعرفي الجسيم",
-            "الاضطراب العصبي المعرفي المعتدل",
-            "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب داء الزهايمر",
-            "اضطراب عصبي معرفي جسيم أو معتدل جبهي صدغي",
-            "اضطراب عصبي معرفي جسيم أو معتدل بسبب جسيمات ليوي",
-            "اضطراب عصبي معرفي وعائي جسيم أو معتدل",
-            "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب أذيات الدماغ الرضية",
-            "الاضطراب العصبي المعرفي الجسيم أو المعتدل المحدث بمادة/دواء",
-            "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب خمج فيروس نقص المناعة البشري HIV",
-            "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب داء بريون",
-            "اضطراب عصبي معرفي معتدل أو جسيم بسبب داء باركنسون",
-            "اضطراب عصبي معرفي جسيم أو معتدل بسبب داء هنتنغتون",
-            "اضطراب عصبي معرفي جسيم أو معتدل بسبب حالة طبية أخرى",
-            "الاضطراب العصبي المعرفي الجسيم أو المعتدل الناتج عن تعدد الأسباب المرضية",
-            "اضطراب عصبي معرفي غير محدد",
-            "اضطرابات الشخصية",
-            "اضطراب الشخصية العام",
-            "المجموعة A من اضطرابات الشخصية",
-            "اضطراب الشخصية الزورانية",
-            "اضطراب الشخصية الفصامية",
-            "اضطراب الشخصية الفصامي النمط",
-            "المجموعة B من اضطرابات الشخصية",
-            "اضطراب الشخصية المعادي للمجتمع",
-            "اضطراب الشخصية الحدية",
-            "اضطراب الشخصية الهيستريونية",
-            "اضطراب الشخصية النرجسية",
-            "المجموعة C من اضطرابات الشخصية",
-            "اضطراب الشخصية التجنبية",
-            "اضطراب الشخصية الاعتمادية",
-            "اضطراب الشخصية الوسواسية القهرية",
-            "اضطرابات الشخصية الأخرى",
-            "تغير الشخصية بسبب حالة طبية أخرى",
-            "اضطراب شخصية محدد آخر",
-            "اضطراب شخصية غير محدد",
-            "اضطراب التلصص",
-            "اضطراب الاستعراء",
-            "اضطراب الاحتكاك",
-            "اضطراب المازوخية الجنسية",
-            "اضطراب السادية الجنسية",
-            "اضطراب الولع بالأطفال",
-            "اضطراب الفيتيشية",
-            "اضطراب لبس ملابس الجنس الآخر",
-            "اضطراب الولع الجنسي المحدد الآخر",
-            "اضطراب الولع الجنسي الغير المحدد",
-            "اضطراب عقلي محدد آخر ناتج عن حالة طبية أخرى",
-            "اضطراب عقلي غير محدد ناتج عن حالة طبية أخرى",
-            "اضطراب عقلي محدد آخر",
-            "اضطراب عقلي غير محدد",
-            "رموز إضافية",
-            "لا يوجد تشخيص أو حالة",
-            "حالات أخرى قد تكون محوراً للاهتمام السريري",
-            "السلوك الانتحاري",
-            "سوء المعاملة والإهمال",
-            "مشاكل إساءة معاملة الطفل وإهماله",
-            "مشاكل سوء المعاملة والإهمال للبالغين",
-            "مشاكل العلاقات",
-            "مشاكل متعلقة بالتنشئة الأسرية",
-            "المشاكل المتعلقة بالبيئة الأسرية",
-            "مشاكل تعليمية",
-            "اضطراب الاحتكاك",
-            "اضطراب المازوخية الجنسية",
-            "اضطراب السادية الجنسية",
-            "اضطراب الولع بالأطفال",
-            "اضطراب الفيتيشية",
-            "اضطراب لبس ملابس الجنس الآخر",
-            "اضطراب الولع الجنسي المحدد الآخر",
-            "اضطراب الولع الجنسي الغير المحدد",
-            "اضطرابات عقلية أخرى ورموز إضافية",
-            "اضطراب عقلي محدد آخر ناتج عن حالة طبية أخرى",
-            "اضطراب عقلي غير محدد ناتج عن حالة طبية أخرى",
-            "اضطراب عقلي محدد آخر",
-            "اضطراب عقلي غير محدد",
-            "رموز إضافية",
-            "لا يوجد تشخيص أو حالة",
-            "اضطرابات الحركة المحدثة بالأدوية والتأثيرات الجانبية الأخرى للأدوية",
-            "حالات أخرى قد تكون محوراً للاهتمام السريري",
-            "السلوك الانتحاري",
-            "سوء المعاملة والإهمال",
-            "مشاكل إساءة معاملة الطفل وإهماله",
-            "مشاكل سوء المعاملة والإهمال للبالغين",
-            "مشاكل العلاقات",
-            "مشاكل متعلقة بالتنشئة الأسرية",
-            "المشاكل المتعلقة بالبيئة الأسرية",
-            "مشاكل تعليمية",
-            "مشاكل مهنية",
-            "مشاكل السكن",
-            "مشاكل اقتصادية",
-            "مشاكل أخرى ذات صلة بالبيئة الاجتماعية",
-            "المشاكل ذات الصلة بالجريمة أو التداخل مع النظام القضائي",
-            "المشكلات المتعلقة بالظروف النفسية والاجتماعية والشخصية والبيئية الأخرى",
-            "المشاكل المتعلقة بالحصول على الرعاية الطبية وأشكال الرعاية الصحية الأخرى",
-            "ظروف التاريخ الشخصي",
-            "مقابلات الخدمات الصحية الأخرى للنصح والمشورة الطبية",
-            "الظروف أو المشاكل الإضافية التي قد تكون محل تركيز للاهتمام السريري",
-        ]
-        autocomplete(document.getElementById("myInput"), data);
-        autocomplete(document.getElementById("myInput2"), data);
-    </script>
-    <%- include('../../layout/footer') -%>
+        .edit-header h1 {
+            font-size: 22px;
+        }
+
+        .patient-summary {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-card-body {
+            padding: 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            font-size: 14px;
+            padding: 12px 16px;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-card {
+        animation: fadeIn 0.4s ease;
+    }
+
+    .form-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .form-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .form-card:nth-child(4) {
+        animation-delay: 0.3s;
+    }
+
+    /* Section Badge */
+    .section-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-right: auto;
+    }
+
+    /* Required Indicator */
+    .required {
+        color: var(--danger);
+        margin-right: 4px;
+    }
+
+    /* Input Icon Wrapper */
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-wrapper ion-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: var(--gray);
+        pointer-events: none;
+    }
+
+    .input-wrapper .form-input,
+    .input-wrapper .form-select {
+        padding-left: 44px;
+    }
+</style>
+
+<div class="edit-container">
+    <!-- Header -->
+    <div class="edit-header">
+        <h1>تعديل معلومات المريض</h1>
+        <p>تحديث البيانات الشخصية والطبية</p>
+    </div>
+
+    <!-- Patient Summary -->
+    <div class="patient-summary">
+        <div class="patient-avatar">
+            <%= data.name.charAt(0) %>
+        </div>
+        <div class="patient-summary-info">
+            <h2><%= data.name %></h2>
+            <p>كود المريض: #<%= data.code %> • <%= data.phone %></p>
+        </div>
+    </div>
+
+    <!-- Edit Form -->
+    <form action="/patient/edit-profile/<%= data._id %>?_method=PUT" method="post">
+        <!-- Personal Information -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <h3>
+                    <ion-icon name="person-outline"></ion-icon>
+                    المعلومات الشخصية
+                    <span class="section-badge">أساسي</span>
+                </h3>
+            </div>
+            <div class="form-card-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">
+                            <ion-icon name="person"></ion-icon>
+                            الاسم الكامل
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" name="name" class="form-input" value="<%= data.name %>" required>
+                            <ion-icon name="create-outline"></ion-icon>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="calendar"></ion-icon>
+                            تاريخ الميلاد
+                            <span class="required">*</span>
+                        </label>
+                        <input type="date" name="birthDate" class="form-input" value="<%= data.birthDate %>" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="male-female"></ion-icon>
+                            الجنس
+                            <span class="required">*</span>
+                        </label>
+                        <select name="gender" class="form-select" required>
+                            <option value="<%= data.gender %>" selected><%= data.gender %></option>
+                            <option>ذكر</option>
+                            <option>انثى</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="call"></ion-icon>
+                            رقم الهاتف
+                            <span class="required">*</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" name="phone" class="form-input" value="<%= data.phone %>" required>
+                            <ion-icon name="call-outline"></ion-icon>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="home"></ion-icon>
+                            العنوان
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" name="address" class="form-input" value="<%= data.address %>">
+                            <ion-icon name="location-outline"></ion-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Education & Social Information -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <h3>
+                    <ion-icon name="school-outline"></ion-icon>
+                    التعليم والحالة الاجتماعية
+                </h3>
+            </div>
+            <div class="form-card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="book"></ion-icon>
+                            المستوى التعليمي
+                        </label>
+                        <select name="study" class="form-select">
+                            <option value="<%= data.study %>" selected><%= data.study %></option>
+                            <option>يقرا و يكتب</option>
+                            <option>ابتدائي</option>
+                            <option>متوسط</option>
+                            <option>ثانوي</option>
+                            <option>دبلوم</option>
+                            <option>بكلوريوس</option>
+                            <option>ماجستير</option>
+                            <option>دكتوراة</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="heart"></ion-icon>
+                            الحالة الاجتماعية
+                        </label>
+                        <select name="relationship" class="form-select">
+                            <option value="<%= data.relationship %>" selected><%= data.relationship %></option>
+                            <option>اعزب</option>
+                            <option>متزوج</option>
+                            <option>ارمل</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="people"></ion-icon>
+                            عدد أفراد العائلة
+                        </label>
+                        <input type="number" name="familyMembers" class="form-input" value="<%= data.familyMembers %>" min="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="swap-horizontal"></ion-icon>
+                            التسلسل في العائلة
+                        </label>
+                        <input type="number" name="familyRank" class="form-input" value="<%= data.familyRank %>" min="1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Health Status -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <h3>
+                    <ion-icon name="medkit-outline"></ion-icon>
+                    الحالة الصحية والنفسية
+                </h3>
+            </div>
+            <div class="form-card-body">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="fitness"></ion-icon>
+                            الحالة الصحية
+                        </label>
+                        <select name="health" class="form-select">
+                            <option value="<%= data.health %>" selected><%= data.health %></option>
+                            <option>جيد</option>
+                            <option>متوسط</option>
+                            <option>ضعيف</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="happy"></ion-icon>
+                            الحالة النفسية
+                        </label>
+                        <select name="psycho" class="form-select">
+                            <option value="<%= data.psycho %>" selected><%= data.psycho %></option>
+                            <option>جيد</option>
+                            <option>متوسط</option>
+                            <option>ضعيف</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="people-circle"></ion-icon>
+                            العلاقات الأسرية
+                        </label>
+                        <select name="RelationshipAndFamily" class="form-select">
+                            <option value="<%= data.RelationshipAndFamily %>" selected><%= data.RelationshipAndFamily %></option>
+                            <option>جيد</option>
+                            <option>متوسط</option>
+                            <option>ضعيف</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="arrow-forward"></ion-icon>
+                            الإحالة إلى
+                        </label>
+                        <input type="text" name="sendTo" class="form-input" value="<%= data.sendTo %>" placeholder="اسم الطبيب أو المركز">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnosis -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <h3>
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    التشخيص
+                    <span class="section-badge">طبي</span>
+                </h3>
+            </div>
+            <div class="form-card-body">
+                <div class="form-grid full-width">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="stethoscope"></ion-icon>
+                            تشخيص المعالج
+                        </label>
+                        <div class="autocomplete">
+                            <input type="text" name="therapist_diagnose" id="myInput" class="form-input" placeholder="ابدأ الكتابة للبحث..." value="<%= data.therapist_diagnose %>">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="medkit"></ion-icon>
+                            تشخيص الطبيب
+                        </label>
+                        <div class="autocomplete">
+                            <input type="text" name="doctor_diagnose" id="myInput2" class="form-input" placeholder="ابدأ الكتابة للبحث..." value="<%= data.doctor_diagnose %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <h3>
+                    <ion-icon name="create-outline"></ion-icon>
+                    الملاحظات
+                </h3>
+            </div>
+            <div class="form-card-body">
+                <div class="form-grid full-width">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="chatbubble"></ion-icon>
+                            ملاحظات نفسية
+                        </label>
+                        <textarea name="psychoNote" class="form-textarea" placeholder="أضف ملاحظات حول الحالة النفسية للمريض..."><%= data.psychoNote %></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <ion-icon name="pill"></ion-icon>
+                            الأدوية المستخدمة
+                        </label>
+                        <textarea name="Notes" class="form-textarea" placeholder="أدخل الأدوية الحالية..."><%= data.Notes %></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                حفظ التغييرات
+            </button>
+            <a href="/patient/get-by-id/<%= data._id %>" class="btn btn-secondary">
+                <ion-icon name="close-circle"></ion-icon>
+                إلغاء
+            </a>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script>
+    function autocomplete(inp, arr) {
+        let currentFocus;
+        const fuse = new Fuse(arr, {
+            threshold: 0.4,
+        });
+
+        inp.addEventListener("input", function () {
+            let a, b, val = this.value;
+            closeAllLists();
+            if (!val) return false;
+            currentFocus = -1;
+
+            a = document.createElement("DIV");
+            a.setAttribute("id", this.id + "autocomplete-list");
+            a.setAttribute("class", "autocomplete-items");
+            this.parentNode.appendChild(a);
+
+            const results = fuse.search(val);
+            results.forEach(({ item }) => {
+                b = document.createElement("DIV");
+                b.innerHTML = `<strong>${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
+                b.innerHTML += `<input type='hidden' value='${item}'>`;
+                b.addEventListener("click", function () {
+                    inp.value = this.getElementsByTagName("input")[0].value;
+                    closeAllLists();
+                });
+                a.appendChild(b);
+            });
+        });
+
+        inp.addEventListener("keydown", function (e) {
+            let x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode == 40) {
+                currentFocus++;
+                addActive(x);
+            } else if (e.keyCode == 38) {
+                currentFocus--;
+                addActive(x);
+            } else if (e.keyCode == 13) {
+                e.preventDefault();
+                if (currentFocus > -1 && x) x[currentFocus].click();
+            }
+        });
+
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = x.length - 1;
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(x) {
+            for (let i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            const x = document.getElementsByClassName("autocomplete-items");
+            for (let i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    const data = [
+        "الإعاقات الذهنية",
+        "اضطراب النمو الذهني",
+        "تأخر النمو الشامل",
+        "الإعاقة الذهنية غير المحددة",
+        "اضطرابات التواصل",
+        "اضطراب النطق",
+        "اضطراب صوت الكلام",
+        "البدء المتأخر لاضطراب الطلاقة (التأتأة)",
+        "اضطراب التواصل الاجتماعي (العملي)",
+        "اضطراب التواصل غير المحدد",
+        "اضطراب طيف التوحد",
+        "اضطراب نقص الانتباه/فرط الحركة المحدد الآخر",
+        "اضطراب نقص الانتباه/فرط الحركة غير المحدد",
+        "اضطرابات التعلم المحددة",
+        "الاضطرابات الحركية",
+        "اضطراب التناسق التطوري",
+        "الحركات النمطية المتكررة",
+        "اضطراب العرة (اللزمات)",
+        "اضطراب توريت",
+        "اضطراب العرة الحركية أو الصوتية المستمر (المزمن)",
+        "اضطراب العرة التمهيدي",
+        "الاضطراب الذهاني",
+        "الاضطراب الذهاني الوجيز",
+        "الاضطراب الذهاني المشيمي الشكل",
+        "الفصام",
+        "الفصام الوجداني",
+        "الاضطراب الذهاني الناتج عن استخدام المواد",
+        "الاضطراب الذهاني بسبب حالة طبية أخرى",
+        "الفصام العاطفي الفاقـد للتمايز عن طيف آخر (محدد الكاتاتونيا)",
+        "الكاتاتونيا بسبب حالة طبية أخرى",
+        "الكاتاتونيا غير المحددة",
+        "اضطرابات طيف الفصام والاضطرابات الذهانية المحددة الأخرى",
+        "اضطرابات طيف الفصام والاضطرابات الذهانية غير المحددة",
+        "اضطراب ثنائي القطب I",
+        "اضطراب ثنائي القطب II",
+        "اضطراب المزاج الدوراني",
+        "الاضطراب ثنائي القطب والاضطرابات ذات الصلة الناتجة بمادة/دواء",
+        "الاضطراب ثنائي القطب والاضطرابات ذات الصلة بسبب حالة طبية أخرى",
+        "الاضطراب ثنائي القطب والاضطرابات ذات الصلة المحددة الأخرى",
+        "ثنائي القطب والاضطرابات ذات الصلة غير المحددة",
+        "اضطراب المزاج غير المحدد",
+        "محددات ثنائي القطب والاضطرابات ذات الصلة",
+        "اضطراب المزاج المتقلب المتشوش",
+        "الاضطراب الاكتئابي الجسيم",
+        "اضطراب اكتئابي مستمر (سوء المزاج)",
+        "اضطراب سوء المزاج ما قبل الطمث",
+        "الاضطراب الاكتئابي المحدد بمدى/شدّة",
+        "الاضطراب الاكتئابي بسبب حالة طبية أخرى",
+        "الاضطراب الاكتئابي محدد آخر",
+        "الاضطراب الاكتئابي غير المحدد",
+        "محددات الاضطرابات الاكتئابية",
+        "اضطراب قلق الانفصال",
+        "الهلع الانتقائي",
+        "الرهاب النوعي",
+        "اضطراب القلق الاجتماعي",
+        "اضطراب الهلع",
+        "اضطراب القلق المعمم",
+        "اضطراب القلق الناتج بمادة/دواء",
+        "اضطراب القلق بسبب حالة طبية أخرى",
+        "اضطراب قلق محدد آخر",
+        "اضطراب قلق غير محدد",
+        "اضطراب الوسواس القهري",
+        "اضطراب تشوه صورة الجسد",
+        "اضطراب الاكتناز",
+        "هوس نتف الشعر (اضطراب نتف الأشعار)",
+        "نزع الجلد (اضطراب نزع الجلد)",
+        "الوسواس القهري والاضطرابات ذات الصلة المحدث بمادة/دواء",
+        "الوسواس القهري والاضطرابات ذات الصلة بسبب حالة طبية أخرى",
+        "الوسواس القهري والاضطرابات ذات الصلة المحددة الأخرى",
+        "الوسواس القهري والاضطرابات ذات الصلة غير المحددة",
+        "اضطراب التعلق التفاعلي",
+        "اضطراب المشاركة الاجتماعية المتخلخل",
+        "اضطراب الكرب ما بعد الصدمة",
+        "اضطراب الكرب ما بعد الصدمة للأطفال بعمر ست سنوات والأصغر سنا",
+        "اضطراب الكرب الحاد",
+        "اضطرابات التأقلم",
+        "اضطراب الحداد المطول",
+        "الاضطرابات المتعلقة بالصدمة والإجهاد المحددة الأخرى",
+        "الاضطرابات المتعلقة بالصدمة والإجهاد غير المحددة",
+        "اضطراب الهوية التفارقية",
+        "النسيان التفارقي",
+        "اضطراب تبدد الشخصية/تبدد الواقع",
+        "اضطراب تفارقي محدد آخر",
+        "اضطراب تفارقي غير محدد",
+        "اضطراب العرض الجسدي",
+        "اضطراب قلق المرض",
+        "اضطراب العرض العصبي الوظيفي (اضطراب التحويل)",
+        "العوامل النفسية المؤثرة في الحالات الطبية الأخرى",
+        "الاضطراب المفتعل",
+        "اضطراب العرض الجسدي والاضطرابات ذات الصلة المحددة الأخرى",
+        "اضطراب العرض الجسدي والاضطرابات ذات الصلة غير المحددة",
+        "شهوة الطين",
+        "اضطراب الاجترار",
+        "اضطراب تناول الطعام التجنبي/المقيد",
+        "فقدان الشهية العصبي (القمه العصبي)",
+        "النهم العصبي",
+        "اضطراب الشراهة للطعام",
+        "اضطراب التغذية أو الأكل المحدد الآخر",
+        "اضطراب التغذية أو الأكل غير المحدد",
+        "سلس البول",
+        "سلس الغائط",
+        "اضطراب الإفراغ المحدد الآخر",
+        "اضطراب الإفراغ غير المحدد",
+        "اضطراب الأرق",
+        "اضطراب فرط النعاس",
+        "النوم الانتيابي",
+        "اضطرابات النوم ذات الصلة بالتنفس",
+        "توقف التنفس أو قصور التنفس الانسدادي أثناء النوم",
+        "اضطراب الأرق",
+        "اضطراب فرط النعاس",
+        "النوم الانتيابي",
+        "اضطرابات النوم ذات الصلة بالتنفس",
+        "توقف التنفس أو قصور التنفس الانسدادي أثناء النوم",
+        "توقف التنفس وسط النوم",
+        "نقص التهوية المتعلق بالنوم",
+        "اضطراب وتيرة النوم - اليقظة اليومي",
+        "حالات النوم المضطرب",
+        "اضطرابات الاستثارة خلال نوم حركة العين السريعة",
+        "اضطراب الكابوس",
+        "اضطراب السلوك خلال نوم حركة العين السريعة",
+        "متلازمة الساقين المتململتين",
+        "اضطراب النوم المحدث بمادة/دواء",
+        "اضطراب أرق محدد آخر",
+        "اضطراب أرق غير محدد",
+        "اضطراب فرط النعاس المحدد الآخر",
+        "اضطراب فرط النعاس غير محدد",
+        "اضطراب نوم - يقظة محدد آخر",
+        "اضطراب نوم - يقظة غير محدد",
+        "تأخر القذف",
+        "اضطراب الانتصاب",
+        "اضطراب النشوة الجنسية الأنثوي",
+        "اضطراب الاهتمام/الاستثارة الجنسي الأنثوي",
+        "اضطراب ألم الإيلاج الحوضي التناسلي",
+        "اضطراب نقص النشاط والرغبة الجنسية الذكري",
+        "القذف المبكر",
+        "خلل جنسي محدد بمادة/دواء",
+        "خلل وظيفة جنسية محدد آخر",
+        "خلل وظيفة جنسية غير محدد",
+        "الانزعاج من الجندر",
+        "الانزعاج من الجندر عند الأطفال",
+        "الانزعاج من الجندر لدى المراهقين والبالغين",
+        "انزعاج من الجندر محدد آخر",
+        "انزعاج من الجندر غير محدد",
+        "اضطراب التحدي الاعتراضي",
+        "الاضطراب الانفصالي المتقطع",
+        "اضطراب المسلك",
+        "اضطراب الشخصية المضادة للمجتمع",
+        "هوس إشعال الحرائق",
+        "هوس السرقة",
+        "اضطراب التشوش والتحكم بالاندفاع والمسلك محدد آخر",
+        "اضطراب التشوش والتحكم بالاندفاع والمسلك غير محدد",
+        "اضطرابات استعمال المادة",
+        "الاضطرابات المتعلقة بالكحول",
+        "اضطراب استعمال الكحول",
+        "الاتسام بالكحول",
+        "سحب الكحول",
+        "الاضطرابات العقلية المحدثة بالكحول",
+        "اضطراب متعلق بالكحول غير محدد",
+        "الاضطرابات المتعلقة بالكافيين",
+        "الاتسام بالكافيين",
+        "سحب الكافيين",
+        "الاضطرابات العقلية المحدثة بالكافيين",
+        "اضطراب متعلق بالكافيين غير محدد",
+        "الاضطرابات المتعلقة بالحشيش",
+        "اضطراب استعمال الحشيش",
+        "الاتسام بالحشيش",
+        "سحب الحشيش",
+        "الاضطرابات العقلية المحدثة بالحشيش",
+        "اضطراب متعلق بالحشيش غير محدد",
+        "الاضطرابات المتعلقة بالمهلوسات",
+        "اضطراب استعمال الفينسيكليدين",
+        "اضطراب استعمال المهلوسات الأخرى",
+        "الاتسام بفينسيكليدين",
+        "الاتسام بمهلوس آخر",
+        "اضطراب الإدراكي المستمر بالمهلوسات",
+        "الاضطرابات العقلية المحدثة بفينسيكليدين",
+        "الاضطرابات العقلية المحدثة بمهلوس آخر",
+        "اضطراب متعلق بفينسيكليدين غير محدد",
+        "اضطراب متعلق بمهلوس غير محدد",
+        "الاضطرابات المتعلقة بالمنشطات",
+        "اضطراب استعمال المستنشقات",
+        "الاتسام بالمستنشقات",
+        "الاضطرابات العقلية المحدثة بالمستنشقات",
+        "اضطراب متعلق بالمستنشقات غير محدد",
+        "الاضطرابات المتعلقة بالأفيون",
+        "اضطراب استعمال الأفيون",
+        "الاتسام بالأفيون",
+        "سحب الأفيون",
+        "الاضطرابات العقلية المحدثة بالأفيون",
+        "اضطراب متعلق بالأفيون غير محدد",
+        "الاضطرابات المتعلقة بالمهدئات والمنومات ومضادات القلق",
+        "اضطراب استعمال المهدئات والمنومات ومضادات القلق",
+        "الاتسام بالمهدئات والمنومات ومضادات القلق",
+        "سحب المهدئات والمنومات ومضادات القلق",
+        "الاضطرابات العقلية المحدثة بالمهدئات والمنومات ومضادات القلق",
+        "اضطراب متعلق بالمهدئات والمنومات ومضادات القلق غير محدد",
+        "الاضطرابات المتعلقة بالمنشطات",
+        "اضطراب استعمال المنشطات",
+        "الاتسام بالمنشطات",
+        "سحب المنشطات",
+        "الاضطرابات العقلية المحدثة بالمنشطات",
+        "اضطراب متعلق بالمنشطات غير محدد",
+        "الاضطرابات المتعلقة بالتبغ",
+        "اضطراب استعمال التبغ",
+        "سحب التبغ",
+        "الاضطرابات العقلية المحدثة بالتبغ",
+        "اضطراب متعلق بالتبغ غير محدد",
+        "الاضطرابات المتعلقة بمادة أخرى (أو غير معروفة)",
+        "اضطراب استعمال مادة أخرى (أو غير معروفة)",
+        "الاتسام بمادة أخرى (أو غير معروفة)",
+        "سحب مادة أخرى (أو غير معروفة)",
+        "الاضطرابات العقلية المحدثة بمادة أخرى (أو غير معروفة)",
+        "اضطراب متعلق بمادة أخرى (أو غير معروفة) غير محدد",
+        "الاضطرابات غير المتعلقة بالمواد",
+        "اضطراب المقامرة",
+        "الاضطرابات العصبية المعرفية",
+        "الهذيان",
+        "هذيان محدد آخر",
+        "هذيان غير محدد",
+        "الاضطراب العصبي المعرفي الجسيم",
+        "الاضطراب العصبي المعرفي المعتدل",
+        "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب داء الزهايمر",
+        "اضطراب عصبي معرفي جسيم أو معتدل جبهي صدغي",
+        "اضطراب عصبي معرفي جسيم أو معتدل بسبب جسيمات ليوي",
+        "اضطراب عصبي معرفي وعائي جسيم أو معتدل",
+        "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب أذيات الدماغ الرضية",
+        "الاضطراب العصبي المعرفي الجسيم أو المعتدل المحدث بمادة/دواء",
+        "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب خمج فيروس نقص المناعة البشري HIV",
+        "الاضطراب العصبي المعرفي الجسيم أو المعتدل بسبب داء بريون",
+        "اضطراب عصبي معرفي معتدل أو جسيم بسبب داء باركنسون",
+        "اضطراب عصبي معرفي جسيم أو معتدل بسبب داء هنتنغتون",
+        "اضطراب عصبي معرفي جسيم أو معتدل بسبب حالة طبية أخرى",
+        "الاضطراب العصبي المعرفي الجسيم أو المعتدل الناتج عن تعدد الأسباب المرضية",
+        "اضطراب عصبي معرفي غير محدد",
+        "اضطرابات الشخصية",
+        "اضطراب الشخصية العام",
+        "المجموعة A من اضطرابات الشخصية",
+        "اضطراب الشخصية الزورانية",
+        "اضطراب الشخصية الفصامية",
+        "اضطراب الشخصية الفصامي النمط",
+        "المجموعة B من اضطرابات الشخصية",
+        "اضطراب الشخصية المعادي للمجتمع",
+        "اضطراب الشخصية الحدية",
+        "اضطراب الشخصية الهيستريونية",
+        "اضطراب الشخصية النرجسية",
+        "المجموعة C من اضطرابات الشخصية",
+        "اضطراب الشخصية التجنبية",
+        "اضطراب الشخصية الاعتمادية",
+        "اضطراب الشخصية الوسواسية القهرية",
+        "اضطرابات الشخصية الأخرى",
+        "تغير الشخصية بسبب حالة طبية أخرى",
+        "اضطراب شخصية محدد آخر",
+        "اضطراب شخصية غير محدد",
+        "اضطراب التلصص",
+        "اضطراب الاستعراء",
+        "اضطراب الاحتكاك",
+        "اضطراب المازوخية الجنسية",
+        "اضطراب السادية الجنسية",
+        "اضطراب الولع بالأطفال",
+        "اضطراب الفيتيشية",
+        "اضطراب لبس ملابس الجنس الآخر",
+        "اضطراب الولع الجنسي المحدد الآخر",
+        "اضطراب الولع الجنسي الغير المحدد",
+        "اضطراب عقلي محدد آخر ناتج عن حالة طبية أخرى",
+        "اضطراب عقلي غير محدد ناتج عن حالة طبية أخرى",
+        "اضطراب عقلي محدد آخر",
+        "اضطراب عقلي غير محدد",
+        "رموز إضافية",
+        "لا يوجد تشخيص أو حالة",
+        "حالات أخرى قد تكون محوراً للاهتمام السريري",
+        "السلوك الانتحاري",
+        "سوء المعاملة والإهمال",
+        "مشاكل إساءة معاملة الطفل وإهماله",
+        "مشاكل سوء المعاملة والإهمال للبالغين",
+        "مشاكل العلاقات",
+        "مشاكل متعلقة بالتنشئة الأسرية",
+        "المشاكل المتعلقة بالبيئة الأسرية",
+        "مشاكل تعليمية",
+        "اضطراب الاحتكاك",
+        "اضطراب المازوخية الجنسية",
+        "اضطراب السادية الجنسية",
+        "اضطراب الولع بالأطفال",
+        "اضطراب الفيتيشية",
+        "اضطراب لبس ملابس الجنس الآخر",
+        "اضطراب الولع الجنسي المحدد الآخر",
+        "اضطراب الولع الجنسي الغير المحدد",
+        "اضطرابات عقلية أخرى ورموز إضافية",
+        "اضطراب عقلي محدد آخر ناتج عن حالة طبية أخرى",
+        "اضطراب عقلي غير محدد ناتج عن حالة طبية أخرى",
+        "اضطراب عقلي محدد آخر",
+        "اضطراب عقلي غير محدد",
+        "رموز إضافية",
+        "لا يوجد تشخيص أو حالة",
+        "اضطرابات الحركة المحدثة بالأدوية والتأثيرات الجانبية الأخرى للأدوية",
+        "حالات أخرى قد تكون محوراً للاهتمام السريري",
+        "السلوك الانتحاري",
+        "سوء المعاملة والإهمال",
+        "مشاكل إساءة معاملة الطفل وإهماله",
+        "مشاكل سوء المعاملة والإهمال للبالغين",
+        "مشاكل العلاقات",
+        "مشاكل متعلقة بالتنشئة الأسرية",
+        "المشاكل المتعلقة بالبيئة الأسرية",
+        "مشاكل تعليمية",
+        "مشاكل مهنية",
+        "مشاكل السكن",
+        "مشاكل اقتصادية",
+        "مشاكل أخرى ذات صلة بالبيئة الاجتماعية",
+        "المشاكل ذات الصلة بالجريمة أو التداخل مع النظام القضائي",
+        "المشكلات المتعلقة بالظروف النفسية والاجتماعية والشخصية والبيئية الأخرى",
+        "المشاكل المتعلقة بالحصول على الرعاية الطبية وأشكال الرعاية الصحية الأخرى",
+        "ظروف التاريخ الشخصي",
+        "مقابلات الخدمات الصحية الأخرى للنصح والمشورة الطبية",
+        "الظروف أو المشاكل الإضافية التي قد تكون محل تركيز للاهتمام السريري",
+    ]
+
+    autocomplete(document.getElementById("myInput"), data);
+    autocomplete(document.getElementById("myInput2"), data);
+</script>
+
+<%- include('../../layout/footer') -%>

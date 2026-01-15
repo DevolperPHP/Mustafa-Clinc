@@ -1,271 +1,379 @@
 <%- include('../../layout/navbar') -%>
+
 <style>
-    .expenses-container {
-        padding: 20px;
-        max-width: 1400px;
-        margin: 0 auto;
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
     }
 
-    .dashboard-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+    .expenses-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .page-header {
         margin-bottom: 30px;
     }
 
-    .card {
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
-        border-radius: 15px;
-        padding: 25px;
-        color: white;
-        box-shadow: 0 10px 30px rgba(164, 200, 66, 0.3);
-        transition: transform 0.3s ease;
+    .page-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-header h1 ion-icon {
+        font-size: 32px;
+        color: var(--danger);
+    }
+
+    .page-header p {
+        font-size: 15px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Messages */
+    .message {
+        padding: 16px 24px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .message ion-icon {
+        font-size: 24px;
+    }
+
+    .success-message {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #16a34a;
+    }
+
+    .error-message {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
+        transition: all 0.3s ease;
         cursor: pointer;
     }
 
-    .card:hover {
-        transform: translateY(-5px);
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px var(--shadow-lg);
     }
 
-    .card.today {
-        background: linear-gradient(135deg, #a4c842 0%, #7fa02e 100%);
-    }
-
-    .card.month {
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
-    }
-
-    .card.total {
-        background: linear-gradient(135deg, #a4c842 0%, #6e9428 100%);
-    }
-
-    .card-title {
-        font-size: 16px;
-        opacity: 0.9;
-        margin-bottom: 10px;
-        text-align: center;
-    }
-
-    .card-value {
-        font-size: 32px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 5px;
-    }
-
-    .card-label {
-        font-size: 12px;
-        opacity: 0.8;
-        text-align: center;
-    }
-
-    .category-section {
-        background: white;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 30px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    }
-
-    .section-title {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        color: #333;
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-bottom: 16px;
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: center;
+        font-size: 28px;
+    }
+
+    .stat-card.today .stat-icon {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    .stat-card.month .stat-icon {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        color: #d97706;
+    }
+
+    .stat-card.total .stat-icon {
+        background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+        color: #be185d;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 8px;
+        color: var(--dark);
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Category Section */
+    .category-section {
+        background: white;
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+    }
+
+    .section-header ion-icon {
+        font-size: 24px;
+        color: var(--danger);
     }
 
     .category-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
     }
 
     .category-card {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 15px;
-        border-left: 4px solid #a4c842;
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        border-radius: 14px;
+        padding: 20px;
+        border: 1px solid #fecaca;
         transition: all 0.3s ease;
         cursor: pointer;
     }
 
     .category-card:hover {
-        background: #e9ecef;
-        transform: translateX(5px);
+        transform: translateX(-4px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+        border-color: #f87171;
     }
 
     .category-name {
         font-size: 14px;
-        color: #666;
-        margin-bottom: 5px;
+        color: var(--gray);
+        margin-bottom: 8px;
     }
 
     .category-amount {
         font-size: 20px;
-        font-weight: bold;
-        color: #333;
+        font-weight: 700;
+        color: #dc2626;
     }
 
-    .controls {
+    /* Controls Section */
+    .controls-section {
         background: white;
-        border-radius: 15px;
-        padding: 30px;
-        margin-bottom: 20px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        direction: rtl;
+        border-radius: 20px;
+        padding: 28px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
     }
 
-    .controls-row {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 20px;
+    .control-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: center;
         margin-bottom: 20px;
     }
 
-    .controls-row:last-child {
+    .control-group:last-child {
         margin-bottom: 0;
     }
 
-    .control-section {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        align-items: center;
-        justify-content: flex-start;
-    }
-
-    .section-label {
+    .control-label {
         font-size: 14px;
-        font-weight: bold;
-        color: #555;
-        margin-right: 10px;
-        min-width: 120px;
-        text-align: right;
+        font-weight: 600;
+        color: var(--dark);
+        min-width: 100px;
     }
 
     .btn-add {
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         color: white;
         border: none;
-        padding: 15px 40px;
-        border-radius: 30px;
-        font-size: 16px;
-        font-weight: bold;
+        padding: 12px 28px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
         cursor: pointer;
-        box-shadow: 0 5px 15px rgba(164, 200, 66, 0.4);
         transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
     }
 
     .btn-add:hover {
         transform: translateY(-2px);
-        box-shadow: 0 7px 20px rgba(164, 200, 66, 0.6);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
     }
 
-    .filter-input {
-        padding: 12px 20px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
+    .input-control {
+        padding: 12px 16px;
+        border: 2px solid var(--gray-light);
+        border-radius: 10px;
         font-size: 14px;
-        transition: border-color 0.3s ease;
-        min-width: 250px;
+        transition: all 0.3s ease;
         direction: rtl;
         text-align: right;
+        background: white;
     }
 
-    .filter-input:focus {
+    .input-control:hover {
+        border-color: #d1d5db;
+    }
+
+    .input-control:focus {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
         outline: none;
-        border-color: #a4c842;
     }
 
-    .date-range-container {
-        border: 2px solid #a4c842;
-        border-radius: 10px;
+    .date-range-box {
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        border: 2px solid #fecaca;
+        border-radius: 14px;
         padding: 20px;
-        background: #f9f9f9;
     }
 
-    .date-range-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 15px;
+    .date-range-box-header {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 16px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        justify-content: flex-start;
-        direction: rtl;
+        gap: 8px;
+    }
+
+    .date-range-box-header ion-icon {
+        color: var(--danger);
     }
 
     .date-inputs {
         display: flex;
-        gap: 15px;
-        align-items: center;
+        gap: 16px;
         flex-wrap: wrap;
-        justify-content: flex-start;
+        align-items: center;
     }
 
-    .date-input {
-        padding: 12px 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
+    .date-input-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .date-input-group label {
         font-size: 14px;
-        transition: border-color 0.3s ease;
-        direction: rtl;
-    }
-
-    .date-input:focus {
-        outline: none;
-        border-color: #a4c842;
-    }
-
-    .date-inputs label {
-        direction: rtl;
+        font-weight: 500;
+        color: var(--dark);
     }
 
     .btn-search {
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         color: white;
         border: none;
-        padding: 12px 30px;
-        border-radius: 25px;
+        padding: 12px 24px;
+        border-radius: 10px;
         font-size: 14px;
-        font-weight: bold;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .btn-search:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(164, 200, 66, 0.4);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
     .btn-clear {
-        background: #999;
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        border-radius: 25px;
+        background: white;
+        color: var(--gray);
+        border: 2px solid var(--gray-light);
+        padding: 12px 24px;
+        border-radius: 10px;
         font-size: 14px;
-        font-weight: bold;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .btn-clear:hover {
-        background: #777;
+        background: var(--gray-light);
     }
 
-    .expenses-table {
+    /* Table Section */
+    .table-section {
         background: white;
-        border-radius: 15px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px var(--shadow);
         overflow: hidden;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        border: 1px solid var(--gray-light);
+    }
+
+    .table-section-header {
+        padding: 24px 28px;
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .table-section-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-section-header ion-icon {
+        font-size: 24px;
+        color: var(--danger);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
     }
 
     table {
@@ -274,76 +382,97 @@
     }
 
     thead {
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
-        color: white;
+        background: var(--light);
     }
 
     th {
-        padding: 15px;
+        padding: 16px 18px;
         text-align: right;
-        font-weight: bold;
-        font-size: 14px;
-    }
-
-    tbody tr {
-        border-bottom: 1px solid #f0f0f0;
-        transition: background-color 0.3s ease;
-    }
-
-    tbody tr:hover {
-        background-color: #f8f9fa;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--gray);
+        border-bottom: 2px solid var(--gray-light);
+        white-space: nowrap;
     }
 
     td {
-        padding: 15px;
-        text-align: right;
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--gray-light);
         font-size: 14px;
+        color: var(--dark);
+    }
+
+    tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    tbody tr:hover {
+        background: var(--light);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .category-badge {
         display: inline-block;
-        padding: 5px 12px;
-        border-radius: 15px;
+        padding: 6px 14px;
+        border-radius: 20px;
         font-size: 12px;
-        font-weight: bold;
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
-        color: white;
+        font-weight: 600;
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
     }
 
     .amount-cell {
-        font-weight: bold;
+        font-weight: 700;
         font-size: 16px;
-        color: #f5576c;
+        color: var(--danger);
     }
 
     .btn-delete {
-        background: #f5576c;
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         color: white;
         border: none;
-        padding: 8px 20px;
-        border-radius: 20px;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .btn-delete:hover {
-        background: #d63447;
-        transform: scale(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
     }
 
+    /* Empty State */
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
-        color: #999;
+        padding: 80px 20px;
     }
 
-    .empty-state-icon {
-        font-size: 64px;
+    .empty-state ion-icon {
+        font-size: 80px;
+        color: var(--gray-light);
         margin-bottom: 20px;
-        opacity: 0.3;
     }
 
-    /* Modal Styles */
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Modal */
     .modal {
         display: none;
         position: fixed;
@@ -352,24 +481,25 @@
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        animation: fadeIn 0.3s ease;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.2s ease;
     }
 
     .modal-content {
-        background-color: white;
+        background: white;
         margin: 5% auto;
-        padding: 30px;
-        border-radius: 20px;
+        border-radius: 24px;
         width: 90%;
-        max-width: 600px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        animation: slideDown 0.3s ease;
+        max-width: 500px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: slideUp 0.3s ease;
+        overflow: hidden;
     }
 
-    @keyframes slideDown {
+    @keyframes slideUp {
         from {
-            transform: translateY(-50px);
+            transform: translateY(30px);
             opacity: 0;
         }
         to {
@@ -384,11 +514,20 @@
     }
 
     .modal-header {
-        font-size: 24px;
-        font-weight: bold;
-        margin-bottom: 25px;
-        color: #333;
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+        padding: 24px 28px;
         text-align: center;
+    }
+
+    .modal-header h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .modal-body {
+        padding: 28px;
     }
 
     .form-group {
@@ -398,122 +537,194 @@
     .form-group label {
         display: block;
         margin-bottom: 8px;
-        font-weight: bold;
-        color: #555;
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 14px;
     }
 
-    .form-group input, .form-group select, .form-group textarea {
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
         width: 100%;
-        padding: 12px 15px;
-        border: 2px solid #e0e0e0;
+        padding: 12px 16px;
+        border: 2px solid var(--gray-light);
         border-radius: 10px;
         font-size: 14px;
-        transition: border-color 0.3s ease;
+        transition: all 0.3s ease;
         direction: rtl;
+        text-align: right;
+        font-family: 'Tajawal', sans-serif;
     }
 
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: var(--danger);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
         outline: none;
-        border-color: #a4c842;
     }
 
-    .form-actions {
+    .form-group textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .modal-actions {
         display: flex;
-        gap: 15px;
+        gap: 12px;
         justify-content: center;
-        margin-top: 30px;
     }
 
     .btn-submit {
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
+        background: linear-gradient(135deg, var(--danger), #dc2626);
         color: white;
         border: none;
-        padding: 12px 40px;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: bold;
+        padding: 12px 32px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .btn-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(164, 200, 66, 0.4);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
     }
 
     .btn-cancel {
-        background: #ccc;
-        color: #333;
-        border: none;
-        padding: 12px 40px;
-        border-radius: 25px;
-        font-size: 16px;
-        font-weight: bold;
+        background: white;
+        color: var(--gray);
+        border: 2px solid var(--gray-light);
+        padding: 12px 32px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
     .btn-cancel:hover {
-        background: #999;
+        background: var(--gray-light);
     }
 
-    .success-message {
-        background: linear-gradient(135deg, #a4c842 0%, #8bb338 100%);
-        color: white;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        text-align: center;
-        font-weight: bold;
-    }
+    /* Responsive */
+    @media (max-width: 768px) {
+        .expenses-container {
+            padding: 20px 16px 80px 16px;
+        }
 
-    .error-message {
-        background: linear-gradient(135deg, #f5576c 0%, #e63946 100%);
-        color: white;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        text-align: center;
-        font-weight: bold;
+        .page-header h1 {
+            font-size: 22px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .category-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .control-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .control-label {
+            min-width: auto;
+        }
+
+        .input-control,
+        .btn-add,
+        .btn-search,
+        .btn-clear {
+            width: 100%;
+        }
+
+        .date-inputs {
+            flex-direction: column;
+        }
+
+        .date-input-group {
+            width: 100%;
+        }
+
+        .date-input-group input {
+            flex: 1;
+        }
+
+        .modal-content {
+            margin: 10% auto;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            font-size: 13px;
+        }
     }
 </style>
 
 <div class="expenses-container">
-    <!-- Success/Error Messages -->
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>
+            <ion-icon name="wallet"></ion-icon>
+            إدارة المصروفات
+        </h1>
+        <p>إضافة وعرض وإدارة جميع المصروفات والنفقات</p>
+    </div>
+
+    <!-- Messages -->
     <% if(suc.length > 0) { %>
-        <div class="success-message">
+        <div class="message success-message">
+            <ion-icon name="checkmark-circle"></ion-icon>
             <%= suc %>
         </div>
     <% } %>
     <% if(err.length > 0) { %>
-        <div class="error-message">
+        <div class="message error-message">
+            <ion-icon name="alert-circle"></ion-icon>
             <%= err %>
         </div>
     <% } %>
 
-    <!-- Dashboard Cards -->
-    <div class="dashboard-cards">
-        <div class="card today" onclick="filterByDate('<%= todayDateForFilter %>')">
-            <div class="card-title">مصروفات اليوم</div>
-            <div class="card-value"><%= todayTotal.toLocaleString() %></div>
-            <div class="card-label">د.ع</div>
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card today" onclick="filterByDate('<%= todayDateForFilter %>')">
+            <div class="stat-icon">
+                <ion-icon name="calendar"></ion-icon>
+            </div>
+            <div class="stat-value"><%= todayTotal.toLocaleString() %></div>
+            <div class="stat-label">مصروفات اليوم</div>
         </div>
-        <div class="card month">
-            <div class="card-title">مصروفات الشهر</div>
-            <div class="card-value"><%= monthTotal.toLocaleString() %></div>
-            <div class="card-label">د.ع</div>
+
+        <div class="stat-card month">
+            <div class="stat-icon">
+                <ion-icon name="calendar-outline"></ion-icon>
+            </div>
+            <div class="stat-value"><%= monthTotal.toLocaleString() %></div>
+            <div class="stat-label">مصروفات الشهر</div>
         </div>
-        <div class="card total">
-            <div class="card-title">إجمالي المصروفات</div>
-            <div class="card-value"><%= totalAllTime.toLocaleString() %></div>
-            <div class="card-label">د.ع</div>
+
+        <div class="stat-card total">
+            <div class="stat-icon">
+                <ion-icon name="cash"></ion-icon>
+            </div>
+            <div class="stat-value"><%= totalAllTime.toLocaleString() %></div>
+            <div class="stat-label">إجمالي المصروفات</div>
         </div>
     </div>
 
-    <!-- Title Breakdown -->
+    <!-- Category Breakdown -->
     <div class="category-section">
-        <div class="section-title">
-            توزيع المصروفات حسب العنوان (الشهر الحالي)
+        <div class="section-header">
+            <ion-icon name="pie-chart"></ion-icon>
+            <h2>توزيع المصروفات حسب العنوان (الشهر الحالي)</h2>
         </div>
         <div class="category-grid">
             <% Object.keys(titleTotals).forEach(title => { %>
@@ -526,88 +737,99 @@
     </div>
 
     <!-- Controls -->
-    <div class="controls">
-        <!-- Add New Expense Section -->
-        <div class="controls-row">
-            <div class="control-section">
-                <div class="section-label">إضافة مصروف</div>
-                <button class="btn-add" onclick="openModal()">
-                    إضافة مصروف جديد
+    <div class="controls-section">
+        <!-- Add New Expense -->
+        <div class="control-group">
+            <button class="btn-add" onclick="openModal()">
+                <ion-icon name="add"></ion-icon>
+                إضافة مصروف جديد
+            </button>
+        </div>
+
+        <!-- Quick Search -->
+        <div class="control-group">
+            <span class="control-label">البحث السريع:</span>
+            <input type="text" id="titleFilter" class="input-control" placeholder="ابحث في عناوين المصروفات..." style="min-width: 250px;" onkeyup="filterByTitleValue()">
+        </div>
+
+        <!-- Date Filter -->
+        <div class="control-group">
+            <span class="control-label">تصفية بالتاريخ:</span>
+            <input type="date" id="dateFilter" class="input-control" onchange="filterByDateValue()">
+        </div>
+
+        <!-- Date Range -->
+        <div class="date-range-box">
+            <div class="date-range-box-header">
+                <ion-icon name="calendar-clear"></ion-icon>
+                البحث بالفترة الزمنية
+            </div>
+            <div class="date-inputs">
+                <div class="date-input-group">
+                    <label>من</label>
+                    <input type="date" id="dateFrom" class="input-control">
+                </div>
+                <div class="date-input-group">
+                    <label>إلى</label>
+                    <input type="date" id="dateTo" class="input-control">
+                </div>
+                <button class="btn-search" onclick="filterByDateRange()">
+                    <ion-icon name="search"></ion-icon>
+                    بحث
                 </button>
-            </div>
-        </div>
-
-        <!-- Quick Search Section -->
-        <div class="controls-row">
-            <div class="control-section">
-                <div class="section-label">البحث السريع</div>
-                <input type="text" id="titleFilter" class="filter-input" placeholder="ابحث في عناوين المصروفات..." onkeyup="filterByTitleValue()">
-            </div>
-        </div>
-
-        <!-- Date Filter Section -->
-        <div class="controls-row">
-            <div class="control-section">
-                <div class="section-label">تصفية بالتاريخ</div>
-                <input type="date" id="dateFilter" class="date-input" onchange="filterByDateValue()">
-            </div>
-        </div>
-
-        <!-- Date Range Section -->
-        <div class="controls-row">
-            <div class="date-range-container">
-                <div class="date-range-title">
-                    البحث بالفترة الزمنية
-                </div>
-                <div class="date-inputs">
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; direction: rtl;">
-                        <label style="font-weight: 500;">من</label>
-                        <input type="date" id="dateFrom" class="date-input">
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; direction: rtl;">
-                        <label style="font-weight: 500;">إلى</label>
-                        <input type="date" id="dateTo" class="date-input">
-                    </div>
-                    <button class="btn-search" onclick="filterByDateRange()">بحث</button>
-                    <button class="btn-clear" onclick="clearDateFilter()">مسح</button>
-                </div>
+                <button class="btn-clear" onclick="clearDateFilter()">
+                    <ion-icon name="close"></ion-icon>
+                    مسح
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Expenses Table -->
-    <div class="expenses-table">
+    <div class="table-section">
+        <div class="table-section-header">
+            <h2>
+                <ion-icon name="list"></ion-icon>
+                قائمة المصروفات
+            </h2>
+        </div>
         <% if(expenses.length > 0) { %>
-            <table>
-                <thead>
-                    <tr>
-                        <th>عنوان المصروف</th>
-                        <th>الوصف</th>
-                        <th>المبلغ</th>
-                        <th>التاريخ</th>
-                        <th>الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% expenses.forEach(expense => { %>
+            <div class="table-responsive">
+                <table>
+                    <thead>
                         <tr>
-                            <td>
-                                <span class="category-badge"><%= expense.title %></span>
-                            </td>
-                            <td><%= expense.description || '-' %></td>
-                            <td class="amount-cell"><%= expense.amount.toLocaleString() %> د.ع</td>
-                            <td><%= expense.date %></td>
-                            <td>
-                                <form action="/expenses/delete/<%= expense._id %>?_method=DELETE" method="post" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟')">
-                                    <button type="submit" class="btn-delete">حذف</button>
-                                </form>
-                            </td>
+                            <th>عنوان المصروف</th>
+                            <th>الوصف</th>
+                            <th>المبلغ</th>
+                            <th>التاريخ</th>
+                            <th>الإجراءات</th>
                         </tr>
-                    <% }) %>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <% expenses.forEach(expense => { %>
+                            <tr>
+                                <td>
+                                    <span class="category-badge"><%= expense.title %></span>
+                                </td>
+                                <td><%= expense.description || '-' %></td>
+                                <td class="amount-cell"><%= expense.amount.toLocaleString() %> د.ع</td>
+                                <td><%= expense.date %></td>
+                                <td>
+                                    <form action="/expenses/delete/<%= expense._id %>?_method=DELETE" method="post" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذا المصروف؟')">
+                                        <button type="submit" class="btn-delete">
+                                            <ion-icon name="trash"></ion-icon>
+                                            حذف
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
         <% } else { %>
             <div class="empty-state">
+                <ion-icon name="receipt-outline"></ion-icon>
                 <h3>لا توجد مصروفات</h3>
                 <p>ابدأ بإضافة مصروف جديد</p>
             </div>
@@ -618,38 +840,48 @@
 <!-- Add Expense Modal -->
 <div id="expenseModal" class="modal">
     <div class="modal-content">
-        <div class="modal-header">إضافة مصروف جديد</div>
-        <form action="/expenses/new" method="post" id="expenseForm">
-            <div class="form-group">
-                <label>عنوان المصروف *</label>
-                <input type="text" name="title" required placeholder="أدخل عنوان المصروف">
-            </div>
+        <div class="modal-header">
+            <h2>إضافة مصروف جديد</h2>
+        </div>
+        <div class="modal-body">
+            <form action="/expenses/new" method="post" id="expenseForm">
+                <div class="form-group">
+                    <label>عنوان المصروف *</label>
+                    <input type="text" name="title" required placeholder="مثال: إيجار، كهرباء، مياه...">
+                </div>
 
-            <div class="form-group">
-                <label>الوصف</label>
-                <input type="text" name="description" placeholder="أدخل وصف المصروف (اختياري)">
-            </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <input type="text" name="description" placeholder="وصف تفصيلي للمصروف (اختياري)">
+                </div>
 
-            <div class="form-group">
-                <label>المبلغ (د.ع) *</label>
-                <input type="number" name="amount" required step="0.001" min="0" placeholder="0.000">
-            </div>
+                <div class="form-group">
+                    <label>المبلغ (د.ع) *</label>
+                    <input type="number" name="amount" required step="0.001" min="0" placeholder="0.000">
+                </div>
 
-            <div class="form-group">
-                <label>التاريخ</label>
-                <input type="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>">
-            </div>
+                <div class="form-group">
+                    <label>التاريخ</label>
+                    <input type="date" name="date" value="<%= new Date().toISOString().split('T')[0] %>">
+                </div>
 
-            <div class="form-group">
-                <label>ملاحظات</label>
-                <textarea name="notes" rows="3" placeholder="ملاحظات إضافية (اختياري)"></textarea>
-            </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <textarea name="notes" rows="3" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+                </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn-submit">حفظ</button>
-                <button type="button" class="btn-cancel" onclick="closeModal()">إلغاء</button>
-            </div>
-        </form>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-submit">
+                        <ion-icon name="checkmark"></ion-icon>
+                        حفظ
+                    </button>
+                    <button type="button" class="btn-cancel" onclick="closeModal()">
+                        <ion-icon name="close"></ion-icon>
+                        إلغاء
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -705,7 +937,6 @@ function filterByTitle(title) {
 function filterByTitleValue() {
     const title = document.getElementById('titleFilter').value;
     if (title) {
-        // Filter by title is done client-side for text input
         const rows = document.querySelectorAll('tbody tr');
         rows.forEach(row => {
             const titleCell = row.querySelector('td:first-child');
@@ -716,7 +947,6 @@ function filterByTitleValue() {
             }
         });
     } else {
-        // Show all rows if no filter
         const rows = document.querySelectorAll('tbody tr');
         rows.forEach(row => {
             row.style.display = '';
@@ -724,7 +954,6 @@ function filterByTitleValue() {
     }
 }
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('expenseModal');
     if (event.target == modal) {
@@ -732,9 +961,8 @@ window.onclick = function(event) {
     }
 }
 
-// Auto hide messages after 3 seconds
 setTimeout(function() {
-    const messages = document.querySelectorAll('.success-message, .error-message');
+    const messages = document.querySelectorAll('.message');
     messages.forEach(function(message) {
         message.style.opacity = '0';
         setTimeout(function() {
@@ -744,5 +972,4 @@ setTimeout(function() {
 }, 3000);
 </script>
 
-<br><br><br>
 <%- include('../../layout/footer') -%>

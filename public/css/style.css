@@ -17,7 +17,7 @@ body {
 
 nav {
     direction: rtl;
-    background-color: #a4c842;
+    background-color: #22C55E;
     z-index: 2;
 }
 
@@ -77,7 +77,7 @@ nav a {
 .title {
     font-weight: 600;
     font-size: 25px;
-    border-bottom: 3px solid #a4c842;
+    border-bottom: 3px solid #22C55E;
     width: 400px;
     text-align: center;
     margin-left: auto;
@@ -88,7 +88,7 @@ nav a {
     .title {
         font-weight: 600;
         font-size: 25px;
-        border-bottom: 3px solid #a4c842;
+        border-bottom: 3px solid #22C55E;
         width: 85%;
         text-align: center;
         margin-left: auto;
@@ -105,7 +105,7 @@ nav a {
 
 .login input {
     border: none;
-    border-bottom: 1px solid #a4c842;
+    border-bottom: 1px solid #22C55E;
     background-color: #00000000;
     margin-top: 40px;
     outline: none;
@@ -117,7 +117,7 @@ nav a {
     width: 150px;
     border: none;
     border-radius: 5px;
-    background-color: #a4c842;
+    background-color: #22C55E;
     color: #fff;
     margin-left: auto;
     margin-right: auto;
@@ -154,7 +154,7 @@ nav a {
 
     .login input {
         border: none;
-        border-bottom: 1px solid #a4c842;
+        border-bottom: 1px solid #22C55E;
         background-color: #00000000;
         margin-top: 40px;
         outline: none;
@@ -166,7 +166,7 @@ nav a {
         width: 150px;
         border: none;
         border-radius: 5px;
-        background-color: #a4c842;
+        background-color: #22C55E;
         color: #fff;
         margin-left: auto;
         margin-right: auto;
@@ -199,7 +199,7 @@ nav a {
 .dashboard .dash-card .symbol {
     font-size: 100px;
     margin-top: 40px;
-    color: #a4c842;
+    color: #22C55E;
     text-shadow: 10px #00000074;
     margin-left: 10px;
 }
@@ -246,7 +246,7 @@ nav a {
     .dashboard .dash-card .symbol {
         font-size: 70px;
         margin-top: 20px;
-        color: #a4c842;
+        color: #22C55E;
         text-shadow: 10px #00000074;
         margin-left: 10px;
     }
@@ -277,7 +277,7 @@ nav a {
 .autocomplete-items {
     position: absolute;
     direction: rtl;
-    background-color: #a4c8426e;
+    background-color: #22C55E6e;
     width: 300px;
     text-align: right;
     margin-right: 20px;
@@ -321,7 +321,7 @@ nav a {
     .autocomplete-items {
         position: absolute;
         direction: rtl;
-        background-color: #a4c8426e;
+        background-color: #22C55E6e;
         width: 300px;
         text-align: right;
         margin-right: 20px;
@@ -350,7 +350,7 @@ nav a {
 }
 
 .tests table th {
-    background-color: #a4c842;
+    background-color: #22C55E;
     color: #fff;
 }
 
@@ -391,7 +391,7 @@ nav a {
 
 @media (max-width: 1000px) {
     .tests table th {
-        background-color: #a4c842;
+        background-color: #22C55E;
         color: #fff;
     }
 
@@ -445,7 +445,7 @@ nav a {
 
 .history .autocomplete input {
     border: none;
-    border-bottom: 1px solid #a4c842;
+    border-bottom: 1px solid #22C55E;
     direction: rtl;
     width: 300px;
     outline: none;
@@ -457,7 +457,7 @@ nav a {
 }
 
 .history table th {
-    background-color: #a4c842;
+    background-color: #22C55E;
     color: #fff;
 }
 
@@ -469,7 +469,7 @@ nav a {
 
 .profile .info-side {
     width: 20%;
-    border-left: 3px solid #a4c842;
+    border-left: 3px solid #22C55E;
     display: grid;
     justify-content: center;
     text-align: center;
@@ -486,7 +486,7 @@ nav a {
 .profile .profile-title {
     font-weight: 700;
     margin-top: 20px;
-    border-bottom: 1px solid #a4c842;
+    border-bottom: 1px solid #22C55E;
     width: 200px;
     margin-left: auto;
     margin-right: auto;
@@ -519,7 +519,7 @@ nav a {
 }
 
 .profile table th {
-    background-color: #a4c842;
+    background-color: #22C55E;
     color: #fff;
 }
 
@@ -608,7 +608,7 @@ nav a {
 
 
 .bills table th {
-    background-color: #a4c842;
+    background-color: #22C55E;
     color: #fff;
 }
 
@@ -627,7 +627,7 @@ nav a {
 }
 
 .user-bills table th {
-    background-color: #a4c842;
+    background-color: #22C55E;
     color: #fff;
 }
 
@@ -655,7 +655,7 @@ nav a {
     text-align: center;
     margin-top: 15px;
     font-size: 22px;
-    border-bottom: 3px solid #a4c842;
+    border-bottom: 3px solid #22C55E;
     width: 500px;
     margin-left: auto;
     margin-right: auto;
@@ -671,13 +671,13 @@ nav a {
 }
 
 .fees table th {
-    background-color: #a4c842;
+    background-color: #22C55E;
     color: #fff;
 }
 
 .fees table input {
     border: none;
-    border-bottom: 2px solid #a4c842;
+    border-bottom: 2px solid #22C55E;
     width: 240px;
 }
 
@@ -688,7 +688,7 @@ nav a {
 
 .fees .tools input {
     border: none;
-    border-bottom: 2px solid #a4c842;
+    border-bottom: 2px solid #22C55E;
     width: 200px;
     outline: none;
 }
@@ -709,7 +709,7 @@ nav a {
 
 .dashboard .tools input {
     border: none;
-    border-bottom: 2px solid #a4c842;
+    border-bottom: 2px solid #22C55E;
     width: 300px;
     outline: none;
 }
@@ -729,20 +729,20 @@ nav a {
 
     .fees table input {
         border: none;
-        border-bottom: 2px solid #a4c842;
+        border-bottom: 2px solid #22C55E;
         width: 100px;
     }
 
     .fees .tools input {
         border: none;
-        border-bottom: 2px solid #a4c842;
+        border-bottom: 2px solid #22C55E;
         width: 150px;
         outline: none;
     }
 
     .dashboard .tools input {
         border: none;
-        border-bottom: 2px solid #a4c842;
+        border-bottom: 2px solid #22C55E;
         width: 150px;
         outline: none;
     }
@@ -751,7 +751,7 @@ nav a {
 .fees .mini-title {
     font-weight: 500;
     font-size: 18px;
-    border-bottom: 1px solid #a4c842;
+    border-bottom: 1px solid #22C55E;
     width: 250px;
     text-align: center;
     margin-left: auto;
@@ -767,7 +767,7 @@ nav a {
 
 .daily input {
     border: none;
-    border-bottom: 2px solid #a4c842;
+    border-bottom: 2px solid #22C55E;
     width: 200px;
     outline: none;
 }

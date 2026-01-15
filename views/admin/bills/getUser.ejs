@@ -1,232 +1,1178 @@
 <%- include('../../layout/navbar') -%>
-    <% if(suc.length> 0){%>
-        <script>
-            Swal.fire({
-                icon: 'success',
-                html: `<%- suc[0].replace(/\n/g, '<br>') %>`,
-                customClass: {
-                    popup: 'swal-wide'
-                }
-            });
-        </script>
-        <style>
-            .swal-wide {
-                width: 600px !important;
-                /* make it wider */
-                text-align: right;
-                /* align text to the right */
-                direction: rtl;
-                /* right-to-left text */
-                font-family: 'Arial', sans-serif;
-                font-size: 18px;
-            }
-        </style>
-        <%} %>
-            <div class="user-bills"><br>
-                <p class="title">
-                    <%= data.name%>
-                </p><br>
-                <% if(data.balance < 0){%>
-                    <p class="balance text-danger">الرصيد : <%=
-                            data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
-                    </p>
-                    <%} else {%>
-                        <p class="balance text-success">الرصيد : <%=
-                                data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
-                        </p>
-                        <%} %>
-                            <div class="container">
-                                <p class="table-title text-danger">الغير مدفوعة</p>
-                                <table class="table table-stripped table-hover">
-                                    <tr>
-                                        <th>الكورس</th>
-                                        <th>التاريخ</th>
-                                        <th>السعر</th>
-                                        <th>المتبقي</th>
-                                        <th>دفع</th>
-                                    </tr>
 
-                                    <% if(notPaid.length> 0){%>
-                                        <% notPaid.forEach(course=> {%>
-                                            <tr>
-                                                <td>
-                                                    <%= course.sessions%>
-                                                    <% if(course.discountType){ %>
-                                                        <br><small class="text-success">
-                                                            خصم: <%= course.discountType === 'percentage' ? course.discountValue + '%' : course.discountValue.toLocaleString() + ' د.ك' %>
-                                                            (<%= course.discountAmount.toLocaleString() %> د.ك)
-                                                        </small>
-                                                        <% if(course.originalPrice){ %>
-                                                            <br><small class="text-muted">
-                                                                السعر الأصلي: <%= course.originalPrice.toLocaleString() %> د.ك
-                                                            </small>
-                                                        <% } %>
-                                                    <% } %>
-                                                </td>
-                                                <td>
-                                                    <%= course.Date%>
-                                                </td>
-                                                <td>
-                                                    <%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
-                                                    <% if(course.discountType){ %>
-                                                        <br><small class="text-success">
-                                                            بعد الخصم
-                                                        </small>
-                                                    <% } %>
-                                                </td>
-                                                <td class="text-danger">
-                                                    <%= course.left%>
-                                                </td>
-                                                <td>
-                                                    <% if(!course.discountType){ %>
-                                                        <button class="btn btn-info btn-sm mb-1"
-                                                                onclick="showDiscountModal('<%= course.code%>')">تطبيق خصم</button><br>
-                                                    <% } else { %>
-                                                        <form action="/bills/remove-discount/<%= data._id%>/<%= course.code%>" method="post" style="display: inline;">
-                                                            <button type="submit" class="btn btn-warning btn-sm mb-1">إلغاء الخصم</button>
-                                                        </form><br>
-                                                    <% } %>
-                                                    <button class="btn btn-success"
-                                                            onclick="window.location.href='/bills/pay/<%= data._id%>/<%= course.code%>'">دفع</button>
-                                                </td>
-                                            </tr>
-                                            <%}) %>
-                                                <%} else {%>
-                                                    <tr>
-                                                        <td colspan="5">لا توجد كورسات غير مدفوعة</td>
-                                                    </tr>
-                                                    <%}%>
-                                </table>
-                                <br>
-                                <hr><br>
-                                <p class="table-title text-success">المدفوعة</p>
-                                <table class="table table-stripped table-hover">
-                                    <tr>
-                                        <th>الكورس</th>
-                                        <th>التاريخ</th>
-                                        <th>السعر</th>
-                                        <th>المتبقي</th>
-                                    </tr>
+<% if(suc.length > 0){ %>
+<style>
+    .receipt-wrapper {
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+    }
 
-                                    <% if(paid.length> 0){%>
-                                        <% paid.forEach(course=> {%>
-                                            <tr>
-                                                <td>
-                                                    <%= course.sessions%>
-                                                </td>
-                                                <td>
-                                                    <%= course.Date%>
-                                                </td>
-                                                <td>
-                                                    <%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
-                                                </td>
-                                                <td class="text-success">
-                                                    <%= course.left.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
-                                                </td>
-                                            </tr>
-                                            <%}) %>
-                                                <%} else {%>
-                                                    <tr>
-                                                        <td colspan="4">لا توجد كورسات مدفوعة</td>
-                                                    </tr>
-                                                    <%} %>
-                                </table>
-                                <br>
-                                <hr>
-                                <br>
-                                <p class="table-title">سجل الدفع</p>
-                                <table class="table table-stripped table-hover">
-                                    <tr>
-                                        <th>الكورس</th>
-                                        <th>تاريخ تسجيل الكورس</th>
-                                        <th>تاريخ الدفع</th>
-                                        <th>المبلغ المدفوع</th>
-                                        <th>الفاتورة</th>
-                                    </tr>
+    .swal-wide {
+        width: 420px !important;
+    }
 
-                                    <% if(data.purchase.length> 0){%>
-                                        <% purchases.forEach(purchase=> {%>
-                                            <form action="/bills/download/<%= purchase.code%>" method="get">
-                                                <tr>
-                                                    <td>
-                                                        <%= purchase.course%>
-                                                    </td>
-                                                    <td>
-                                                        <%= purchase.courseDate%>
-                                                    </td>
-                                                    <td>
-                                                        <%= purchase.payDate%>
-                                                    </td>
-                                                    <td>
-                                                        <%= purchase.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","
-                                                            )%>
-                                                    </td>
-                                                    <td>
-                                                        <button class="btn btn-success" type="submit">تحميل</button>
-                                                    </td>
-                                                </tr>
-                                            </form>
-                                            <%}) %>
-                                                <%} else {%>
-                                                    <tr>
-                                                        <td colspan="4">لا يوجد سجل دفع</td>
-                                                    </tr>
-                                                    <%} %>
-                                </table>
+    .receipt {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
 
-                                <!-- Discount History Section -->
-                                <% if(data.discounts && data.discounts.length > 0) { %>
-                                    <br>
-                                    <hr>
-                                    <br>
-                                    <p class="table-title">سجل الخصومات</p>
-                                    <table class="table table-stripped table-hover">
-                                        <tr>
-                                            <th>الكورس</th>
-                                            <th>نوع الخصم</th>
-                                            <th>قيمة الخصم</th>
-                                            <th>مبلغ الخصم</th>
-                                            <th>تاريخ التطبيق</th>
-                                            <th>طبق بواسطة</th>
-                                        </tr>
-                                        <% data.discounts.slice().reverse().forEach(discount => { %>
-                                            <tr>
-                                                <td><%= discount.billCode %></td>
-                                                <td><%= discount.discountType === 'percentage' ? 'نسبة مئوية' : 'مبلغ ثابت' %></td>
-                                                <td>
-                                                    <%= discount.discountType === 'percentage'
-                                                        ? discount.discountValue + '%'
-                                                        : discount.discountValue.toLocaleString() + ' د.ك' %>
-                                                </td>
-                                                <td class="text-success">
-                                                    <%= discount.discountAmount.toLocaleString() %> د.ك
-                                                </td>
-                                                <td><%= discount.date %></td>
-                                                <td><%= discount.appliedBy %></td>
-                                            </tr>
-                                        <% }) %>
-                                    </table>
-                                <% } %>
+    .receipt-header {
+        background: linear-gradient(135deg, #22C55E, #16a34a);
+        padding: 20px 24px;
+        text-align: center;
+        color: white;
+    }
+
+    .receipt-clinic {
+        font-size: 11px;
+        opacity: 0.9;
+        margin-bottom: 4px;
+        letter-spacing: 1px;
+    }
+
+    .receipt-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .receipt-body {
+        padding: 24px;
+    }
+
+    .receipt-section {
+        margin-bottom: 20px;
+    }
+
+    .receipt-section-title {
+        font-size: 11px;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+
+    .receipt-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .receipt-info-item {
+        background: #f9fafb;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .receipt-info-label {
+        font-size: 11px;
+        color: #6b7280;
+        margin-bottom: 4px;
+    }
+
+    .receipt-info-value {
+        font-size: 14px;
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+    .receipt-line {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+        margin: 16px 0;
+    }
+
+    .receipt-amount {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border-radius: 8px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    .receipt-amount-label {
+        font-size: 12px;
+        color: #16a34a;
+        margin-bottom: 4px;
+    }
+
+    .receipt-amount-value {
+        font-size: 24px;
+        color: #16a34a;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .receipt-balance {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-top: 1px dashed #e5e7eb;
+        margin-top: 12px;
+    }
+
+    .receipt-balance-label {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .receipt-balance-value {
+        font-size: 15px;
+        color: #1f2937;
+        font-weight: 700;
+    }
+
+    .receipt-discount-box {
+        background: #fffbeb;
+        border: 1px solid #fcd34d;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .receipt-discount-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 4px 0;
+    }
+
+    .receipt-discount-label {
+        color: #92400e;
+    }
+
+    .receipt-discount-value {
+        font-weight: 600;
+        color: #92400e;
+    }
+
+    .receipt-footer {
+        text-align: center;
+        padding: 16px 24px 20px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .receipt-footer-text {
+        font-size: 11px;
+        color: #9ca3af;
+        margin: 0;
+    }
+
+    .swal2-popup {
+        border-radius: 16px !important;
+    }
+
+    .swal2-html-container {
+        padding: 0 !important;
+    }
+
+    .swal2-confirm {
+        background: linear-gradient(135deg, #22C55E, #16a34a) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+</style>
+<script>
+    // Store receipt data in a global variable
+    window.receiptData = <%- suc.length > 0 ? JSON.stringify(suc[0]) : 'null' %>;
+</script>
+
+<script>
+    // Wait for DOM and SweetAlert to be ready
+    function showReceipt() {
+        if (typeof Swal === 'undefined') {
+            // SweetAlert not loaded yet, retry after a short delay
+            setTimeout(showReceipt, 100);
+            return;
+        }
+
+        let receiptHTML = '';
+        try {
+            const receiptData = JSON.parse(window.receiptData);
+
+            receiptHTML = `
+                <div class="receipt-wrapper">
+                    <div class="receipt">
+                        <div class="receipt-header">
+                            <div class="receipt-clinic">عيادة مصطفى نبيل</div>
+                            <h2 class="receipt-title">تم الدفع بنجاح</h2>
+                        </div>
+                        <div class="receipt-body">
+                            <div class="receipt-section">
+                                <div class="receipt-section-title">تفاصيل المريض</div>
+                                <div class="receipt-info-grid">
+                                    <div class="receipt-info-item">
+                                        <div class="receipt-info-label">الاسم</div>
+                                        <div class="receipt-info-value">${receiptData.patientName}</div>
+                                    </div>
+                                    <div class="receipt-info-item">
+                                        <div class="receipt-info-label">الكود</div>
+                                        <div class="receipt-info-value">#${receiptData.patientCode}</div>
+                                    </div>
+                                    <div class="receipt-info-item">
+                                        <div class="receipt-info-label">الجلسات</div>
+                                        <div class="receipt-info-value">${receiptData.sessions}</div>
+                                    </div>
+                                    <div class="receipt-info-item">
+                                        <div class="receipt-info-label">تاريخ الدفع</div>
+                                        <div class="receipt-info-value">${receiptData.payDate}</div>
+                                    </div>
+                                </div>
                             </div>
+
+                            ${receiptData.hasDiscount ? `
+                            <div class="receipt-section">
+                                <div class="receipt-section-title">تفاصيل الخصم</div>
+                                <div class="receipt-discount-box">
+                                    <div class="receipt-discount-row">
+                                        <span class="receipt-discount-label">السعر الأصلي</span>
+                                        <span class="receipt-discount-value">${receiptData.originalPrice.toLocaleString()} د.ع</span>
+                                    </div>
+                                    <div class="receipt-discount-row">
+                                        <span class="receipt-discount-label">الخصم (${receiptData.discountType === 'percentage' ? receiptData.discountValue + '%' : receiptData.discountValue.toLocaleString() + ' د.ع'})</span>
+                                        <span class="receipt-discount-value">-${receiptData.discountAmount.toLocaleString()} د.ع</span>
+                                    </div>
+                                    <div class="receipt-discount-row">
+                                        <span class="receipt-discount-label">السعر بعد الخصم</span>
+                                        <span class="receipt-discount-value">${receiptData.finalPrice.toLocaleString()} د.ع</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            <div class="receipt-section">
+                                <div class="receipt-section-title">ملخص الدفع</div>
+                                <div class="receipt-amount">
+                                    <div class="receipt-amount-label">المبلغ المدفوع</div>
+                                    <div class="receipt-amount-value">${receiptData.amount.toLocaleString()} د.ع</div>
+                                </div>
+                                <div class="receipt-balance">
+                                    <span class="receipt-balance-label">الرصيد الحالي</span>
+                                    <span class="receipt-balance-value">${receiptData.balance.toLocaleString()} د.ع</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="receipt-footer">
+                            <p class="receipt-footer-text">شكراً لك • ${new Date().getFullYear()}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch(e) {
+            receiptHTML = `<div style="text-align: right; direction: rtl; padding: 20px;">${window.receiptData.replace(/\n/g, '<br>')}</div>`;
+        }
+
+        Swal.fire({
+            html: receiptHTML,
+            customClass: {
+                popup: 'swal-wide'
+            },
+            showConfirmButton: true,
+            confirmButtonText: 'تم',
+            confirmButtonColor: '#22C55E'
+        });
+    }
+
+    // Execute when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showReceipt);
+    } else {
+        showReceipt();
+    }
+</script>
+<%} %>
+
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
+
+    .bills-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .bills-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .patient-info {
+        flex: 1;
+    }
+
+    .patient-name {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .patient-meta {
+        display: flex;
+        gap: 16px;
+        color: var(--gray);
+        font-size: 14px;
+        flex-wrap: wrap;
+    }
+
+    .patient-meta span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .patient-meta ion-icon {
+        font-size: 18px;
+        color: var(--primary);
+    }
+
+    /* Balance Card */
+    .balance-card {
+        min-width: 280px;
+        padding: 24px 32px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 10px 30px var(--shadow-lg);
+    }
+
+    .balance-card.positive {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+    }
+
+    .balance-card.negative {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+    }
+
+    .balance-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+    }
+
+    .balance-amount {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    /* Tabs */
+    .tabs-container {
+        margin-bottom: 24px;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 8px;
+        background: var(--light);
+        padding: 8px;
+        border-radius: 12px;
+        overflow-x: auto;
+    }
+
+    .tab {
+        padding: 12px 24px;
+        border: none;
+        background: transparent;
+        color: var(--gray);
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        border-radius: 8px;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .tab:hover {
+        background: white;
+        color: var(--dark);
+    }
+
+    .tab.active {
+        background: white;
+        color: var(--primary);
+        box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    .tab ion-icon {
+        font-size: 20px;
+    }
+
+    .tab-badge {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* Card */
+    .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+        border: 1px solid var(--gray-light);
+    }
+
+    .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--gray-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .card-body {
+        padding: 0;
+    }
+
+    /* Tables */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .modern-table th,
+    .modern-table td {
+        padding: 14px 16px;
+        text-align: right;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .modern-table th {
+        background: #f8fafc;
+        color: var(--dark);
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--primary);
+    }
+
+    .modern-table th:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+
+    .modern-table th:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+
+    .modern-table tbody tr {
+        transition: background 0.2s ease;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #f0fdf4;
+    }
+
+    .modern-table td {
+        font-size: 14px;
+        color: var(--dark);
+    }
+
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .status-badge.unpaid {
+        background: #fef2f2;
+        color: var(--danger);
+    }
+
+    .status-badge.paid {
+        background: #f0fdf4;
+        color: var(--success);
+    }
+
+    .status-badge.discount {
+        background: #fef3c7;
+        color: var(--warning);
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        direction: rtl;
+    }
+
+    .btn ion-icon {
+        font-size: 18px;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, var(--info), #2563eb);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Discount Info */
+    .discount-info {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-top: 6px;
+        font-size: 12px;
+    }
+
+    .discount-info small {
+        display: block;
+        margin: 2px 0;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--gray);
+    }
+
+    .empty-state ion-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+        color: var(--gray-light);
+    }
+
+    .empty-state-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 8px;
+    }
+
+    .empty-state-text {
+        font-size: 14px;
+        color: var(--gray);
+    }
+
+    /* Tab Content */
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Amount Display */
+    .amount {
+        font-weight: 700;
+        font-size: 15px;
+    }
+
+    .amount.positive {
+        color: var(--success);
+    }
+
+    .amount.negative {
+        color: var(--danger);
+    }
+
+    /* Discount Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal {
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        width: 100%;
+        max-width: 480px;
+        box-shadow: 0 20px 60px var(--shadow-lg);
+        animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 24px 0;
+        text-align: center;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .form-radio-group {
+        display: flex;
+        gap: 16px;
+    }
+
+    .form-radio-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--dark);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--gray-light);
+        border-radius: 8px;
+        font-size: 14px;
+        direction: rtl;
+        font-family: 'Tajawal', sans-serif;
+        transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .modal-actions .btn {
+        flex: 1;
+        justify-content: center;
+        padding: 12px;
+    }
+
+    .btn-secondary {
+        background: var(--gray-light);
+        color: var(--dark);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .bills-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .bills-header {
+            flex-direction: column;
+        }
+
+        .patient-name {
+            font-size: 22px;
+        }
+
+        .balance-card {
+            width: 100%;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+        }
+
+        .tabs {
+            flex-wrap: nowrap;
+        }
+
+        .modern-table th,
+        .modern-table td {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: fadeIn 0.4s ease;
+    }
+</style>
+
+<div class="bills-container">
+    <!-- Header -->
+    <div class="bills-header">
+        <div class="patient-info">
+            <h1 class="patient-name"><%= data.name %></h1>
+            <div class="patient-meta">
+                <span>
+                    <ion-icon name="call-outline"></ion-icon>
+                    <%= data.phone %>
+                </span>
+                <span>
+                    <ion-icon name="code-outline"></ion-icon>
+                    <%= data.code %>
+                </span>
             </div>
+        </div>
+
+        <div class="balance-card <%= data.balance < 0 ? 'negative' : 'positive' %>">
+            <div class="balance-label">الرصيد</div>
+            <div class="balance-amount">
+                <%= data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab active" data-tab="unpaid">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                غير مدفوعة
+                <span class="tab-badge"><%= notPaid.length %></span>
+            </button>
+            <button class="tab" data-tab="paid">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                مدفوعة
+                <span class="tab-badge"><%= paid.length %></span>
+            </button>
+            <button class="tab" data-tab="history">
+                <ion-icon name="receipt-outline"></ion-icon>
+                سجل الدفع
+                <span class="tab-badge"><%= purchases.length %></span>
+            </button>
+            <% if(data.discounts && data.discounts.length > 0) { %>
+            <button class="tab" data-tab="discounts">
+                <ion-icon name="pricetag-outline"></ion-icon>
+                سجل الخصومات
+                <span class="tab-badge"><%= data.discounts.length %></span>
+            </button>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Unpaid Bills Tab -->
+    <div class="tab-content active" id="unpaid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <ion-icon name="alert-circle"></ion-icon>
+                    الفواتير غير المدفوعة
+                </h3>
+            </div>
+            <div class="card-body">
+                <% if(notPaid.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>الكورس</th>
+                                    <th>التاريخ</th>
+                                    <th>السعر</th>
+                                    <th>المتبقي</th>
+                                    <th>إجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% notPaid.forEach(course => { %>
+                                <tr>
+                                    <td>
+                                        <strong><%= course.sessions %></strong>
+                                        <% if(course.discountType) { %>
+                                            <div class="discount-info">
+                                                <small class="text-success">
+                                                    <ion-icon name="pricetag"></ion-icon>
+                                                    خصم: <%= course.discountType === 'percentage' ? course.discountValue + '%' : course.discountValue.toLocaleString() + ' د.ع' %>
+                                                    (<%= course.discountAmount.toLocaleString() %> د.ع)
+                                                </small>
+                                                <% if(course.originalPrice) { %>
+                                                    <small class="text-muted">
+                                                        السعر الأصلي: <%= course.originalPrice.toLocaleString() %> د.ع
+                                                    </small>
+                                                <% } %>
+                                            </div>
+                                        <% } %>
+                                    </td>
+                                    <td><%= course.Date %></td>
+                                    <td>
+                                        <span class="amount <%= course.discountType ? '' : 'negative' %>">
+                                            <%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %>
+                                        </span>
+                                        <% if(course.discountType) { %>
+                                            <br><small class="text-success">بعد الخصم</small>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <span class="amount negative"><%= course.left %></span>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <% if(!course.discountType) { %>
+                                                <button class="btn btn-info btn-sm" onclick="showDiscountModal('<%= course.code %>')">
+                                                    <ion-icon name="pricetag-outline"></ion-icon>
+                                                    خصم
+                                                </button>
+                                            <% } else { %>
+                                                <form action="/bills/remove-discount/<%= data._id %>/<%= course.code %>" method="post" style="display: inline;">
+                                                    <button type="submit" class="btn btn-warning btn-sm">
+                                                        <ion-icon name="close-outline"></ion-icon>
+                                                        إلغاء
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                            <a class="btn btn-success btn-sm" href="/bills/pay/<%= data._id %>/<%= course.code %>">
+                                                <ion-icon name="cash-outline"></ion-icon>
+                                                دفع
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <ion-icon name="checkmark-done-circle"></ion-icon>
+                        <div class="empty-state-title">جميع الفواتير مدفوعة</div>
+                        <div class="empty-state-text">لا توجد فواتير معلقة</div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paid Bills Tab -->
+    <div class="tab-content" id="paid">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                    الفواتير المدفوعة
+                </h3>
+            </div>
+            <div class="card-body">
+                <% if(paid.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>الكورس</th>
+                                    <th>التاريخ</th>
+                                    <th>السعر</th>
+                                    <th>المتبقي</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% paid.forEach(course => { %>
+                                <tr>
+                                    <td><strong><%= course.sessions %></strong></td>
+                                    <td><%= course.Date %></td>
+                                    <td>
+                                        <span class="amount">
+                                            <%= course.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="amount positive">
+                                            <%= course.left.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <ion-icon name="receipt-outline"></ion-icon>
+                        <div class="empty-state-title">لا توجد فواتير مدفوعة</div>
+                        <div class="empty-state-text">لم يتم دفع أي فواتير بعد</div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History Tab -->
+    <div class="tab-content" id="history">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <ion-icon name="time-outline"></ion-icon>
+                    سجل الدفعات
+                </h3>
+            </div>
+            <div class="card-body">
+                <% if(data.purchase.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>الكورس</th>
+                                    <th>تاريخ تسجيل الكورس</th>
+                                    <th>تاريخ الدفع</th>
+                                    <th>المبلغ المدفوع</th>
+                                    <th>الفاتورة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% purchases.forEach(purchase => { %>
+                                <tr>
+                                    <td><strong><%= purchase.course %></strong></td>
+                                    <td><%= purchase.courseDate %></td>
+                                    <td><%= purchase.payDate %></td>
+                                    <td>
+                                        <span class="amount positive">
+                                            <%= purchase.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <form action="/bills/download/<%= purchase.code %>" method="get">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <ion-icon name="download-outline"></ion-icon>
+                                                تحميل
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <ion-icon name="document-outline"></ion-icon>
+                        <div class="empty-state-title">لا يوجد سجل دفع</div>
+                        <div class="empty-state-text">لم يتم تسجيل أي دفعات بعد</div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discount History Tab -->
+    <% if(data.discounts && data.discounts.length > 0) { %>
+    <div class="tab-content" id="discounts">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <ion-icon name="pricetags"></ion-icon>
+                    سجل الخصومات
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>الكورس</th>
+                                <th>نوع الخصم</th>
+                                <th>قيمة الخصم</th>
+                                <th>مبلغ الخصم</th>
+                                <th>تاريخ التطبيق</th>
+                                <th>طبق بواسطة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% data.discounts.slice().reverse().forEach(discount => { %>
+                            <tr>
+                                <td><strong>#<%= discount.billCode %></strong></td>
+                                <td>
+                                    <span class="status-badge discount">
+                                        <%= discount.discountType === 'percentage' ? 'نسبة مئوية' : 'مبلغ ثابت' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= discount.discountType === 'percentage'
+                                        ? discount.discountValue + '%'
+                                        : discount.discountValue.toLocaleString() + ' د.ع' %>
+                                </td>
+                                <td>
+                                    <span class="amount positive">
+                                        <%= discount.discountAmount.toLocaleString() %> د.ع
+                                    </span>
+                                </td>
+                                <td><%= discount.date %></td>
+                                <td><%= discount.appliedBy %></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <% } %>
+</div>
 
 <!-- Discount Modal -->
-<div id="discountModal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-    <div style="background-color: white; margin: 10% auto; padding: 20px; width: 500px; border-radius: 10px; direction: rtl;">
-        <h3 style="text-align: center;">تطبيق خصم</h3>
+<div class="modal-overlay" id="discountModal">
+    <div class="modal">
+        <h3 class="modal-title">تطبيق خصم</h3>
         <form id="discountForm" method="post">
-            <div style="margin: 15px 0;">
-                <label>نوع الخصم:</label><br>
-                <input type="radio" name="discountType" value="percentage" id="percentage" checked> نسبة مئوية
-                <input type="radio" name="discountType" value="fixed" id="fixed" style="margin-right: 20px;"> مبلغ ثابت
+            <div class="form-group">
+                <label class="form-label">نوع الخصم</label>
+                <div class="form-radio-group">
+                    <label class="form-radio-label">
+                        <input type="radio" name="discountType" value="percentage" id="percentage" checked>
+                        نسبة مئوية
+                    </label>
+                    <label class="form-radio-label">
+                        <input type="radio" name="discountType" value="fixed" id="fixed">
+                        مبلغ ثابت
+                    </label>
+                </div>
             </div>
-            <div style="margin: 15px 0;">
-                <label id="discountValueLabel" for="discountValue">قيمة الخصم (%) :</label><br>
-                <input type="number" name="discountValue" id="discountValue" required style="width: 100%; padding: 8px; direction: rtl;" min="1" max="100">
+            <div class="form-group">
+                <label class="form-label" id="discountValueLabel" for="discountValue">قيمة الخصم (%)</label>
+                <input type="number" name="discountValue" id="discountValue" class="form-input" required min="1" max="100" placeholder="أدخل النسبة (1-100)">
             </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button type="submit" class="btn btn-success">تطبيق الخصم</button>
-                <button type="button" class="btn btn-secondary" onclick="hideDiscountModal()" style="margin-right: 10px;">إلغاء</button>
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-success">
+                    <ion-icon name="checkmark"></ion-icon>
+                    تطبيق الخصم
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="hideDiscountModal()">
+                    <ion-icon name="close"></ion-icon>
+                    إلغاء
+                </button>
             </div>
         </form>
     </div>
@@ -235,14 +1181,32 @@
 <script>
 let currentBillCode = '';
 
+// Tab functionality
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        // Remove active from all tabs
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        // Add active to clicked tab
+        this.classList.add('active');
+
+        // Hide all tab contents
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        // Show selected tab content
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+    });
+});
+
+// Discount modal functions
 function showDiscountModal(code) {
     currentBillCode = code;
-    document.getElementById('discountModal').style.display = 'block';
+    document.getElementById('discountModal').classList.add('show');
 }
 
 function hideDiscountModal() {
-    document.getElementById('discountModal').style.display = 'none';
+    document.getElementById('discountModal').classList.remove('show');
     currentBillCode = '';
+    document.getElementById('discountForm').reset();
 }
 
 // Update label based on discount type
@@ -251,11 +1215,11 @@ document.addEventListener('change', function(e) {
         const label = document.getElementById('discountValueLabel');
         const input = document.getElementById('discountValue');
         if (e.target.value === 'percentage') {
-            label.textContent = 'قيمة الخصم (%) :';
+            label.textContent = 'قيمة الخصم (%)';
             input.max = '100';
             input.placeholder = 'أدخل النسبة (1-100)';
         } else {
-            label.textContent = 'قيمة الخصم (د.ك) :';
+            label.textContent = 'قيمة الخصم (د.ع)';
             input.max = '';
             input.placeholder = 'أدخل المبلغ';
         }
@@ -269,20 +1233,23 @@ document.getElementById('discountForm').addEventListener('submit', function(e) {
     const discountType = formData.get('discountType');
     const discountValue = formData.get('discountValue');
 
-    // Update form action to include the bill code
-    this.action = `/bills/apply-discount/<%= data._id%>/${currentBillCode}`;
-
+    this.action = `/bills/apply-discount/<%= data._id %>/${currentBillCode}`;
     this.submit();
 });
 
 // Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('discountModal');
-    if (event.target == modal) {
+document.getElementById('discountModal').addEventListener('click', function(e) {
+    if (e.target === this) {
         hideDiscountModal();
     }
-}
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hideDiscountModal();
+    }
+});
 </script>
 
-<br><br><br>
-            <%- include('../../layout/footer') -%>
+<%- include('../../layout/footer') -%>

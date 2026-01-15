@@ -7,22 +7,102 @@ const QRCode = require('qrcode');
 const Course = require('../models/Course')
 const Tests = require('../models/Tests')
 const Exercise = require('../models/Exercise')
-const { text } = require('body-parser')
-
 router.use(isAdminMiddleWare)
 
+// NEW: Simplified patient addition wizard
 router.get('/add', async (req, res) => {
     try {
         const courses = await Course.find({})
-        res.render('admin/patient/add', {
+        res.render('admin/patient/add-simple', {
             user: req.user,
             err: req.flash('error'),
             suc: req.flash('success'),
-            courses,
-
+            courses
         })
     } catch (err) {
         console.log(err);
+    }
+})
+
+// API endpoint for fetching all patients (for client-side search)
+// Supports optional filter parameter: ?filter=all|active|inactive
+router.get('/api/patients', async (req, res) => {
+    try {
+        const { filter } = req.query;
+        let query = {};
+
+        // Apply status filter if provided
+        if (filter === 'active') {
+            query.inCourse = true;
+        } else if (filter === 'inactive') {
+            query.inCourse = false;
+        }
+
+        const patients = await Patient.find(query)
+            .sort({ dateAdded: -1 }) // Sort by newest first
+            .lean();
+
+        res.json({
+            success: true,
+            patients,
+            total: patients.length
+        });
+    } catch (err) {
+        console.error('Fetch patients error:', err);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to fetch patients'
+        });
+    }
+})
+
+// Enhanced search API endpoint with query and filter support
+// Usage: /patient/api/search?q=query&filter=all|active|inactive
+router.get('/api/search', async (req, res) => {
+    try {
+        const { q, filter = 'all' } = req.query;
+
+        if (!q || q.trim().length < 2) {
+            return res.json({
+                success: true,
+                patients: [],
+                total: 0,
+                query: q
+            });
+        }
+
+        const query = q.trim();
+        let searchQuery = {
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { phone: { $regex: query, $options: 'i' } },
+                { code: { $regex: query, $options: 'i' } }
+            ]
+        };
+
+        // Apply additional filter if specified
+        if (filter === 'active') {
+            searchQuery.$and = [{ inCourse: true }];
+        } else if (filter === 'inactive') {
+            searchQuery.$and = [{ inCourse: false }];
+        }
+
+        const patients = await Patient.find(searchQuery)
+            .sort({ dateAdded: -1 })
+            .lean();
+
+        res.json({
+            success: true,
+            patients,
+            total: patients.length,
+            query: q
+        });
+    } catch (err) {
+        console.error('Search error:', err);
+        res.status(500).json({
+            success: false,
+            error: 'فشل في البحث عن المرضى'
+        });
     }
 })
 

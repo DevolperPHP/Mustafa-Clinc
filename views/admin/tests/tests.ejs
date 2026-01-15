@@ -5,6 +5,7 @@
         Swal.fire({
             icon: 'error',
             text: '<%= err%>',
+            confirmButtonColor: '#ef4444'
         })
     </script>
 <%} %>
@@ -14,68 +15,500 @@
         Swal.fire({
             icon: 'success',
             text: '<%= suc%>',
+            confirmButtonColor: '#22C55E'
         })
     </script>
 <%} %>
 
-    <div class="tests">
-        <div class="container"><br>
-            <p class="title">الاختبارات</p>
-            <br>
-            <button id="add-btn" onclick="add()" class="add-btn"><ion-icon class="icon" name="add"></ion-icon></button>
-            <button id="close-btn" style="display: none; background-color: #d9534f;" onclick="closePanel()"
-                class="add-btn"><ion-icon class="icon" name="remove"></ion-icon></button>
-            <table class="table table-stripped table-hover">
-                <thead>
-                    <tr>
-                        <th>الاختبار</th>
-                        <th>تعديل</th>
-                        <th>حذف</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="add" style="display: none;">
-                        <form action="/tests/add" method="post">
-                            <td>
-                                <input type="text" name="name" placeholder="اسم الاختبار">
-                            </td>
-                            <td><button class="btn btn-success">اضاقة</button></td>
-                            <td></td>
-                        </form>
-                    </tr>
-                    <% for (let i=0; i < data.length; i++) {%>
-                        <tr>
-                            <td>
-                                <%= data[i].name%>
-                            </td>
-                            <td><button onclick="window.location.href='/tests/edit/<%= data[i]._id%>'" class="edit-btn"><ion-icon class="icon" name="pencil"></ion-icon></button></td>
-                            <td><form action="/tests/delete/<%= data[i]._id%>?_method=DELETE" method="post">
-                                <button class="delete-btn"><ion-icon class="icon" name="remove"></ion-icon></button>
-                                </form>
-                            </td>
-                        </tr>
-                        <%} %>
-                </tbody>
-            </table>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
+
+    .tests-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .tests-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .tests-header-info {
+        flex: 1;
+    }
+
+    .tests-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .tests-header p {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Add Button */
+    .btn-add {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    .btn-add ion-icon {
+        font-size: 22px;
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-close {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-close:hover {
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Add Form Card */
+    .add-form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        margin-bottom: 30px;
+        display: none;
+    }
+
+    .add-form-card.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    .add-form-header {
+        padding: 20px 28px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .add-form-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .add-form-header ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .add-form-body {
+        padding: 28px;
+    }
+
+    .add-form {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20px;
+        align-items: end;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-label ion-icon {
+        font-size: 18px;
+        color: var(--primary);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .btn-submit {
+        padding: 14px 32px;
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        font-family: 'Tajawal', sans-serif;
+        height: 52px;
+        white-space: nowrap;
+    }
+
+    .btn-submit ion-icon {
+        font-size: 22px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Tests Grid */
+    .tests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .test-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .test-card:hover {
+        box-shadow: 0 8px 30px var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .test-card-header {
+        padding: 24px;
+        background: linear-gradient(135deg, var(--info), #2563eb);
+        color: white;
+        text-align: center;
+    }
+
+    .test-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.9;
+    }
+
+    .test-name {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .test-card-body {
+        padding: 24px;
+    }
+
+    .test-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .btn-action {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        font-family: 'Tajawal', sans-serif;
+        text-decoration: none;
+    }
+
+    .btn-action ion-icon {
+        font-size: 18px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: #1e40af;
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #fecaca, #fca5a5);
+        transform: translateY(-2px);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
+    }
+
+    .empty-state ion-icon {
+        font-size: 80px;
+        color: var(--gray-light);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        color: var(--gray);
+        margin: 0 0 24px 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .tests-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .tests-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .tests-header h1 {
+            font-size: 22px;
+        }
+
+        .tests-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .add-form {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-submit {
+            width: 100%;
+        }
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .test-card {
+        animation: fadeIn 0.4s ease;
+    }
+
+    .test-card:nth-child(1) { animation-delay: 0s; }
+    .test-card:nth-child(2) { animation-delay: 0.05s; }
+    .test-card:nth-child(3) { animation-delay: 0.1s; }
+    .test-card:nth-child(4) { animation-delay: 0.15s; }
+    .test-card:nth-child(5) { animation-delay: 0.2s; }
+    .test-card:nth-child(6) { animation-delay: 0.25s; }
+    .test-card:nth-child(7) { animation-delay: 0.3s; }
+    .test-card:nth-child(8) { animation-delay: 0.35s; }
+    .test-card:nth-child(9) { animation-delay: 0.4s; }
+</style>
+
+<div class="tests-container">
+    <!-- Header -->
+    <div class="tests-header">
+        <div class="tests-header-info">
+            <h1>الاختبارات</h1>
+            <p>إدارة أنواع الاختبارات الطبية</p>
+        </div>
+        <button id="add-btn" class="btn-add" onclick="add()">
+            <ion-icon name="add-circle"></ion-icon>
+            إضافة اختبار جديد
+        </button>
+        <button id="close-btn" class="btn-add btn-close" style="display: none;" onclick="closePanel()">
+            <ion-icon name="close-circle"></ion-icon>
+            إلغاء
+        </button>
+    </div>
+
+    <!-- Add Form Card -->
+    <div class="add-form-card" id="addFormCard">
+        <div class="add-form-header">
+            <h3>
+                <ion-icon name="flask"></ion-icon>
+                إضافة اختبار جديد
+            </h3>
+        </div>
+        <div class="add-form-body">
+            <form class="add-form" action="/tests/add" method="post">
+                <div class="form-group">
+                    <label class="form-label">
+                        <ion-icon name="document-text"></ion-icon>
+                        اسم الاختبار
+                    </label>
+                    <input type="text" name="name" class="form-input" placeholder="أدخل اسم الاختبار" required>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                    إضافة الاختبار
+                </button>
+            </form>
         </div>
     </div>
 
-    <script>
-        const addPanel = document.getElementById("add")
-        const addBtn = document.getElementById("add-btn")
-        const closeBtn = document.getElementById("close-btn")
+    <!-- Tests Grid -->
+    <% if(data.length > 0) { %>
+        <div class="tests-grid">
+            <% for (let i=0; i < data.length; i++) {%>
+                <div class="test-card">
+                    <div class="test-card-header">
+                        <ion-icon class="test-icon" name="flask"></ion-icon>
+                        <h3 class="test-name"><%= data[i].name %></h3>
+                    </div>
+                    <div class="test-card-body">
+                        <div class="test-actions">
+                            <button onclick="window.location.href='/tests/edit/<%= data[i]._id%>'" class="btn-action btn-edit">
+                                <ion-icon name="create-outline"></ion-icon>
+                                تعديل
+                            </button>
+                            <form action="/tests/delete/<%= data[i]._id%>?_method=DELETE" method="post" style="margin: 0;">
+                                <button type="submit" class="btn-action btn-delete" onclick="return confirm('هل أنت متأكد من حذف هذا الاختبار؟')">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                    حذف
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <%} %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <ion-icon name="flask-outline"></ion-icon>
+            <h3>لا توجد اختبارات</h3>
+            <p>لم يتم إضافة أي اختبارات بعد</p>
+            <button class="btn-add" onclick="add()">
+                <ion-icon name="add-circle"></ion-icon>
+                إضافة اختبار جديد
+            </button>
+        </div>
+    <% } %>
+</div>
 
-        function add() {
-            addPanel.style.display = "contents"
-            addBtn.style.display = "none"
-            closeBtn.style.display = "block"
-        }
+<script>
+    const addFormCard = document.getElementById("addFormCard");
+    const addBtn = document.getElementById("add-btn");
+    const closeBtn = document.getElementById("close-btn");
 
-        function closePanel() {
-            addPanel.style.display = "none"
-            addBtn.style.display = "block"
-            closeBtn.style.display = "none"
-        }
-    </script>
+    function add() {
+        addFormCard.classList.add('show');
+        addBtn.style.display = "none";
+        closeBtn.style.display = "inline-flex";
+        // Focus on input
+        setTimeout(() => {
+            document.querySelector('#addFormCard input').focus();
+        }, 100);
+    }
 
-    <%- include('../../layout/footer') -%>
+    function closePanel() {
+        addFormCard.classList.remove('show');
+        addBtn.style.display = "inline-flex";
+        closeBtn.style.display = "none";
+    }
+</script>
+
+<%- include('../../layout/footer') -%>

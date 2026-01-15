@@ -2,7 +2,57 @@ const express = require('express')
 const router = express.Router()
 const moment = require('moment')
 const Fees = require('../models/Fees')
+const Expenses = require('../models/Expenses')
 const Patient = require('../models/Patient')
+
+// Helper function to convert Arabic numerals to Western numerals
+function convertArabicToWesternNumerals(str) {
+    const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const westernNumerals = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    let result = str;
+    for (let i = 0; i < arabicNumerals.length; i++) {
+        result = result.replace(new RegExp(arabicNumerals[i], 'g'), westernNumerals[i]);
+    }
+    return result;
+}
+
+// Robust date parser that handles multiple Arabic locale formats
+function parseArabicDate(dateString) {
+    if (!dateString) return null;
+
+    // Try multiple parsing strategies
+    const strategies = [
+        // Strategy 1: D/M/YYYY with Arabic numerals converted
+        () => {
+            const western = convertArabicToWesternNumerals(dateString);
+            const parsed = moment(western, 'D/M/YYYY');
+            if (parsed.isValid()) return parsed;
+            return null;
+        },
+        // Strategy 2: Try parsing with ar-kw locale using moment's flexible parsing
+        () => {
+            const parsed = moment(dateString, 'L', 'ar-kw');
+            if (parsed.isValid()) return parsed;
+            return null;
+        },
+        // Strategy 3: Try without locale, just flexible parsing
+        () => {
+            const western = convertArabicToWesternNumerals(dateString);
+            const parsed = moment(western);
+            if (parsed.isValid()) return parsed;
+            return null;
+        }
+    ];
+
+    // Try each strategy
+    for (const strategy of strategies) {
+        const result = strategy();
+        if (result) return result;
+    }
+
+    // If all strategies fail, return invalid moment
+    return moment.invalid();
+}
 
 router.get('/', async (req, res) => {
     try {
@@ -16,24 +66,35 @@ router.get('/', async (req, res) => {
 
 router.get('/fees/:startDate/:endDate', async (req, res) => {
     try {
-        const startDate = moment(req.params.startDate, 'YYYY-MM-DD').locale('ar-kw').format('l')
-        const endDate = moment(req.params.endDate, 'YYYY-MM-DD').locale('ar-kw').format('l')
+        const startDate = moment(req.params.startDate, 'YYYY-MM-DD');
+        const endDate = moment(req.params.endDate, 'YYYY-MM-DD');
 
-        const fees = await Fees.find({
-            Date: { $gte: startDate, $lte: endDate }
+        // Fetch all expenses and filter by date range
+        const allExpenses = await Expenses.find();
+        const filteredExpenses = allExpenses.filter(expense => {
+            const expenseDate = moment(expense.date, 'D/M/YYYY');
+            return expenseDate.isValid() && expenseDate.isBetween(startDate, endDate, undefined, '[]');
         });
-        var total = 0
+
+        // Transform to match the expected format for the view
+        const fees = filteredExpenses.map(exp => ({
+            name: exp.title,
+            price: exp.amount,
+            Date: exp.date
+        }));
+
+        var total = 0;
         if (fees.length > 0) {
-            total = fees.map(x => x.price).reduce((a, b) => a + b)
+            total = fees.map(x => x.price).reduce((a, b) => a + b);
         }
 
         res.render('admin/analysis/fees', {
             user: req.user,
             fees,
             total,
-            startDate,
-            endDate,
-        })
+            startDate: startDate.locale('ar-kw').format('l'),
+            endDate: endDate.locale('ar-kw').format('l'),
+        });
 
     } catch (err) {
         console.log(err);
@@ -125,12 +186,19 @@ router.get('/profit/:startDate/:endDate', async (req, res) => {
         const startDate = moment(req.params.startDate, 'YYYY-MM-DD').locale('ar-kw');
         const endDate = moment(req.params.endDate, 'YYYY-MM-DD').locale('ar-kw');
 
-        // --- Fees ---
-        const allFees = await Fees.find();
-        const filteredFees = allFees.filter(fee => {
-            const feeDate = moment(fee.Date, 'D/M/YYYY').locale('ar-kw');
-            return feeDate.isBetween(startDate, endDate, undefined, '[]');
+        // --- Expenses (Fees) ---
+        const allExpenses = await Expenses.find();
+        const filteredExpenses = allExpenses.filter(expense => {
+            const expenseDate = moment(expense.date, 'D/M/YYYY');
+            return expenseDate.isValid() && expenseDate.isBetween(startDate, endDate, undefined, '[]');
         });
+
+        // Transform to match expected format
+        const filteredFees = filteredExpenses.map(exp => ({
+            name: exp.title,
+            price: exp.amount,
+            Date: exp.date
+        }));
 
         const totalFees = filteredFees.length > 0
             ? filteredFees.map(f => f.price).reduce((a, b) => a + b, 0)

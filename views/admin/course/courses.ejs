@@ -5,6 +5,7 @@
         Swal.fire({
             icon: 'error',
             text: '<%= err%>',
+            confirmButtonColor: '#ef4444'
         })
     </script>
 <%} %>
@@ -14,75 +15,547 @@
         Swal.fire({
             icon: 'success',
             text: '<%= suc%>',
+            confirmButtonColor: '#22C55E'
         })
     </script>
 <%} %>
 
-    <div class="tests">
-        <div class="container"><br>
-            <p class="title">الكورسات</p>
-            <br>
-            <button id="add-btn" onclick="add()" class="add-btn"><ion-icon class="icon" name="add"></ion-icon></button>
-            <button id="close-btn" style="display: none; background-color: #d9534f;" onclick="closePanel()"
-                class="add-btn"><ion-icon class="icon" name="remove"></ion-icon></button>
-            <table class="table table-stripped table-hover">
-                <thead>
-                    <tr>
-                        <th>عدد الجلسات</th>
-                        <th>سعر الجلسة</th>
-                        <th>السعر الكلي</th>
-                        <th>تعديل</th>
-                        <th>حذف</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="add" style="display: none;">
-                        <form action="/course/add" method="post">
-                            <td>
-                                <input type="number" name="sessions" placeholder="عدد الجلسات">
-                            </td>
-                            <td>
-                                <input type="number" name="price" placeholder="سعر الكورس">
-                            </td>
-                            <td><button class="btn btn-success">اضاقة</button></td>
-                            <td></td>
-                            <td></td>
-                        </form>
-                    </tr>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
 
-                    <% for (let i = 0; i < data.length; i++) {%>
-                        <tr>
-                            <td><%= data[i].sessions%></td>
-                            <td><%= ((data[i].price)/data[i].sessions).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %></td>
-                            <td><%= (data[i].price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %></td>
-                            <td><button onclick="window.location.href='/course/edit/<%= data[i]._id%>'" class="edit-btn"><ion-icon class="icon" name="pencil"></ion-icon></button></td>
-                            <td><form action="/course/delete/<%= data[i]._id%>?_method=DELETE" method="post">
-                                <button class="delete-btn"><ion-icon class="icon" name="remove"></ion-icon></button>
-                                </form>
-                            </td>
-                        </tr>
-                    <%} %>
-                </tbody>
-            </table>
+    .courses-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .courses-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .courses-header-info {
+        flex: 1;
+    }
+
+    .courses-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .courses-header p {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Add Button */
+    .btn-add {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+        font-family: 'Tajawal', sans-serif;
+    }
+
+    .btn-add ion-icon {
+        font-size: 22px;
+    }
+
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    .btn-close {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-close:hover {
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    /* Add Form Card */
+    .add-form-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        margin-bottom: 30px;
+        display: none;
+    }
+
+    .add-form-card.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    .add-form-header {
+        padding: 20px 28px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .add-form-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .add-form-header ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .add-form-body {
+        padding: 28px;
+    }
+
+    .add-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        align-items: end;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-label ion-icon {
+        font-size: 18px;
+        color: var(--primary);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .btn-submit {
+        padding: 14px 32px;
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        font-family: 'Tajawal', sans-serif;
+        height: 52px;
+    }
+
+    .btn-submit ion-icon {
+        font-size: 22px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Courses Grid */
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+
+    .course-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .course-card:hover {
+        box-shadow: 0 8px 30px var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .course-card-header {
+        padding: 24px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        text-align: center;
+    }
+
+    .course-sessions {
+        font-size: 48px;
+        font-weight: 800;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .course-sessions-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-top: 8px;
+    }
+
+    .course-card-body {
+        padding: 24px;
+    }
+
+    .course-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .info-item {
+        background: var(--light);
+        padding: 16px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .info-label {
+        font-size: 12px;
+        color: var(--gray);
+        margin-bottom: 6px;
+    }
+
+    .info-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .info-value.highlight {
+        color: var(--primary);
+    }
+
+    .course-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .btn-action {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        font-family: 'Tajawal', sans-serif;
+        text-decoration: none;
+    }
+
+    .btn-action ion-icon {
+        font-size: 18px;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        color: #1e40af;
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #bfdbfe, #93c5fd);
+        transform: translateY(-2px);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #fecaca, #fca5a5);
+        transform: translateY(-2px);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
+    }
+
+    .empty-state ion-icon {
+        font-size: 80px;
+        color: var(--gray-light);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        color: var(--gray);
+        margin: 0 0 24px 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .courses-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .courses-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .courses-header h1 {
+            font-size: 22px;
+        }
+
+        .courses-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .add-form {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-submit {
+            width: 100%;
+        }
+    }
+
+    /* Animations */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .course-card {
+        animation: fadeIn 0.4s ease;
+    }
+
+    .course-card:nth-child(1) { animation-delay: 0s; }
+    .course-card:nth-child(2) { animation-delay: 0.05s; }
+    .course-card:nth-child(3) { animation-delay: 0.1s; }
+    .course-card:nth-child(4) { animation-delay: 0.15s; }
+    .course-card:nth-child(5) { animation-delay: 0.2s; }
+    .course-card:nth-child(6) { animation-delay: 0.25s; }
+</style>
+
+<div class="courses-container">
+    <!-- Header -->
+    <div class="courses-header">
+        <div class="courses-header-info">
+            <h1>الكورسات والجلسات</h1>
+            <p>إدارة باقات الجلسات والأسعار</p>
+        </div>
+        <button id="add-btn" class="btn-add" onclick="add()">
+            <ion-icon name="add-circle"></ion-icon>
+            إضافة كورس جديد
+        </button>
+        <button id="close-btn" class="btn-add btn-close" style="display: none;" onclick="closePanel()">
+            <ion-icon name="close-circle"></ion-icon>
+            إلغاء
+        </button>
+    </div>
+
+    <!-- Add Form Card -->
+    <div class="add-form-card" id="addFormCard">
+        <div class="add-form-header">
+            <h3>
+                <ion-icon name="library-add"></ion-icon>
+                إضافة كورس جديد
+            </h3>
+        </div>
+        <div class="add-form-body">
+            <form class="add-form" action="/course/add" method="post">
+                <div class="form-group">
+                    <label class="form-label">
+                        <ion-icon name="layers"></ion-icon>
+                        عدد الجلسات
+                    </label>
+                    <input type="number" name="sessions" class="form-input" placeholder="أدخل عدد الجلسات" required min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <ion-icon name="cash"></ion-icon>
+                        السعر الكلي
+                    </label>
+                    <input type="number" name="price" class="form-input" placeholder="أدخل سعر الكورس" required min="0" step="0.001">
+                </div>
+                <button type="submit" class="btn-submit">
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                    إضافة الكورس
+                </button>
+            </form>
         </div>
     </div>
 
-    <script>
-        const addPanel = document.getElementById("add")
-        const addBtn = document.getElementById("add-btn")
-        const closeBtn = document.getElementById("close-btn")
+    <!-- Courses Grid -->
+    <% if(data.length > 0) { %>
+        <div class="courses-grid">
+            <% for (let i = 0; i < data.length; i++) {%>
+                <div class="course-card">
+                    <div class="course-card-header">
+                        <h2 class="course-sessions"><%= data[i].sessions %></h2>
+                        <p class="course-sessions-label">جلسة</p>
+                    </div>
+                    <div class="course-card-body">
+                        <div class="course-info">
+                            <div class="info-item">
+                                <div class="info-label">سعر الجلسة</div>
+                                <div class="info-value">
+                                    <%= ((data[i].price)/data[i].sessions).toLocaleString() %> د.ع
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">السعر الكلي</div>
+                                <div class="info-value highlight">
+                                    <%= (data[i].price).toLocaleString() %> د.ع
+                                </div>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <button onclick="window.location.href='/course/edit/<%= data[i]._id%>'" class="btn-action btn-edit">
+                                <ion-icon name="create-outline"></ion-icon>
+                                تعديل
+                            </button>
+                            <form action="/course/delete/<%= data[i]._id%>?_method=DELETE" method="post" style="margin: 0;">
+                                <button type="submit" class="btn-action btn-delete" onclick="return confirm('هل أنت متأكد من حذف هذا الكورس؟')">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                    حذف
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <%} %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <ion-icon name="library-outline"></ion-icon>
+            <h3>لا توجد كورسات</h3>
+            <p>لم يتم إضافة أي كورسات بعد</p>
+            <button class="btn-add" onclick="add()">
+                <ion-icon name="add-circle"></ion-icon>
+                إضافة كورس جديد
+            </button>
+        </div>
+    <% } %>
+</div>
 
-        function add() {
-            addPanel.style.display = "contents"
-            addBtn.style.display = "none"
-            closeBtn.style.display = "block"
-        }
+<script>
+    const addFormCard = document.getElementById("addFormCard");
+    const addBtn = document.getElementById("add-btn");
+    const closeBtn = document.getElementById("close-btn");
 
-        function closePanel() {
-            addPanel.style.display = "none"
-            addBtn.style.display = "block"
-            closeBtn.style.display = "none"
-        }
-    </script>
+    function add() {
+        addFormCard.classList.add('show');
+        addBtn.style.display = "none";
+        closeBtn.style.display = "inline-flex";
+        // Focus on first input
+        setTimeout(() => {
+            document.querySelector('#addFormCard input').focus();
+        }, 100);
+    }
 
-    <%- include('../../layout/footer') -%>
+    function closePanel() {
+        addFormCard.classList.remove('show');
+        addBtn.style.display = "inline-flex";
+        closeBtn.style.display = "none";
+    }
+</script>
+
+<%- include('../../layout/footer') -%>

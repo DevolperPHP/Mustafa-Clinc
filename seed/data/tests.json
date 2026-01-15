@@ -1,0 +1,44 @@
+{
+  "tests": [
+    {
+      "name": "مقياس وكسلر لذكاء البالغين",
+      "abbreviation": "WAIS",
+      "category": "ذكاء"
+    },
+    {
+      "name": "اختبار شخصية مينيسوتا",
+      "abbreviation": "MMPI",
+      "category": "شخصية"
+    },
+    {
+      "name": "مقياس بيك للاكتئاب",
+      "abbreviation": "BDI",
+      "category": "اكتئاب"
+    },
+    {
+      "name": "مقياس القلق ليبوتسكي",
+      "abbreviation": "LSAS",
+      "category": "قلق"
+    },
+    {
+      "name": "مقياس فرط الحركة وتشتت الانتباه",
+      "abbreviation": "ADHD",
+      "category": "انتباه"
+    },
+    {
+      "name": "مقياس الوسواس القهري",
+      "abbreviation": "OCI-R",
+      "category": "وسواس"
+    },
+    {
+      "name": "مقياس تقدير الذات",
+      "abbreviation": "RSES",
+      "category": "تقدير الذات"
+    },
+    {
+      "name": "اختبار الرسم التلقائي",
+      "abbreviation": "DAP",
+      "category": "أسقام"
+    }
+  ]
+}

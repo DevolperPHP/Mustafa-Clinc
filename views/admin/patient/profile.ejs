@@ -1,574 +1,1331 @@
 <%- include('../../layout/navbar') -%>
-    <% if(suc.length> 0){%>
-        <script>
-            Swal.fire({
-                icon: 'success',
-                text: `<%= suc%>`
-            })
-        </script>
-        <%} %>
 
-            <% if(err.length> 0){%>
-                <script>
-                    Swal.fire({
-                        icon: 'error',
-                        text: `<%= err%>`
-                    })
-                </script>
-                <%} %>
-                    <div class="profile">
-                        <div class="profile-info">
-                            <div class="info-side">
-                                <% if(data.status=="close" ){%>
-                                    <p class="profile-title text-danger">الحالة مغلقة</p>
-                                    <%} else {%>
-                                        <p class="profile-title">معلومات المريض</p>
-                                        <%} %>
-                                            <div class="info">
-                                                <p>الاسم : <%= data.name%>
-                                                </p>
-                                                <p>نوع الكورس: <%= data.type%>
-                                                </p>
-                                                <p>تاريخ الميلاد : <%= data.birthDate%>
-                                                </p>
-                                                <p>الجنس : <%= data.gender%>
-                                                </p>
-                                                <p>الدراسة : <%= data.study%>
-                                                </p>
-                                                <p>العنوان : <%= data.address%>
-                                                </p>
-                                                <p>رقم الهاتف : <%= data.phone%>
-                                                </p>
-                                                <p>الحالة الاجتماعية : <%= data.relationship%>
-                                                </p>
-                                                <p>عدد الاطفال : <%= data.children%>
-                                                </p>
-                                                <p>عدد افراد العائلة : <%= data.familyMembers%>
-                                                </p>
-                                                <p>الترتيب بالعائلة : <%= data.familyRank%>
-                                                </p>
-                                                <p>الحالة الصحية : <%= data.health%>
-                                                </p>
-                                                <p>الحالة النفسية : <%= data.psycho%>
-                                                </p>
-                                                <p>العلاقات : <%= data.RelationshipAndFamily%>
-                                                </p>
-                                                <p>العمل : <%= data.job%>
-                                                </p>
-                                                <p>التجربة السابقة : <%= data.experince%>
-                                                </p>
-                                                <p>تقييم التجربة : <%= data.experince_rate%>
-                                                </p>
-                                                <p>تاريخ التسجيل : <%= data.dateAdded%>
-                                                </p>
-                                                <p>تشخيص المعالج : <%= data.doctor_diagnose%>
-                                                </p>
-                                                <p>تشخيص الطبيب : <%= data.therapist_diagnose%>
-                                                </p>
-                                                <div class="btns">
-                                                    <button onclick="window.location.href='/bills/get/<%= data.id%>'"
-                                                        class="btn btn-warning">سجل الحسابات</button><br>
-                                                    <button
-                                                        onclick="window.location.href='/patient/qrcode/<%= data.code%>/download'"
-                                                        class="btn btn-primary">تحميل QR Code</button><br>
-                                                    <button
-                                                        onclick="window.location.href='/patient/notes/get/<%= data.id%>'"
-                                                        class="btn btn-dark">المتابعة</button><br>
-                                                    <button
-                                                        onclick="window.location.href='/patient/edit-profile/<%= data.id%>'"
-                                                        class="btn btn-info">تعديل المعلومات</button><br>
-                                                    <% if(data.status=="open" ){%>
-                                                        <button onclick="closeAcc()" class="btn btn-danger">غلق
-                                                            الحالة</button>
-                                                        <%} else {%>
-                                                            <button onclick="openAcc()" class="btn btn-success">اعادة فتح الحالة</button>
-                                                            <%}%>
-                                                                <br>
-                                                                <button
-                                                                    onclick="window.location.href='/patient/get-status/<%= data._id%>'"
-                                                                    class="btn btn-secondary">حالات الحساب</button>
-                                                                <br><br>
-                                                </div>
-                                            </div>
+<% if(suc.length > 0){ %>
+<script>
+    Swal.fire({
+        icon: 'success',
+        text: `<%= suc%>`
+    })
+</script>
+<%} %>
 
-                            </div>
-                            <div class="tables-side">
-                                <p class="balance">الرصيد :
-                                    <% if(data.balance>= 0){%>
-                                        <span style="color:#5cb85c">
-                                            <%= data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
-                                        </span>
-                                        <%} else {%>
-                                            <span style="color: #d9534f">
-                                                <%= data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "," )%>
-                                            </span>
+<% if(err.length > 0){ %>
+<script>
+    Swal.fire({
+        icon: 'error',
+        text: `<%= err%>`
+    })
+</script>
+<%} %>
 
-                                            <%} %>
-                                </p>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: #86efac;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
 
-                                <div class="profile-courses">
-                                    <% if(data.inCourse==true){%>
-                                        <p class="profile-title">الكورس الحالي</p>
-                                        <table class="table table-stripped table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>رقم الجلسة</th>
-                                                    <th>تاريخ الجلسة</th>
-                                                    <th>انهاء</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <% for (let i=0; i < Object.keys(CurrentCourse.sessions).length; i++) {
-                                                    const key=Object.keys(CurrentCourse.sessions)[i]; const
-                                                    s=CurrentCourse.sessions[key]; %>
-                                                    <% if (s.Done==false) { %>
-                                                        <form
-                                                            action="/patient/end-session/<%= data._id %>/<%= CurrentCourse.code %>/<%= s.session %>?_method=PUT"
-                                                            method="post">
-                                                            <tr>
-                                                                <td>جلسة <%= s.session %>
-                                                                </td>
-                                                                <td>
-                                                                    <% if (s.Date) { %>
-                                                                        <%= s.Date %>
-                                                                            <% } else { %>
-                                                                                <input type="date" name="date"
-                                                                                    class="form-control">
-                                                                                <% } %>
-                                                                </td>
-                                                                <td>
-                                                                    <button type="submit"
-                                                                        class="btn btn-primary">انهاء</button>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="3" style="text-align: center;">
-                                                                    <textarea name="note"
-                                                                        style="width: 80%; max-width: 100%; margin: auto; display: block;"
-                                                                        class="form-control"
-                                                                        placeholder="ملاحظة الجلسة <%= s.session %>"></textarea>
-                                                                </td>
-                                                            </tr>
-                                                        </form>
-                                                        <% } else { %>
-                                                            <tr>
-                                                                <td>جلسة <%= s.session %>
-                                                                </td>
-                                                                <td>
-                                                                    <%= s.Date %>
-                                                                </td>
-                                                                <td>
-                                                                    <form
-                                                                        action="/patient/cancel-session/<%= data._id %>/<%= CurrentCourse.code %>/<%= s.session %>?_method=PUT"
-                                                                        method="post">
-                                                                        <button class="btn btn-warning">تراجع</button>
-                                                                    </form>
-                                                                </td>
-                                                            </tr>
-                                                            <% } %>
-                                                                <% } %>
-                                            </tbody>
+    .profile-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
 
+    /* Header Section */
+    .profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 30px;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
 
+    .patient-basic-info {
+        flex: 1;
+        min-width: 300px;
+    }
 
+    .patient-name {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-                                        </table>
-                                        <%} %>
-                                            <p class="profile-title">الكورسات</p>
-                                            <table class="table table-stripped table-hover">
-                                                <thead>
-                                                    <tr>
-                                                        <th>عدد الجلسات</th>
-                                                        <th>التاريخ</th>
-                                                        <th>تاريخ الانتهاء</th>
-                                                        <th>السعر</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <% if(data.course.length> 0){%>
-                                                        <% data.course.forEach(course=> {%>
-                                                            <tr
-                                                                onclick="window.location.href='/patient/get-course/<%= data._id%>/<%= course.code%>'">
-                                                                <td>
-                                                                    <%= Object.keys(course.sessions).length %>
-                                                                </td>
-                                                                <td>
-                                                                    <%= course.Date%>
-                                                                </td>
-                                                                <% if(course.endDate==null){%>
-                                                                    <td>مستمر</td>
-                                                                    <%} else {%>
-                                                                        <td>
-                                                                            <%= course.endDate%>
-                                                                        </td>
-                                                                        <%} %>
-                                                                            <td>
-                                                                                <%= course.price%>
-                                                                            </td>
+    .patient-code {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
 
-                                                            </tr>
-                                                            <%}) %>
-                                                                <tr>
-                                                                    <td colspan="5">مجموع عدد الجلسات : <%=
-                                                                            totalSesstions%>
-                                                                    </td>
-                                                                </tr>
-                                                                <%} %>
-                                                                    <% if(data.course.length <=0){%>
-                                                                        <tr>
-                                                                            <td colspan="5">لا يوجد كورسات سابقة</td>
-                                                                        </tr>
-                                                                        <%} %>
-                                                                            <tr id="add-course" style="display: none;">
-                                                                                <form
-                                                                                    action="/patient/add-course/<%= data._id%>?_method=PUT"
-                                                                                    method="post" id="addCourseForm">
-                                                                                    <td colspan="3">
-                                                                                        <select class="form-select" id="courseSelect2" name="course">
-                                                                                            <% courses.forEach(course=> {%>
-                                                                                            <option value="<%= course.sessions %>">
-                                                                                                <%= course.sessions%>
-                                                                                            </option>
-                                                                                            <%}) %>
-                                                                                        </select>
-                                                                                        <!-- Discount Section -->
-                                                                                        <div id="discountSection2" style="display: none; border: 1px solid #ddd; padding: 10px; margin-top: 10px; border-radius: 5px; background-color: #f9f9f9;">
-                                                                                            <h5 style="margin-top: 0;">الخصم على الكورس</h5>
-                                                                                            <div style="margin: 5px 0;">
-                                                                                                <label style="display: block; margin-bottom: 5px;">نوع الخصم:</label>
-                                                                                                <input type="radio" name="discountType" value="percentage" id="discountPercentage2"> نسبة مئوية
-                                                                                                <input type="radio" name="discountType" value="fixed" id="discountFixed2" style="margin-right: 15px;"> مبلغ ثابت
-                                                                                            </div>
-                                                                                            <div style="margin: 5px 0;">
-                                                                                                <label id="discountValueLabel2" for="discountValue2" style="display: block; margin-bottom: 5px;">قيمة الخصم (%):</label>
-                                                                                                <input type="number" name="discountValue" id="discountValue2" style="width: 100%; padding: 8px; direction: rtl;" min="1" max="100" placeholder="أدخل النسبة (1-100)">
-                                                                                            </div>
-                                                                                            <div id="discountPreview2" style="margin-top: 10px; padding: 8px; background-color: #e8f5e9; border-radius: 5px; display: none;">
-                                                                                                <p style="margin: 3px 0; font-size: 14px; color: #2e7d32;"><strong>السعر الأصلي:</strong> <span id="originalPrice2">-</span> د.ك</p>
-                                                                                                <p style="margin: 3px 0; font-size: 14px; color: #d32f2f;"><strong>قيمة الخصم:</strong> <span id="discountAmount2">-</span> د.ك</p>
-                                                                                                <p style="margin: 3px 0; font-size: 16px; color: #1976d2;"><strong>السعر النهائي:</strong> <span id="finalPrice2">-</span> د.ك</p>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                    <td><button class="btn btn-primary">اضافة</button></td>
-                                                                                </form>
-                                                                            </tr>
-                                                </tbody>
-                                            </table>
-                                            <button id="add-course-btn" onclick="addCourse()"
-                                                class="btn btn-success">اضافة كورس</button>
-                                            <button style="display: none;" onclick="hideCourse()" id="hide-course"
-                                                class="btn btn-danger">اخفاء</button>
-                                            <br><br>
-                                            <p class="profile-title">الاختبارات</p>
-                                            <table class="table table-stripped table-hover">
-                                                <thead>
-                                                    <tr>
-                                                        <th>الاختبار</th>
-                                                        <th>تاريخ الاضافة</th>
-                                                        <th>حذف</th>
-                                                    </tr>
-                                                </thead>
+    .patient-meta {
+        display: flex;
+        gap: 20px;
+        color: var(--gray);
+        font-size: 14px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
 
-                                                <tbody>
-                                                    <% if(data.tests.length> 0){%>
-                                                        <% data.tests.forEach(test=> {%>
-                                                            <tr>
-                                                                <td>
-                                                                    <%= test.test%>
-                                                                </td>
-                                                                <td>
-                                                                    <%= test.Date%>
-                                                                </td>
-                                                                <td>
-                                                                    <form
-                                                                        action="/patient/remove-test/<%= data._id%>/<%= test.test%>?_method=PUT"
-                                                                        method="post">
-                                                                        <button class="btn btn-danger">حذف</button>
-                                                                    </form>
-                                                                </td>
-                                                            </tr>
-                                                            <%}) %>
-                                                                <%} else {%>
-                                                                    <tr>
-                                                                        <td colspan="3">لا يوجد اختبارات</td>
-                                                                    </tr>
-                                                                    <%} %>
-                                                                        <tr id="table-Test" style="display: none;">
-                                                                            <form
-                                                                                action="/patient/add-test/<%= data._id%>?_method=PUT"
-                                                                                method="post">
-                                                                                <td><select class="form-select"
-                                                                                        name="test">
-                                                                                        <option>الاختبارات</option>
-                                                                                        <% tests.forEach(test=> {%>
-                                                                                            <option>
-                                                                                                <%= test.name%>
-                                                                                            </option>
-                                                                                            <%}) %>
-                                                                                    </select></td>
-                                                                                <td></td>
-                                                                                <td><button
-                                                                                        class="btn btn-primary">اضافة</button>
-                                                                                </td>
-                                                                            </form>
-                                                                        </tr>
-                                                </tbody>
+    .patient-meta span {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-                                            </table>
-                                            <br>
-                                            <button onclick="addTestFun()" id="addTest" class="btn btn-success">اضافة
-                                                اختبار</button>
-                                            <button onclick="hideTestFun()" id="hideTest" style="display: none;"
-                                                class="btn btn-danger">اخفاء</button>
-                                            <br><br>
-                                            <p class="profile-title">التمارين</p>
-                                            <table class="table table-stripped table-hover">
-                                                <thead>
-                                                    <tr>
-                                                        <th>التمرين</th>
-                                                        <th>تاريخ الاضافة</th>
-                                                        <th>حذف</th>
-                                                    </tr>
-                                                </thead>
+    .patient-meta ion-icon {
+        font-size: 18px;
+        color: var(--primary);
+    }
 
-                                                <tbody>
-                                                    <% if(data.exercise.length> 0){%>
-                                                        <% data.exercise.forEach(test=> {%>
-                                                            <tr>
-                                                                <td>
-                                                                    <%= test.exercise%>
-                                                                </td>
-                                                                <td>
-                                                                    <%= test.Date%>
-                                                                </td>
-                                                                <td>
-                                                                    <form
-                                                                        action="/patient/remove-exercise/<%= data._id%>/<%= test.exercise%>?_method=PUT"
-                                                                        method="post">
-                                                                        <button class="btn btn-danger">حذف</button>
-                                                                    </form>
-                                                                </td>
-                                                            </tr>
-                                                            <%}) %>
-                                                                <%} else {%>
-                                                                    <tr>
-                                                                        <td colspan="3">لا يوجد تمارين</td>
-                                                                    </tr>
-                                                                    <%} %>
-                                                                        <tr id="table-exercise" style="display: none;">
-                                                                            <form
-                                                                                action="/patient/add-exercise/<%= data._id%>?_method=PUT"
-                                                                                method="post">
-                                                                                <td><select class="form-select"
-                                                                                        name="exercise">
-                                                                                        <option>التمارين</option>
-                                                                                        <% exercise.forEach(test=> {%>
-                                                                                            <option>
-                                                                                                <%= test.name%>
-                                                                                            </option>
-                                                                                            <%}) %>
-                                                                                    </select></td>
-                                                                                <td></td>
-                                                                                <td><button
-                                                                                        class="btn btn-primary">اضافة</button>
-                                                                                </td>
-                                                                            </form>
-                                                                        </tr>
-                                                </tbody>
+    /* Status Badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+    }
 
-                                            </table>
-                                            <br>
-                                            <button onclick="addexerciseFun()" id="addexercise"
-                                                class="btn btn-success">اضافة تمرين</button>
-                                            <button onclick="hideexerciseFun()" id="hideexercise" style="display: none;"
-                                                class="btn btn-danger">اخفاء</button>
-                                </div>
-                            </div>
+    .status-badge.active {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #16a34a;
+    }
+
+    .status-badge.inactive {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    .status-badge ion-icon {
+        font-size: 20px;
+    }
+
+    /* Balance Card */
+    .balance-card {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 24px 32px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 10px 30px var(--shadow-lg);
+        min-width: 250px;
+    }
+
+    .balance-card.negative {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+    }
+
+    .balance-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 8px;
+    }
+
+    .balance-amount {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    /* Grid Layout */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    /* Card Styles */
+    .card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        margin-bottom: 24px;
+        border: 1px solid var(--gray-light);
+    }
+
+    .card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--gray-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .card-title ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .card-body {
+        padding: 20px 24px;
+    }
+
+    /* Info List */
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-size: 14px;
+        color: var(--gray);
+        font-weight: 500;
+    }
+
+    .info-value {
+        font-size: 15px;
+        color: var(--dark);
+        font-weight: 600;
+        text-align: left;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 20px 24px;
+    }
+
+    .action-btn {
+        padding: 12px 16px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        direction: rtl;
+    }
+
+    .action-btn ion-icon {
+        font-size: 20px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--info), #2563eb);
+        color: white;
+    }
+
+    .btn-warning {
+        background: linear-gradient(135deg, var(--warning), #d97706);
+        color: white;
+    }
+
+    .btn-dark {
+        background: linear-gradient(135deg, var(--dark), #374151);
+        color: white;
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #06b6d4, #0891b2);
+        color: white;
+    }
+
+    .btn-danger {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+        color: white;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .action-btn.full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* Tables */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .modern-table th,
+    .modern-table td {
+        padding: 14px 16px;
+        text-align: right;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .modern-table th {
+        background: #f8fafc;
+        color: var(--dark);
+        font-weight: 700;
+        font-size: 13px;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid var(--primary);
+    }
+
+    .modern-table th:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+
+    .modern-table th:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+
+    .modern-table tbody tr {
+        transition: background 0.2s ease;
+        cursor: pointer;
+    }
+
+    .modern-table tbody tr:hover {
+        background: #f0fdf4;
+    }
+
+    .modern-table td {
+        font-size: 14px;
+        color: var(--dark);
+    }
+
+    .table-btn {
+        padding: 6px 14px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .table-btn:hover {
+        transform: scale(1.05);
+    }
+
+    /* Add Form in Table */
+    .add-form-row {
+        background: #f0fdf4;
+    }
+
+    .add-form-row select,
+    .add-form-row input[type="date"],
+    .add-form-row input[type="number"],
+    .add-form-row input[type="text"] {
+        padding: 8px 12px;
+        border: 1px solid var(--gray-light);
+        border-radius: 6px;
+        font-size: 14px;
+        width: 100%;
+        direction: rtl;
+    }
+
+    .add-form-row select:focus,
+    .add-form-row input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    /* Session Notes */
+    .session-note {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--gray-light);
+        border-radius: 8px;
+        font-size: 14px;
+        resize: vertical;
+        direction: rtl;
+        font-family: 'Tajawal', sans-serif;
+        min-height: 60px;
+    }
+
+    .session-note:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+
+    /* Current Course Sessions */
+    .session-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .session-item {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid var(--gray-light);
+    }
+
+    .session-item.completed {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .session-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .session-number {
+        font-weight: 700;
+        color: var(--dark);
+        font-size: 16px;
+    }
+
+    .session-status {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .session-status.pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .session-status.done {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .session-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .session-form-row {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--gray);
+    }
+
+    .empty-state ion-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        color: var(--gray-light);
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-size: 14px;
+    }
+
+    /* Discount Section */
+    .discount-box {
+        background: #f9fafb;
+        border: 1px solid var(--gray-light);
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 12px;
+    }
+
+    .discount-title {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0 0 12px 0;
+        color: var(--dark);
+    }
+
+    .discount-type-group {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 12px;
+    }
+
+    .discount-type-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .discount-preview {
+        background: white;
+        border-radius: 8px;
+        padding: 12px;
+        margin-top: 12px;
+        display: none;
+    }
+
+    .discount-preview.show {
+        display: block;
+    }
+
+    .discount-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .discount-row:last-child {
+        margin-bottom: 0;
+        padding-top: 8px;
+        border-top: 1px dashed var(--gray-light);
+        font-weight: 700;
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .profile-header {
+            flex-direction: column;
+        }
+
+        .patient-name {
+            font-size: 22px;
+        }
+
+        .balance-card {
+            width: 100%;
+        }
+
+        .balance-amount {
+            font-size: 28px;
+        }
+
+        .card-header {
+            padding: 16px;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .modern-table th,
+        .modern-table td {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .info-value {
+            text-align: right;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: fadeIn 0.4s ease;
+    }
+
+    /* Total Row */
+    .total-row {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+        color: var(--dark);
+        font-weight: 700;
+        border-top: 2px solid var(--primary);
+    }
+
+    .total-row td {
+        color: var(--primary-dark);
+    }
+
+    /* Add Button */
+    .add-section-btn {
+        width: 100%;
+        padding: 14px;
+        background: white;
+        border: 2px dashed var(--gray-light);
+        border-radius: 10px;
+        color: var(--gray);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .add-section-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: #f0fdf4;
+    }
+
+    /* Hide/Show Buttons */
+    .toggle-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .toggle-btn {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .hide-btn {
+        background: var(--danger);
+        color: white;
+    }
+
+    .show-btn {
+        background: var(--gray-light);
+        color: var(--dark);
+    }
+
+    .toggle-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px var(--shadow);
+    }
+</style>
+
+<div class="profile-container">
+    <!-- Header -->
+    <div class="profile-header">
+        <div class="patient-basic-info">
+            <h1 class="patient-name">
+                <%= data.name %>
+                <span class="patient-code">#<%= data.code %></span>
+            </h1>
+            <div class="patient-meta">
+                <span>
+                    <ion-icon name="call-outline"></ion-icon>
+                    <%= data.phone %>
+                </span>
+                <span>
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    <%= data.birthDate %>
+                </span>
+                <span>
+                    <ion-icon name="person-outline"></ion-icon>
+                    <%= data.gender %>
+                </span>
+            </div>
+            <div class="patient-meta" style="margin-top: 4px;">
+                <span>
+                    <ion-icon name="home-outline"></ion-icon>
+                    <%= data.address %>
+                </span>
+            </div>
+        </div>
+
+        <% if(data.status == "close") { %>
+            <div class="status-badge inactive">
+                <ion-icon name="close-circle"></ion-icon>
+                الحالة مغلقة
+            </div>
+        <% } else { %>
+            <div class="status-badge active">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                الحالة نشطة
+            </div>
+        <% } %>
+
+        <div class="balance-card <%= data.balance < 0 ? 'negative' : '' %>">
+            <div class="balance-label">الرصيد</div>
+            <div class="balance-amount">
+                <%= data.balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <ion-icon name="flash-outline"></ion-icon>
+                        إجراءات سريعة
+                    </h3>
+                </div>
+                <div class="action-buttons">
+                    <a href="/bills/get/<%= data.id %>" class="action-btn btn-warning">
+                        <ion-icon name="receipt-outline"></ion-icon>
+                        سجل الحسابات
+                    </a>
+                    <a href="/patient/qrcode/<%= data.code %>/download" class="action-btn btn-primary">
+                        <ion-icon name="qr-code-outline"></ion-icon>
+                        QR Code
+                    </a>
+                    <a href="/patient/notes/get/<%= data.id %>" class="action-btn btn-dark">
+                        <ion-icon name="create-outline"></ion-icon>
+                        المتابعة
+                    </a>
+                    <a href="/patient/edit-profile/<%= data.id %>" class="action-btn btn-info">
+                        <ion-icon name="pencil-outline"></ion-icon>
+                        تعديل المعلومات
+                    </a>
+                    <% if(data.status == "open") { %>
+                        <button onclick="closeAcc()" class="action-btn btn-danger full-width">
+                            <ion-icon name="lock-closed-outline"></ion-icon>
+                            غلق الحالة
+                        </button>
+                    <% } else { %>
+                        <button onclick="openAcc()" class="action-btn btn-success full-width">
+                            <ion-icon name="lock-open-outline"></ion-icon>
+                            إعادة فتح الحالة
+                        </button>
+                    <% } %>
+                    <a href="/patient/get-status/<%= data._id %>" class="action-btn btn-secondary full-width">
+                        <ion-icon name="time-outline"></ion-icon>
+                        حالات الحساب
+                    </a>
+                </div>
+            </div>
+
+            <!-- Patient Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <ion-icon name="person-circle-outline"></ion-icon>
+                        معلومات المريض
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">نوع الكورس</span>
+                            <span class="info-value"><%= data.type %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الدراسة</span>
+                            <span class="info-value"><%= data.study %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الحالة الاجتماعية</span>
+                            <span class="info-value"><%= data.relationship %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">العمل</span>
+                            <span class="info-value"><%= data.job %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">عدد الأطفال</span>
+                            <span class="info-value"><%= data.children %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الحالة الصحية</span>
+                            <span class="info-value"><%= data.health %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">الحالة النفسية</span>
+                            <span class="info-value"><%= data.psycho %></span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">تاريخ التسجيل</span>
+                            <span class="info-value"><%= data.dateAdded %></span>
                         </div>
                     </div>
-                    <br><br><br>
-
-                    <script>
-                        const courseRow = document.getElementById("add-course")
-                        const addBtn = document.getElementById("add-course-btn")
-                        const hideBtn = document.getElementById("hide-course")
-                        function addCourse() {
-                            courseRow.style.display = "contents"
-                            addBtn.style.display = "none"
-                            hideBtn.style.display = "initial"
-                        }
-
-                        function hideCourse() {
-                            courseRow.style.display = "none"
-                            addBtn.style.display = "initial"
-                            hideBtn.style.display = "none"
-                        }
-
-                        const tableTest = document.getElementById("table-Test")
-                        const addTest = document.getElementById("addTest")
-                        const hideTest = document.getElementById("hideTest")
-
-                        function addTestFun() {
-                            tableTest.style.display = "contents"
-                            addTest.style.display = "none"
-                            hideTest.style.display = "initial"
-                        }
-
-                        function hideTestFun() {
-                            tableTest.style.display = "none"
-                            addTest.style.display = "initial"
-                            hideTest.style.display = "none"
-                        }
-                        const tableexercise = document.getElementById("table-exercise")
-                        const addexercise = document.getElementById("addexercise")
-                        const hideexercise = document.getElementById("hideexercise")
-
-                        function addexerciseFun() {
-                            tableexercise.style.display = "contents"
-                            addexercise.style.display = "none"
-                            hideexercise.style.display = "initial"
-                        }
-
-                        function hideexerciseFun() {
-                            tableexercise.style.display = "none"
-                            addexercise.style.display = "initial"
-                            hideexercise.style.display = "none"
-                        }
-                    </script>
-                                                                <script>
-                                                function closeAcc() {
-                                                    Swal.fire({
-                                                        icon: 'warning',
-                                                        showConfirmButton: false,
-                                                        html: `
-    <form action="/patient/close-acc/<%= data._id %>?_method=PUT" method="post" id="close-form">
-        <label for="reason" style="font-weight: bold; display: block; margin-bottom: 5px;">سبب الإغلاق</label>
-        <select name="reason" id="reason" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;">
-            <option value="تحقيق الاهداف العلاجية">تحقيبق الاهداف العلاجية</option>
-            <option value="الانسحاب و عدم الالتزام بالجلسات">الانسحاب و عدم الالتزام بالجلسات</option>
-            <option value="وفاة">وفاة</option>
-            <option value="الانتقال الى مكان">الانتقال الى مكان</option>
-            <option value="اخرى">أخرى</option>
-        </select>
-
-        <input type="text" name="customReason" id="customReason" placeholder="يرجى توضيح السبب"
-            style="display: none; width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px;" />
-
-        <div style="text-align: center;">
-            <button type="submit" class="btn btn-danger">إغلاق الحساب</button>
-            <button type="button" class="btn btn-secondary" onclick="Swal.close()">إلغاء</button>
-        </div>
-    </form>
-    `,
-                                                        didOpen: () => {
-                                                            const reasonSelect = document.getElementById('reason');
-                                                            const customInput = document.getElementById('customReason');
-
-                                                            reasonSelect.addEventListener('change', () => {
-                                                                if (reasonSelect.value === 'اخرى') {
-                                                                    customInput.style.display = 'block';
-                                                                    customInput.setAttribute('required', true);
-                                                                } else {
-                                                                    customInput.style.display = 'none';
-                                                                    customInput.removeAttribute('required');
-                                                                }
-                                                            });
-                                                        }
-                                                    });
-
-                                                }
-
-                                                function openAcc() {
-                                                    Swal.fire({
-    icon: 'info',
-    title: 'فتح الحساب',
-    showConfirmButton: false,
-    html: `
-        <form action="/patient/open-acc/<%= data._id %>?_method=PUT" method="post" id="open-form">
-            <label for="note" style="font-weight: bold; display: block; margin-bottom: 5px;">ملاحظة (اختياري)</label>
-            <input type="text" name="note" id="note"
-                placeholder="أدخل ملاحظة لفتح الحساب"
-                style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;" />
-
-            <div style="text-align: center;">
-                <button type="submit" class="btn btn-success">فتح الحساب</button>
-                <button type="button" class="btn btn-secondary" onclick="Swal.close()">إلغاء</button>
+                </div>
             </div>
-        </form>
-    `
-});
+        </div>
 
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Current Course -->
+            <% if(data.inCourse == true) { %>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <ion-icon name="play-circle-outline"></ion-icon>
+                        الكورس الحالي
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <%
+                    let hasPendingSessions = false;
+                    for (let i = 0; i < Object.keys(CurrentCourse.sessions).length; i++) {
+                        const key = Object.keys(CurrentCourse.sessions)[i];
+                        const s = CurrentCourse.sessions[key];
+                        if (s.Done == false) {
+                            hasPendingSessions = true;
+                            break;
+                        }
+                    }
+                    %>
 
-                                                }
+                    <% if(hasPendingSessions) { %>
+                        <div class="session-list">
+                            <% for (let i = 0; i < Object.keys(CurrentCourse.sessions).length; i++) {
+                                const key = Object.keys(CurrentCourse.sessions)[i];
+                                const s = CurrentCourse.sessions[key];
+                                if (s.Done == false) { %>
+                            <div class="session-item">
+                                <form action="/patient/end-session/<%= data._id %>/<%= CurrentCourse.code %>/<%= s.session %>?_method=PUT" method="post">
+                                    <div class="session-header">
+                                        <span class="session-number">جلسة <%= s.session %></span>
+                                        <span class="session-status pending">قيد الانتظار</span>
+                                    </div>
+                                    <div class="session-form">
+                                        <div class="session-form-row">
+                                            <input type="date" name="date" class="session-note" placeholder="تاريخ الجلسة" <%= s.Date ? 'value="' + s.Date + '"' : '' %>>
+                                            <button type="submit" class="action-btn btn-success">إنهاء الجلسة</button>
+                                        </div>
+                                        <textarea name="note" class="session-note" placeholder="ملاحظة الجلسة <%= s.session %>"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <% } else { %>
+                            <div class="session-item completed">
+                                <div class="session-header">
+                                    <span class="session-number">جلسة <%= s.session %></span>
+                                    <span class="session-status done">مكتملة</span>
+                                </div>
+                                <div class="session-form-row">
+                                    <span><%= s.Date %></span>
+                                    <form action="/patient/cancel-session/<%= data._id %>/<%= CurrentCourse.code %>/<%= s.session %>?_method=PUT" method="post">
+                                        <button type="submit" class="table-btn btn-warning">تراجع</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <% }
+                            } %>
+                        </div>
+                    <% } else { %>
+                        <div class="empty-state">
+                            <ion-icon name="checkmark-done-circle"></ion-icon>
+                            <p>جميع الجلسات مكتملة</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            <% } %>
 
-                                                // Course price data for profile page
-                                                const coursePrices2 = {
-                                                    <% courses.forEach((course, index) => { %>
-                                                        "<%= course.sessions %>": <%= course.price %><%= index < courses.length - 1 ? ',' : '' %>
+            <!-- Courses -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <ion-icon name="library-outline"></ion-icon>
+                        الكورسات
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>عدد الجلسات</th>
+                                    <th>التاريخ</th>
+                                    <th>تاريخ الانتهاء</th>
+                                    <th>السعر</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if(data.course.length > 0) { %>
+                                    <% data.course.forEach(course => { %>
+                                    <tr onclick="window.location.href='/patient/get-course/<%= data._id %>/<%= course.code %>'">
+                                        <td><%= Object.keys(course.sessions).length %></td>
+                                        <td><%= course.Date %></td>
+                                        <td>
+                                            <% if(course.endDate == null) { %>
+                                                <span style="color: var(--success); font-weight: 600;">مستمر</span>
+                                            <% } else { %>
+                                                <%= course.endDate %>
+                                            <% } %>
+                                        </td>
+                                        <td><%= course.price %></td>
+                                    </tr>
+                                    <% }) %>
+                                    <tr class="total-row">
+                                        <td colspan="3">مجموع عدد الجلسات</td>
+                                        <td><%= totalSesstions %></td>
+                                    </tr>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="4">
+                                            <div class="empty-state">
+                                                <ion-icon name="folder-open-outline"></ion-icon>
+                                                <p>لا يوجد كورسات سابقة</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                                <tr id="add-course" style="display: none;" class="add-form-row">
+                                    <td colspan="4">
+                                        <form action="/patient/add-course/<%= data._id %>?_method=PUT" method="post">
+                                            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                                <select id="courseSelect2" name="course" style="flex: 1; min-width: 200px;">
+                                                    <% courses.forEach(course => { %>
+                                                        <option value="<%= course.sessions %>"><%= course.sessions %> جلسة</option>
                                                     <% }) %>
-                                                };
+                                                </select>
+                                                <button type="submit" class="action-btn btn-success">إضافة</button>
+                                            </div>
 
-                                                // Show/hide discount section based on course selection
-                                                document.getElementById('courseSelect2').addEventListener('change', function() {
-                                                    const discountSection = document.getElementById('discountSection2');
-                                                    if (this.value) {
-                                                        discountSection.style.display = 'block';
-                                                        updateDiscountPreview2();
-                                                    } else {
-                                                        discountSection.style.display = 'none';
-                                                    }
-                                                });
+                                            <div id="discountSection2" class="discount-box" style="display: none;">
+                                                <p class="discount-title">الخصم على الكورس</p>
+                                                <div class="discount-type-group">
+                                                    <label class="discount-type-label">
+                                                        <input type="radio" name="discountType" value="percentage" id="discountPercentage2">
+                                                        نسبة مئوية
+                                                    </label>
+                                                    <label class="discount-type-label">
+                                                        <input type="radio" name="discountType" value="fixed" id="discountFixed2">
+                                                        مبلغ ثابت
+                                                    </label>
+                                                </div>
+                                                <div style="margin-top: 12px;">
+                                                    <label id="discountValueLabel2" for="discountValue2" style="display: block; margin-bottom: 8px; font-size: 14px; color: var(--gray);">قيمة الخصم (%):</label>
+                                                    <input type="number" name="discountValue" id="discountValue2" style="width: 100%; padding: 10px; border: 1px solid var(--gray-light); border-radius: 6px; direction: rtl;" min="1" max="100" placeholder="أدخل النسبة (1-100)">
+                                                </div>
+                                                <div id="discountPreview2" class="discount-preview">
+                                                    <div class="discount-row">
+                                                        <span>السعر الأصلي:</span>
+                                                        <span id="originalPrice2">-</span>
+                                                    </div>
+                                                    <div class="discount-row">
+                                                        <span>قيمة الخصم:</span>
+                                                        <span id="discountAmount2" style="color: var(--danger);">-</span>
+                                                    </div>
+                                                    <div class="discount-row">
+                                                        <span>السعر النهائي:</span>
+                                                        <span id="finalPrice2" style="color: var(--primary);">-</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                                                // Update label and validation based on discount type
-                                                document.querySelectorAll('input[name="discountType"]').forEach(radio => {
-                                                    radio.addEventListener('change', function() {
-                                                        const label = document.getElementById('discountValueLabel2');
-                                                        const input = document.getElementById('discountValue2');
-                                                        if (this.value === 'percentage') {
-                                                            label.textContent = 'قيمة الخصم (%):';
-                                                            input.max = '100';
-                                                            input.placeholder = 'أدخل النسبة (1-100)';
-                                                        } else {
-                                                            label.textContent = 'قيمة الخصم (د.ك):';
-                                                            input.max = '';
-                                                            input.placeholder = 'أدخل المبلغ';
-                                                        }
-                                                        updateDiscountPreview2();
-                                                    });
-                                                });
+                    <% if(data.course.length == 0 || typeof addCourse === 'undefined') { %>
+                        <button id="add-course-btn" onclick="addCourse()" class="add-section-btn">
+                            <ion-icon name="add-circle-outline"></ion-icon>
+                            إضافة كورس جديد
+                        </button>
+                    <% } %>
 
-                                                // Update discount preview on value change
-                                                document.getElementById('discountValue2').addEventListener('input', function() {
-                                                    updateDiscountPreview2();
-                                                });
+                    <div id="toggle-course-btns" class="toggle-buttons" style="display: none;">
+                        <button onclick="hideCourse()" class="toggle-btn hide-btn">إخفاء</button>
+                    </div>
+                </div>
+            </div>
 
-                                                function updateDiscountPreview2() {
-                                                    const courseSelect = document.getElementById('courseSelect2');
-                                                    const discountType = document.querySelector('input[name="discountType"]:checked');
-                                                    const discountValue = document.getElementById('discountValue2').value;
+            <!-- Tests -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <ion-icon name="clipboard-outline"></ion-icon>
+                        الاختبارات
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>الاختبار</th>
+                                    <th>تاريخ الاضافة</th>
+                                    <th>حذف</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if(data.tests.length > 0) { %>
+                                    <% data.tests.forEach(test => { %>
+                                    <tr>
+                                        <td><%= test.test %></td>
+                                        <td><%= test.Date %></td>
+                                        <td>
+                                            <form action="/patient/remove-test/<%= data._id %>/<%= test.test %>?_method=PUT" method="post">
+                                                <button type="submit" class="table-btn btn-danger">حذف</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="3">
+                                            <div class="empty-state">
+                                                <ion-icon name="document-outline"></ion-icon>
+                                                <p>لا يوجد اختبارات</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                                <tr id="table-Test" style="display: none;" class="add-form-row">
+                                    <td colspan="3">
+                                        <form action="/patient/add-test/<%= data._id %>?_method=PUT" method="post">
+                                            <div style="display: flex; gap: 12px; align-items: center;">
+                                                <select name="test" style="flex: 1; padding: 10px; border: 1px solid var(--gray-light); border-radius: 6px;">
+                                                    <option value="">اختر اختبار</option>
+                                                    <% tests.forEach(test => { %>
+                                                        <option><%= test.name %></option>
+                                                    <% }) %>
+                                                </select>
+                                                <button type="submit" class="action-btn btn-success">إضافة</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                                                    if (courseSelect.value && discountType && discountValue) {
-                                                        const originalPrice = coursePrices2[courseSelect.value] || 0;
-                                                        const value = Number(discountValue);
-                                                        let discountAmount = 0;
+                    <button id="addTest" onclick="addTestFun()" class="add-section-btn">
+                        <ion-icon name="add-circle-outline"></ion-icon>
+                        إضافة اختبار
+                    </button>
 
-                                                        if (discountType.value === 'percentage') {
-                                                            discountAmount = (originalPrice * value) / 100;
-                                                        } else if (discountType.value === 'fixed') {
-                                                            discountAmount = value;
-                                                        }
+                    <div id="toggle-test-btns" class="toggle-buttons" style="display: none;">
+                        <button onclick="hideTestFun()" class="toggle-btn hide-btn">إخفاء</button>
+                    </div>
+                </div>
+            </div>
 
-                                                        const finalPrice = originalPrice - discountAmount;
+            <!-- Exercises -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <ion-icon name="fitness-outline"></ion-icon>
+                        التمارين
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>التمرين</th>
+                                    <th>تاريخ الاضافة</th>
+                                    <th>حذف</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if(data.exercise.length > 0) { %>
+                                    <% data.exercise.forEach(test => { %>
+                                    <tr>
+                                        <td><%= test.exercise %></td>
+                                        <td><%= test.Date %></td>
+                                        <td>
+                                            <form action="/patient/remove-exercise/<%= data._id %>/<%= test.exercise %>?_method=PUT" method="post">
+                                                <button type="submit" class="table-btn btn-danger">حذف</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="3">
+                                            <div class="empty-state">
+                                                <ion-icon name="barbell-outline"></ion-icon>
+                                                <p>لا يوجد تمارين</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% } %>
+                                <tr id="table-exercise" style="display: none;" class="add-form-row">
+                                    <td colspan="3">
+                                        <form action="/patient/add-exercise/<%= data._id %>?_method=PUT" method="post">
+                                            <div style="display: flex; gap: 12px; align-items: center;">
+                                                <select name="exercise" style="flex: 1; padding: 10px; border: 1px solid var(--gray-light); border-radius: 6px;">
+                                                    <option value="">اختر تمرين</option>
+                                                    <% exercise.forEach(test => { %>
+                                                        <option><%= test.name %></option>
+                                                    <% }) %>
+                                                </select>
+                                                <button type="submit" class="action-btn btn-success">إضافة</button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                                                        document.getElementById('originalPrice2').textContent = originalPrice.toLocaleString();
-                                                        document.getElementById('discountAmount2').textContent = discountAmount.toLocaleString();
-                                                        document.getElementById('finalPrice2').textContent = finalPrice.toLocaleString();
-                                                        document.getElementById('discountPreview2').style.display = 'block';
-                                                    } else {
-                                                        document.getElementById('discountPreview2').style.display = 'none';
-                                                    }
-                                                }
-                                            </script>
+                    <button id="addexercise" onclick="addexerciseFun()" class="add-section-btn">
+                        <ion-icon name="add-circle-outline"></ion-icon>
+                        إضافة تمرين
+                    </button>
 
-                    <%- include('../../layout/footer') -%>
+                    <div id="toggle-exercise-btns" class="toggle-buttons" style="display: none;">
+                        <button onclick="hideexerciseFun()" class="toggle-btn hide-btn">إخفاء</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Course Management
+    function addCourse() {
+        document.getElementById("add-course").style.display = "table-row";
+        document.getElementById("add-course-btn").style.display = "none";
+        document.getElementById("toggle-course-btns").style.display = "flex";
+    }
+
+    function hideCourse() {
+        document.getElementById("add-course").style.display = "none";
+        document.getElementById("add-course-btn").style.display = "flex";
+        document.getElementById("toggle-course-btns").style.display = "none";
+    }
+
+    // Test Management
+    function addTestFun() {
+        document.getElementById("table-Test").style.display = "table-row";
+        document.getElementById("addTest").style.display = "none";
+        document.getElementById("toggle-test-btns").style.display = "flex";
+    }
+
+    function hideTestFun() {
+        document.getElementById("table-Test").style.display = "none";
+        document.getElementById("addTest").style.display = "flex";
+        document.getElementById("toggle-test-btns").style.display = "none";
+    }
+
+    // Exercise Management
+    function addexerciseFun() {
+        document.getElementById("table-exercise").style.display = "table-row";
+        document.getElementById("addexercise").style.display = "none";
+        document.getElementById("toggle-exercise-btns").style.display = "flex";
+    }
+
+    function hideexerciseFun() {
+        document.getElementById("table-exercise").style.display = "none";
+        document.getElementById("addexercise").style.display = "flex";
+        document.getElementById("toggle-exercise-btns").style.display = "none";
+    }
+
+    // Close Account
+    function closeAcc() {
+        Swal.fire({
+            icon: 'warning',
+            showConfirmButton: false,
+            html: `
+                <form action="/patient/close-acc/<%= data._id %>?_method=PUT" method="post" id="close-form">
+                    <label for="reason" style="font-weight: bold; display: block; margin-bottom: 8px;">سبب الإغلاق</label>
+                    <select name="reason" id="reason" style="width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 6px; direction: rtl;">
+                        <option value="تحقيق الاهداف العلاجية">تحقيق الاهداف العلاجية</option>
+                        <option value="الانسحاب و عدم الالتزام بالجلسات">الانسحاب و عدم الالتزام بالجلسات</option>
+                        <option value="وفاة">وفاة</option>
+                        <option value="الانتقال الى مكان">الانتقال الى مكان</option>
+                        <option value="اخرى">أخرى</option>
+                    </select>
+
+                    <input type="text" name="customReason" id="customReason" placeholder="يرجى توضيح السبب"
+                        style="display: none; width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 12px;" />
+
+                    <div style="text-align: center; display: flex; gap: 10px; justify-content: center;">
+                        <button type="submit" class="action-btn btn-danger">إغلاق الحساب</button>
+                        <button type="button" class="action-btn btn-secondary" onclick="Swal.close()">إلغاء</button>
+                    </div>
+                </form>
+            `,
+            didOpen: () => {
+                const reasonSelect = document.getElementById('reason');
+                const customInput = document.getElementById('customReason');
+
+                reasonSelect.addEventListener('change', () => {
+                    if (reasonSelect.value === 'اخرى') {
+                        customInput.style.display = 'block';
+                        customInput.setAttribute('required', true);
+                    } else {
+                        customInput.style.display = 'none';
+                        customInput.removeAttribute('required');
+                    }
+                });
+            }
+        });
+    }
+
+    // Open Account
+    function openAcc() {
+        Swal.fire({
+            icon: 'info',
+            title: 'فتح الحساب',
+            showConfirmButton: false,
+            html: `
+                <form action="/patient/open-acc/<%= data._id %>?_method=PUT" method="post">
+                    <label for="note" style="font-weight: bold; display: block; margin-bottom: 8px;">ملاحظة (اختياري)</label>
+                    <input type="text" name="note" id="note"
+                        placeholder="أدخل ملاحظة لفتح الحساب"
+                        style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px;" />
+
+                    <div style="text-align: center; display: flex; gap: 10px; justify-content: center;">
+                        <button type="submit" class="action-btn btn-success">فتح الحساب</button>
+                        <button type="button" class="action-btn btn-secondary" onclick="Swal.close()">إلغاء</button>
+                    </div>
+                </form>
+            `
+        });
+    }
+
+    // Course price data
+    const coursePrices2 = {
+        <% courses.forEach((course, index) => { %>
+            "<%= course.sessions %>": <%= course.price %><%= index < courses.length - 1 ? ',' : '' %>
+        <% }) %>
+    };
+
+    // Show/hide discount section based on course selection
+    document.getElementById('courseSelect2').addEventListener('change', function() {
+        const discountSection = document.getElementById('discountSection2');
+        if (this.value) {
+            discountSection.style.display = 'block';
+            updateDiscountPreview2();
+        } else {
+            discountSection.style.display = 'none';
+        }
+    });
+
+    // Update label and validation based on discount type
+    document.querySelectorAll('input[name="discountType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const label = document.getElementById('discountValueLabel2');
+            const input = document.getElementById('discountValue2');
+            if (this.value === 'percentage') {
+                label.textContent = 'قيمة الخصم (%):';
+                input.max = '100';
+                input.placeholder = 'أدخل النسبة (1-100)';
+            } else {
+                label.textContent = 'قيمة الخصم (د.ك):';
+                input.max = '';
+                input.placeholder = 'أدخل المبلغ';
+            }
+            updateDiscountPreview2();
+        });
+    });
+
+    // Update discount preview on value change
+    document.getElementById('discountValue2').addEventListener('input', function() {
+        updateDiscountPreview2();
+    });
+
+    function updateDiscountPreview2() {
+        const courseSelect = document.getElementById('courseSelect2');
+        const discountType = document.querySelector('input[name="discountType"]:checked');
+        const discountValue = document.getElementById('discountValue2').value;
+
+        if (courseSelect.value && discountType && discountValue) {
+            const originalPrice = coursePrices2[courseSelect.value] || 0;
+            const value = Number(discountValue);
+            let discountAmount = 0;
+
+            if (discountType.value === 'percentage') {
+                discountAmount = (originalPrice * value) / 100;
+            } else if (discountType.value === 'fixed') {
+                discountAmount = value;
+            }
+
+            const finalPrice = originalPrice - discountAmount;
+
+            document.getElementById('originalPrice2').textContent = originalPrice.toLocaleString() + ' د.ك';
+            document.getElementById('discountAmount2').textContent = discountAmount.toLocaleString() + ' د.ك';
+            document.getElementById('finalPrice2').textContent = finalPrice.toLocaleString() + ' د.ك';
+            document.getElementById('discountPreview2').classList.add('show');
+        } else {
+            document.getElementById('discountPreview2').classList.remove('show');
+        }
+    }
+</script>
+
+<%- include('../../layout/footer') -%>

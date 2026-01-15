@@ -1,35 +1,515 @@
 <%- include('../../layout/navbar') -%>
-    <div class="notes"><br>
-        <p class="title">حالات الحساب</p><br>
-        <div class="container">
-            <% if(data.statusReasons.length> 0){%>
-                <% data.statusReasons.forEach(note=> {%>
-                    <br>
-                    <div class="card">
-                        <% if(note.type=="close" ){%>
-                            <div class="card-header text-danger">
-                                اغلاق - <%= note.Date%>
-                            </div>
-                            <%} else {%>
-                                 <div class="card-header text-success">
-                                فتح - <%= note.Date%>
-                            </div>
-                            <%} %>
-                                <div class="card-body">
-                                    <figure>
-                                        <blockquote class="blockquote">
-                                            <p>
-                                                <%= note.text%>
-                                            </p>
-                                        </blockquote>
-                                    </figure>
-                                </div>
-                    </div>
-                    <%}) %>
-                        <%} else {%>
-                            <p>لم يتم اغلاق الحساب من قبل</p>
-                            <%} %>
-                                <br>
+
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
+
+    .status-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .status-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .status-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .status-header p {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Patient Summary */
+    .patient-summary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 24px 32px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .patient-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .patient-summary-info h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 6px 0;
+    }
+
+    .patient-summary-info p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* Current Status Badge */
+    .current-status {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px var(--shadow);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid var(--gray-light);
+    }
+
+    .current-status-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .current-status-label ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .current-status-value {
+        font-size: 18px;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .current-status-value.active {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #16a34a;
+    }
+
+    .current-status-value.inactive {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    /* Timeline */
+    .timeline-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+    }
+
+    .timeline-card-header {
+        padding: 20px 28px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .timeline-card-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .timeline-card-header h3 ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .timeline-card-body {
+        padding: 28px;
+    }
+
+    /* Timeline Items */
+    .timeline {
+        position: relative;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        right: 15px;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--gray-light);
+        border-radius: 3px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding-right: 50px;
+        margin-bottom: 32px;
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-icon {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 33px;
+        height: 33px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: white;
+        z-index: 1;
+    }
+
+    .timeline-icon.close {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .timeline-icon.open {
+        background: linear-gradient(135deg, var(--success), #059669);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .timeline-content {
+        background: var(--light);
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid var(--gray-light);
+        transition: all 0.3s ease;
+    }
+
+    .timeline-content:hover {
+        box-shadow: 0 4px 12px var(--shadow);
+        transform: translateX(-4px);
+    }
+
+    .timeline-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .timeline-type {
+        font-size: 14px;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .timeline-type.close {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    .timeline-type.open {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #16a34a;
+    }
+
+    .timeline-type ion-icon {
+        font-size: 16px;
+    }
+
+    .timeline-date {
+        font-size: 13px;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .timeline-date ion-icon {
+        font-size: 16px;
+    }
+
+    .timeline-text {
+        font-size: 15px;
+        color: var(--dark);
+        line-height: 1.6;
+        margin: 0;
+        padding: 12px 16px;
+        background: white;
+        border-radius: 8px;
+        border-right: 3px solid var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state ion-icon {
+        font-size: 64px;
+        color: var(--gray-light);
+        margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Back Button */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: var(--gray-light);
+        color: var(--dark);
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: #d1d5db;
+        transform: translateX(4px);
+    }
+
+    .back-btn ion-icon {
+        font-size: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .status-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .status-header h1 {
+            font-size: 22px;
+        }
+
+        .patient-summary {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .current-status {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .timeline-card-body {
+            padding: 20px;
+        }
+
+        .timeline-item {
+            padding-right: 40px;
+        }
+
+        .timeline-icon {
+            width: 28px;
+            height: 28px;
+            font-size: 14px;
+            right: 2px;
+        }
+
+        .timeline::before {
+            right: 15px;
+        }
+
+        .timeline-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .timeline-content:hover {
+            transform: none;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .timeline-item {
+        animation: fadeIn 0.4s ease;
+    }
+
+    .timeline-item:nth-child(1) {
+        animation-delay: 0s;
+    }
+
+    .timeline-item:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .timeline-item:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .timeline-item:nth-child(4) {
+        animation-delay: 0.3s;
+    }
+
+    .timeline-item:nth-child(5) {
+        animation-delay: 0.4s;
+    }
+</style>
+
+<div class="status-container">
+    <!-- Back Button -->
+    <a href="/patient/get-by-id/<%= data._id %>" class="back-btn">
+        <ion-icon name="arrow-forward"></ion-icon>
+        العودة للملف
+    </a>
+
+    <!-- Header -->
+    <div class="status-header">
+        <h1>حالات الحساب</h1>
+        <p>سجل تغييرات حالة المريض</p>
+    </div>
+
+    <!-- Patient Summary -->
+    <div class="patient-summary">
+        <div class="patient-avatar">
+            <%= data.name.charAt(0) %>
+        </div>
+        <div class="patient-summary-info">
+            <h2><%= data.name %></h2>
+            <p>كود المريض: #<%= data.code %> • <%= data.phone %></p>
         </div>
     </div>
-    <%- include('../../layout/footer') -%>
+
+    <!-- Current Status -->
+    <div class="current-status">
+        <span class="current-status-label">
+            <ion-icon name="information-circle"></ion-icon>
+            الحالة الحالية
+        </span>
+        <% if(data.status == "open") { %>
+            <span class="current-status-value active">
+                <ion-icon name="checkmark-circle"></ion-icon>
+                نشط
+            </span>
+        <% } else { %>
+            <span class="current-status-value inactive">
+                <ion-icon name="close-circle"></ion-icon>
+                مغلق
+            </span>
+        <% } %>
+    </div>
+
+    <!-- Timeline Card -->
+    <div class="timeline-card">
+        <div class="timeline-card-header">
+            <h3>
+                <ion-icon name="time-outline"></ion-icon>
+                سجل التغييرات
+            </h3>
+        </div>
+        <div class="timeline-card-body">
+            <% if(data.statusReasons.length > 0) { %>
+                <div class="timeline">
+                    <% data.statusReasons.forEach((note, index) => { %>
+                        <div class="timeline-item">
+                            <div class="timeline-icon <%= note.type %>">
+                                <% if(note.type == "close") { %>
+                                    <ion-icon name="close"></ion-icon>
+                                <% } else { %>
+                                    <ion-icon name="checkmark"></ion-icon>
+                                <% } %>
+                            </div>
+                            <div class="timeline-content">
+                                <div class="timeline-header">
+                                    <span class="timeline-type <%= note.type %>">
+                                        <ion-icon name="<%= note.type == 'close' ? 'lock-closed' : 'lock-open' %>"></ion-icon>
+                                        <%= note.type == "close" ? "إغلاق الحساب" : "فتح الحساب" %>
+                                    </span>
+                                    <span class="timeline-date">
+                                        <ion-icon name="calendar-outline"></ion-icon>
+                                        <%= note.Date %>
+                                    </span>
+                                </div>
+                                <p class="timeline-text">
+                                    <%= note.text %>
+                                </p>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="empty-state">
+                    <ion-icon name="document-outline"></ion-icon>
+                    <h3>لا يوجد سجل للتغييرات</h3>
+                    <p>لم يتم تغيير حالة هذا الحساب من قبل</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include('../../layout/footer') -%>

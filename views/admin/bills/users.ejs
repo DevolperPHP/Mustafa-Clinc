@@ -1,28 +1,552 @@
 <%- include('../../layout/navbar') -%>
 
-<div class="bills"><br>
-    <p class="title">الحسابات</p>
-    <div class="container">
-        <table class="table table-stripped table-hover">
-            <thead>
-                <th>الاسم</th>
-                <th>الرصيد</th>
-            </thead>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
 
-            <tbody>
-                <% patients.forEach(data => {%>
-                    <tr onclick="window.location.href = '/bills/get/<%= data._id%>'">
-                        <td><%= data.name%></td>
-                        <% if(data.balance < 0){%>
-                            <td class="text-danger"><%= data.balance%></td>
-                        <%} else {%>
-                            <td class="text-success"><%= data.balance%></td>
-                        <%} %>
-                    </tr>
-                <%}) %>
-            </tbody>
-        </table>
+    .bills-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .bills-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .bills-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .bills-header p {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Summary Card */
+    .summary-card {
+        background: linear-gradient(135deg, var(--danger), #dc2626);
+        color: white;
+        padding: 24px 32px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .summary-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .summary-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+
+    .summary-info h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 6px 0;
+        opacity: 0.9;
+    }
+
+    .summary-info p {
+        font-size: 14px;
+        opacity: 0.8;
+        margin: 0;
+    }
+
+    .summary-amount {
+        text-align: left;
+    }
+
+    .summary-amount .amount-value {
+        font-size: 32px;
+        font-weight: 800;
+        display: block;
+    }
+
+    .summary-amount .amount-label {
+        font-size: 13px;
+        opacity: 0.8;
+    }
+
+    /* Search Bar */
+    .search-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        padding: 20px 28px;
+        margin-bottom: 30px;
+        border: 1px solid var(--gray-light);
+    }
+
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .search-wrapper ion-icon {
+        position: absolute;
+        right: 16px;
+        font-size: 20px;
+        color: var(--gray);
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 14px 50px 14px 18px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
+        text-align: center;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .stat-icon.positive {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #16a34a;
+    }
+
+    .stat-icon.negative {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    .stat-icon.neutral {
+        background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+        color: #0284c7;
+    }
+
+    .stat-card .stat-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--dark);
+        margin-bottom: 4px;
+    }
+
+    .stat-card .stat-label {
+        font-size: 13px;
+        color: var(--gray);
+    }
+
+    /* Patient Grid */
+    .patients-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+
+    .patient-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .patient-card:hover {
+        box-shadow: 0 8px 30px var(--shadow-lg);
+        transform: translateY(-4px);
+    }
+
+    .patient-card-header {
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid var(--gray-light);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .patient-avatar {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .patient-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .patient-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 4px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .patient-code {
+        font-size: 13px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    .patient-card-body {
+        padding: 20px 24px;
+    }
+
+    .balance-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .balance-label {
+        font-size: 14px;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .balance-label ion-icon {
+        font-size: 18px;
+    }
+
+    .balance-value {
+        font-size: 18px;
+        font-weight: 700;
+        padding: 8px 16px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .balance-value.positive {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #16a34a;
+    }
+
+    .balance-value.negative {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #dc2626;
+    }
+
+    .balance-value.neutral {
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        color: var(--gray);
+    }
+
+    .balance-value ion-icon {
+        font-size: 18px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
+    }
+
+    .empty-state ion-icon {
+        font-size: 80px;
+        color: var(--gray-light);
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .empty-state p {
+        font-size: 15px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .bills-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .bills-header h1 {
+            font-size: 22px;
+        }
+
+        .summary-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .summary-info {
+            flex-direction: column;
+        }
+
+        .summary-amount {
+            text-align: center;
+        }
+
+        .summary-amount .amount-value {
+            font-size: 28px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .patients-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-card {
+            padding: 16px 20px;
+        }
+
+        .patient-card-header {
+            padding: 16px 20px;
+        }
+
+        .patient-card-body {
+            padding: 16px 20px;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .patient-card {
+        animation: fadeIn 0.4s ease;
+    }
+
+    .patient-card:nth-child(1) { animation-delay: 0s; }
+    .patient-card:nth-child(2) { animation-delay: 0.05s; }
+    .patient-card:nth-child(3) { animation-delay: 0.1s; }
+    .patient-card:nth-child(4) { animation-delay: 0.15s; }
+    .patient-card:nth-child(5) { animation-delay: 0.2s; }
+    .patient-card:nth-child(6) { animation-delay: 0.25s; }
+    .patient-card:nth-child(7) { animation-delay: 0.3s; }
+    .patient-card:nth-child(8) { animation-delay: 0.35s; }
+    .patient-card:nth-child(9) { animation-delay: 0.4s; }
+</style>
+
+<div class="bills-container">
+    <!-- Header -->
+    <div class="bills-header">
+        <h1>الحسابات والفواتير</h1>
+        <p>إدارة رصيد ومبالغ المرضى</p>
     </div>
+
+    <!-- Summary Card -->
+    <div class="summary-card">
+        <div class="summary-info">
+            <div class="summary-icon">
+                <ion-icon name="alert-circle"></ion-icon>
+            </div>
+            <div>
+                <h2>إجمالي الديون</h2>
+                <p>المبلغ المالي المستحق على جميع المرضى</p>
+            </div>
+        </div>
+        <div class="summary-amount">
+            <span class="amount-value"><%= Math.abs(negativeBalance).toLocaleString() %> د.ع</span>
+            <span class="amount-label">ديون غير مدفوعة</span>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon neutral">
+                <ion-icon name="people"></ion-icon>
+            </div>
+            <div class="stat-value"><%= patients.length %></div>
+            <div class="stat-label">إجمالي المرضى</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon negative">
+                <ion-icon name="trending-down"></ion-icon>
+            </div>
+            <div class="stat-value"><%= patients.filter(p => p.balance < 0).length %></div>
+            <div class="stat-label">عليهم ديون</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon positive">
+                <ion-icon name="trending-up"></ion-icon>
+            </div>
+            <div class="stat-value"><%= patients.filter(p => p.balance > 0).length %></div>
+            <div class="stat-label">لديهم رصيد</div>
+        </div>
+    </div>
+
+    <!-- Search Card -->
+    <div class="search-card">
+        <div class="search-wrapper">
+            <ion-icon name="search"></ion-icon>
+            <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مريض بالاسم أو الكود...">
+        </div>
+    </div>
+
+    <!-- Patients Grid -->
+    <% if(patients.length > 0) { %>
+        <div class="patients-grid" id="patientsGrid">
+            <% patients.forEach((data, index) => { %>
+                <div class="patient-card" onclick="window.location.href = '/bills/get/<%= data._id %>'" data-search="<%= data.name.toLowerCase() %> <%= data.code %>">
+                    <div class="patient-card-header">
+                        <div class="patient-avatar">
+                            <%= data.name.charAt(0) %>
+                        </div>
+                        <div class="patient-info">
+                            <h3 class="patient-name"><%= data.name %></h3>
+                            <p class="patient-code">كود: #<%= data.code %></p>
+                        </div>
+                    </div>
+                    <div class="patient-card-body">
+                        <div class="balance-row">
+                            <span class="balance-label">
+                                <ion-icon name="wallet"></ion-icon>
+                                الرصيد
+                            </span>
+                            <% if(data.balance < 0) { %>
+                                <span class="balance-value negative">
+                                    <ion-icon name="arrow-down"></ion-icon>
+                                    <%= data.balance.toLocaleString() %> د.ع
+                                </span>
+                            <% } else if(data.balance > 0) { %>
+                                <span class="balance-value positive">
+                                    <ion-icon name="arrow-up"></ion-icon>
+                                    <%= data.balance.toLocaleString() %> د.ع
+                                </span>
+                            <% } else { %>
+                                <span class="balance-value neutral">
+                                    <ion-icon name="remove"></ion-icon>
+                                    0 د.ع
+                                </span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <div class="empty-state">
+            <ion-icon name="people-outline"></ion-icon>
+            <h3>لا يوجد مرضى</h3>
+            <p>لم يتم إضافة أي مرضى في النظام بعد</p>
+        </div>
+    <% } %>
 </div>
+
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const patientsGrid = document.getElementById('patientsGrid');
+
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        const cards = patientsGrid.getElementsByClassName('patient-card');
+
+        Array.from(cards).forEach(card => {
+            const searchData = card.getAttribute('data-search');
+            if (searchData.includes(searchTerm)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
 
 <%- include('../../layout/footer') -%>

@@ -34,6 +34,10 @@ router.get('/get/:id', async (req, res) => {
         const notPaid = data.bills.filter((x) => x.paid == false)
         const paid = data.bills.filter((x) => x.paid == true)
         const purchases = data.purchase.sort((a, b) => {
+            // Handle missing payDate
+            if (!a.payDate) return 1;
+            if (!b.payDate) return -1;
+
             const [dayA, monthA, yearA] = a.payDate.split('/').map(Number);
             const [dayB, monthB, yearB] = b.payDate.split('/').map(Number);
 
@@ -59,10 +63,12 @@ router.get('/get/:id', async (req, res) => {
 router.get('/pay/:id/:code', async (req, res) => {
     try {
         const data = await Patient.findOne({ _id: req.params.id })
+        const bill = data.bills.find((x) => x.code == Number(req.params.code))
         const course = data.course.find((x) => x.code == Number(req.params.code))
 
         res.render('admin/bills/pay', {
             user: req.user,
+            bill,
             course,
             data
         })
@@ -100,18 +106,16 @@ router.post('/apply-discount/:id/:code', async (req, res) => {
         }
 
         // Update bill with discount information
-        // When applying discount, reduce both price and left (remaining amount)
         await Patient.updateOne(
             { _id: patientId, 'bills.code': billCode },
             {
                 $set: {
-                    balance: data.balance - Number(-discountValue),
                     'bills.$.discountType': discountType,
-                    'bills.$.discountValue': Number(-discountValue),
+                    'bills.$.discountValue': Number(discountValue),
                     'bills.$.discountAmount': discountAmount,
                     'bills.$.originalPrice': bill.price,
                     'bills.$.price': bill.price - discountAmount,
-                    'bills.$.left': bill.left - (-discountAmount),
+                    'bills.$.left': (bill.price - discountAmount) + bill.left,
                 }
             }
         );
@@ -164,16 +168,12 @@ router.post('/remove-discount/:id/:code', async (req, res) => {
         }
 
         // Restore original price
-        // Inverse of apply discount: get the balance back and left amount back
-        const discountValue = Math.abs(Number(bill.discountValue));
-
         await Patient.updateOne(
             { _id: patientId, 'bills.code': billCode },
             {
                 $set: {
                     'bills.$.price': bill.originalPrice,
-                    'bills.$.left': bill.left - discountValue,
-                    balance: data.balance - discountValue,
+                    'bills.$.left': bill.originalPrice + bill.left + bill.discountAmount,
                 },
                 $unset: {
                     'bills.$.discountType': '',
@@ -264,15 +264,24 @@ router.put('/pay/:id/:code', async (req, res) => {
             }
         })
 
+        const finalBalance = data.balance + amount;
+        const receiptData = {
+            amount,
+            patientName: data.name,
+            patientCode: data.code,
+            payDate: moment().locale('ar-kw').format('l'),
+            courseDate: bill.Date,
+            sessions: bill.sessions,
+            balance: finalBalance,
+            hasDiscount: bill.discountType ? true : false,
+            originalPrice: bill.originalPrice || (bill.price + bill.left),
+            discountType: bill.discountType,
+            discountValue: bill.discountValue,
+            discountAmount: bill.discountAmount || 0,
+            finalPrice: bill.price
+        };
 
-        req.flash('suc', `
-            تم دفع مبلغ ${amount} بنجاح
-            اسم المستفيد : ${data.name}
-            تاريخ الدفع: ${moment().locale('ar-kw').format('l')}
-            تاريخ تسجيل الكورس : ${bill.Date},
-            عدد الجلسات : ${bill.sessions}
-            المبلغ المتبقي : ${data.balance + amount}
-            `)
+        req.flash('suc', JSON.stringify(receiptData));
         res.redirect(`/bills/get/${req.params.id}`)
 
     } catch (err) {
@@ -284,7 +293,7 @@ router.get('/download/:code', async (req, res) => {
     try {
         const patient = await Patient.findOne(
             { 'purchase.code': Number(req.params.code) },
-            { 'purchase.$': 1, name: 1, balance: 1 }
+            { 'purchase.$': 1, name: 1, balance: 1, code: 1 }
         );
 
         if (!patient) return res.status(404).send('Bill not found');
@@ -295,63 +304,226 @@ router.get('/download/:code', async (req, res) => {
         const patientFull = await Patient.findOne({ _id: patient._id });
         const discountInfo = patientFull.discounts.find(d => d.billCode === bill.code);
 
-        // High resolution canvas
-        const width = 1600;   // doubled
-        const height = 1200;  // doubled
-        const canvas = createCanvas(width, height);
-        const ctx = canvas.getContext('2d');
+        // Calculate dimensions based on content
+        const baseHeight = 800;
+        const discountHeight = discountInfo ? 150 : 0;
+        const height = baseHeight + discountHeight;
+        const width = 840;
 
-        // Background
-        ctx.fillStyle = '#fff';
+        // High resolution canvas (2x for retina)
+        const scale = 2;
+        const canvas = createCanvas(width * scale, height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+
+        // Fill with white background
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, width, height);
 
-        // Text settings
-        ctx.fillStyle = '#000';
+        const padding = 48;
+        const cardRadius = 24;
+        let y = padding;
+
+        // ========== HEADER (Green Gradient) ==========
+        const headerGradient = ctx.createLinearGradient(0, 0, width, 0);
+        headerGradient.addColorStop(0, '#22C55E');
+        headerGradient.addColorStop(1, '#16a34a');
+
+        // Draw rounded header
+        ctx.fillStyle = headerGradient;
+        roundRect(ctx, padding, y, width - (padding * 2), 100, cardRadius);
+        ctx.fill();
+
+        // Header text
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.font = '22px Tajawal';
+        ctx.fillText('عيادة مصطفى نبيل', width / 2, y + 35);
+        ctx.font = 'bold 36px Tajawal';
+        ctx.fillText('تم الدفع بنجاح', width / 2, y + 70);
+
+        y += 140;
+
+        // ========== SECTION TITLE ==========
+        ctx.fillStyle = '#9ca3af';
         ctx.textAlign = 'right';
+        ctx.font = '22px Tajawal';
+        ctx.fillText('تفاصيل المريض', width - padding, y);
+        y += 48;
 
-        let y = 100;  // start y-coordinate
+        // ========== INFO GRID (2 columns) ==========
+        const infoBoxSize = (width - (padding * 2) - 24) / 2;
+        const infoData = [
+            { label: 'الاسم', value: patient.name },
+            { label: 'الكود', value: `#${patient.code}` },
+            { label: 'الجلسات', value: `${bill.course}` },
+            { label: 'تاريخ الدفع', value: bill.payDate }
+        ];
 
-        // Clinic title
-        ctx.font = 'bold 72px Arial';
-        ctx.fillText('عيادة الاخصائي النفسي مصطفى نبيل بشير', width - 40, y);
+        infoData.forEach((item, index) => {
+            const col = index % 2;
+            const row = Math.floor(index / 2);
+            const x = padding + (col * (infoBoxSize + 24));
+            const boxY = y + (row * (80 + 24));
 
-        y += 160;
-        ctx.font = '56px Arial';
+            // Info box background
+            ctx.fillStyle = '#f9fafb';
+            roundRect(ctx, x, boxY, infoBoxSize, 80, 12);
+            ctx.fill();
 
-        // Patient info
-        ctx.fillText(`وصل قبض`, width - 40, y);
-        y += 100;
-        ctx.fillText(`اسم المراجع: ${patient.name}`, width - 40, y);
-        y += 100;
-        ctx.fillText(`عدد الجلسات: ${bill.course}`, width - 40, y);
-        y += 100;
-        ctx.fillText(`تاريخ تسجيل الكورس: ${bill.courseDate}`, width - 40, y);
-        y += 100;
-        ctx.fillText(`تاريخ الدفع: ${bill.payDate}`, width - 40, y);
-        y += 100;
+            // Label
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '22px Tajawal';
+            ctx.textAlign = 'right';
+            ctx.fillText(item.label, x + infoBoxSize - 16, boxY + 30);
 
-        // Show discount info if exists
+            // Value
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 28px Tajawal';
+            ctx.fillText(item.value, x + infoBoxSize - 16, boxY + 60);
+        });
+
+        y += 208;
+
+        // ========== DISCOUNT SECTION (if applicable) ==========
         if (discountInfo) {
-            ctx.fillStyle = '#5cb85c'; // green color for discount
-            ctx.fillText(`السعر الأصلي: ${discountInfo.originalPrice.toLocaleString()}`, width - 40, y);
-            y += 100;
-            ctx.fillText(`نوع الخصم: ${discountInfo.discountType === 'percentage' ? discountInfo.discountValue + '%' : discountInfo.discountValue.toLocaleString() + ' د.ك'}`, width - 40, y);
-            y += 100;
-            ctx.fillText(`قيمة الخصم: ${discountInfo.discountAmount.toLocaleString()}`, width - 40, y);
-            y += 100;
-            ctx.fillStyle = '#000';
+            ctx.fillStyle = '#9ca3af';
+            ctx.textAlign = 'right';
+            ctx.font = '22px Tajawal';
+            ctx.fillText('تفاصيل الخصم', width - padding, y);
+            y += 48;
+
+            // Discount box
+            const discountBoxY = y;
+            const discountBoxWidth = width - (padding * 2);
+            const discountBoxHeight = 130;
+
+            // Yellow background
+            ctx.fillStyle = '#fffbeb';
+            roundRect(ctx, padding, discountBoxY, discountBoxWidth, discountBoxHeight, 12);
+            ctx.fill();
+
+            // Border
+            ctx.strokeStyle = '#fcd34d';
+            ctx.lineWidth = 2;
+            roundRect(ctx, padding, discountBoxY, discountBoxWidth, discountBoxHeight, 12);
+            ctx.stroke();
+
+            // Discount rows
+            const discountRows = [
+                {
+                    label: 'السعر الأصلي',
+                    value: `${discountInfo.originalPrice.toLocaleString()} د.ع`
+                },
+                {
+                    label: `الخصم (${discountInfo.discountType === 'percentage' ? discountInfo.discountValue + '%' : discountInfo.discountValue.toLocaleString() + ' د.ع'})`,
+                    value: `-${discountInfo.discountAmount.toLocaleString()} د.ع`
+                },
+                {
+                    label: 'السعر بعد الخصم',
+                    value: `${discountInfo.finalPrice.toLocaleString()} د.ع`
+                }
+            ];
+
+            ctx.textAlign = 'right';
+            ctx.font = '26px Tajawal';
+
+            discountRows.forEach((row, i) => {
+                const rowY = discountBoxY + 30 + (i * 36);
+
+                // Label
+                ctx.fillStyle = '#92400e';
+                ctx.fillText(row.label, width - padding - 20, rowY);
+
+                // Value
+                ctx.fillStyle = '#92400e';
+                ctx.font = 'bold 26px Tajawal';
+                ctx.fillText(row.value, width - padding - 320, rowY);
+                ctx.font = '26px Tajawal';
+            });
+
+            y += 190;
         }
 
-        // Amounts in bold
-        ctx.font = 'bold 56px Arial';
-        ctx.fillText(`المبلغ المدفوع: ${bill.amount.toLocaleString()}`, width - 40, y);
+        // ========== PAYMENT SUMMARY ==========
+        ctx.fillStyle = '#9ca3af';
+        ctx.textAlign = 'right';
+        ctx.font = '22px Tajawal';
+        ctx.fillText('ملخص الدفع', width - padding, y);
+        y += 48;
+
+        // Amount box (green gradient)
+        const amountBoxWidth = width - (padding * 2);
+        const amountGradient = ctx.createLinearGradient(0, y, 0, y + 80);
+        amountGradient.addColorStop(0, '#f0fdf4');
+        amountGradient.addColorStop(1, '#dcfce7');
+
+        ctx.fillStyle = amountGradient;
+        roundRect(ctx, padding, y, amountBoxWidth, 80, 12);
+        ctx.fill();
+
+        // Amount label
+        ctx.fillStyle = '#16a34a';
+        ctx.textAlign = 'center';
+        ctx.font = '24px Tajawal';
+        ctx.fillText('المبلغ المدفوع', width / 2, y + 35);
+
+        // Amount value
+        ctx.fillStyle = '#16a34a';
+        ctx.font = 'bold 48px Tajawal';
+        ctx.fillText(`${bill.amount.toLocaleString()} د.ع`, width / 2, y + 70);
+
         y += 100;
-        ctx.font = '56px Arial';
-        ctx.fillText(`المبلغ المتبقي: ${patient.balance.toLocaleString()}`, width - 40, y);
+
+        // Balance row
+        ctx.strokeStyle = '#e5e7eb';
+        ctx.setLineDash([8, 8]);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(padding + 20, y + 20);
+        ctx.lineTo(width - padding - 20, y + 20);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#6b7280';
+        ctx.textAlign = 'right';
+        ctx.font = '26px Tajawal';
+        ctx.fillText('الرصيد الحالي', width - padding - 200, y + 50);
+
+        ctx.fillStyle = '#1f2937';
+        ctx.font = 'bold 30px Tajawal';
+        ctx.fillText(`${patient.balance.toLocaleString()} د.ع`, width - padding - 20, y + 50);
+
+        y += 90;
+
+        // ========== FOOTER ==========
+        ctx.fillStyle = '#e5e7eb';
+        ctx.fillRect(padding, y, width - (padding * 2), 2);
+
+        y += 30;
+        ctx.fillStyle = '#9ca3af';
+        ctx.textAlign = 'center';
+        ctx.font = '22px Tajawal';
+        ctx.fillText(`شكراً لك • ${new Date().getFullYear()}`, width / 2, y);
+
+        // Helper function for rounded rectangles
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
 
         // Send PNG
         const buffer = canvas.toBuffer('image/png');
-        res.setHeader('Content-Disposition', `attachment; filename=bill-${bill.code}.png`);
+        res.setHeader('Content-Disposition', `attachment; filename=receipt-${bill.code}.png`);
         res.setHeader('Content-Type', 'image/png');
         res.send(buffer);
 

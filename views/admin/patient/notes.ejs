@@ -1,57 +1,523 @@
 <%- include('../../layout/navbar') -%>
-    <div class="notes"><br>
-        <p class="title">المتابعة</p><br>
-        <div class="container">
-            <form style="display: none;" action="/patient/notes/add/<%= data._id%>?_method=PUT" method="post">
-                <div class="form-group">
-                    <input name="title" type="text" class="form-control" id="exampleFormControlInput1"
-                        placeholder="عنوان الملاحظة" value="الملاحظات النفسة" required>
-                </div>
-                <br>
-                <div class="form-group">
-                    <textarea name="note" class="form-control" placeholder="الملاحظات النفسية" id="exampleFormControlTextarea1" rows="3">
-                        <%= data.psychoNote%>
-                    </textarea>
-                </div>
-                <br>
-                <div class="d-flex justify-content-center">
-                    <button class="btn btn-success">اضافة</button>
-                </div>
-            </form>
-            
 
-            <% data.otherNotes.forEach(note => {%>
-                <br><div class="card">
-                <div class="card-header">
-                    <%= note.title %> - <%= note.Date%>
-                </div>
-                <div class="card-body">
-                    <figure>
-                        <blockquote class="blockquote">
-                            <p>
-                                <%= note.note%>
-                            </p>
-                        </blockquote>
-                    </figure>
-                </div>
-            </div>
-            <%}) %>
-<br>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
 
-            <form action="/patient/notes/add/<%= data._id%>?_method=PUT" method="post">
+    .notes-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .notes-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .notes-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .notes-header p {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Patient Summary */
+    .patient-summary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 24px 32px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px var(--shadow-lg);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .patient-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .patient-summary-info h2 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 6px 0;
+    }
+
+    .patient-summary-info p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* Add Note Card */
+    .add-note-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        margin-bottom: 30px;
+    }
+
+    .add-note-header {
+        padding: 20px 28px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .add-note-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .add-note-header h3 ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .add-note-body {
+        padding: 28px;
+    }
+
+    .note-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-label ion-icon {
+        font-size: 18px;
+        color: var(--primary);
+    }
+
+    .form-input,
+    .form-textarea {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 15px;
+        font-family: 'Tajawal', sans-serif;
+        direction: rtl;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .btn-submit {
+        padding: 14px 32px;
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .btn-submit ion-icon {
+        font-size: 24px;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Notes Section */
+    .notes-section {
+        margin-bottom: 30px;
+    }
+
+    .notes-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .notes-section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .notes-section-title ion-icon {
+        font-size: 24px;
+        color: var(--primary);
+    }
+
+    .notes-count {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    /* Note Card */
+    .note-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--gray-light);
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .note-card:hover {
+        box-shadow: 0 8px 30px var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    .note-card-header {
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        border-bottom: 1px solid var(--gray-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .note-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .note-title ion-icon {
+        font-size: 20px;
+        color: var(--primary);
+    }
+
+    .note-date {
+        font-size: 13px;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .note-date ion-icon {
+        font-size: 16px;
+    }
+
+    .note-card-body {
+        padding: 24px;
+    }
+
+    .note-content {
+        font-size: 15px;
+        color: var(--dark);
+        line-height: 1.8;
+        margin: 0;
+        white-space: pre-wrap;
+        background: var(--light);
+        padding: 20px;
+        border-radius: 12px;
+        border-right: 4px solid var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px var(--shadow);
+        border: 1px solid var(--gray-light);
+    }
+
+    .empty-state ion-icon {
+        font-size: 64px;
+        color: var(--gray-light);
+        margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .empty-state p {
+        font-size: 14px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Back Button */
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        background: var(--gray-light);
+        color: var(--dark);
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .back-btn:hover {
+        background: #d1d5db;
+        transform: translateX(4px);
+    }
+
+    .back-btn ion-icon {
+        font-size: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .notes-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .notes-header h1 {
+            font-size: 22px;
+        }
+
+        .patient-summary {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .add-note-body {
+            padding: 20px;
+        }
+
+        .note-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .note-card-body {
+            padding: 20px;
+        }
+
+        .note-content {
+            padding: 16px;
+            font-size: 14px;
+        }
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .note-card {
+        animation: fadeIn 0.4s ease;
+    }
+
+    .note-card:nth-child(1) {
+        animation-delay: 0s;
+    }
+
+    .note-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    .note-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .note-card:nth-child(4) {
+        animation-delay: 0.3s;
+    }
+
+    .note-card:nth-child(5) {
+        animation-delay: 0.4s;
+    }
+</style>
+
+<div class="notes-container">
+    <!-- Back Button -->
+    <a href="/patient/get-by-id/<%= data._id %>" class="back-btn">
+        <ion-icon name="arrow-forward"></ion-icon>
+        العودة للملف
+    </a>
+
+    <!-- Header -->
+    <div class="notes-header">
+        <h1>المتابعة</h1>
+        <p>ملاحظات ومتابعات المريض</p>
+    </div>
+
+    <!-- Patient Summary -->
+    <div class="patient-summary">
+        <div class="patient-avatar">
+            <%= data.name.charAt(0) %>
+        </div>
+        <div class="patient-summary-info">
+            <h2><%= data.name %></h2>
+            <p>كود المريض: #<%= data.code %> • <%= data.phone %></p>
+        </div>
+    </div>
+
+    <!-- Add Note Form -->
+    <div class="add-note-card">
+        <div class="add-note-header">
+            <h3>
+                <ion-icon name="create-outline"></ion-icon>
+                إضافة ملاحظة جديدة
+            </h3>
+        </div>
+        <div class="add-note-body">
+            <form class="note-form" action="/patient/notes/add/<%= data._id %>?_method=PUT" method="post">
                 <div class="form-group">
-                    <input name="title" type="text" class="form-control" id="exampleFormControlInput1"
-                        placeholder="عنوان الملاحظة" required>
+                    <label class="form-label">
+                        <ion-icon name="text-outline"></ion-icon>
+                        عنوان الملاحظة
+                    </label>
+                    <input type="text" name="title" class="form-input" placeholder="أدخل عنوان الملاحظة..." required>
                 </div>
-                <br>
+
                 <div class="form-group">
-                    <textarea name="note" class="form-control" placeholder="الملاحظة" id="exampleFormControlTextarea1" rows="3"></textarea>
+                    <label class="form-label">
+                        <ion-icon name="document-text-outline"></ion-icon>
+                        نص الملاحظة
+                    </label>
+                    <textarea name="note" class="form-textarea" placeholder="أدخل تفاصيل الملاحظة..." required></textarea>
                 </div>
-                <br>
-                <div class="d-flex justify-content-center">
-                    <button class="btn btn-success">اضافة</button>
-                </div>
+
+                <button type="submit" class="btn-submit">
+                    <ion-icon name="add-circle"></ion-icon>
+                    إضافة الملاحظة
+                </button>
             </form>
         </div>
     </div>
-    <%- include('../../layout/footer') -%>
+
+    <!-- Notes Section -->
+    <% if(data.otherNotes && data.otherNotes.length > 0) { %>
+        <div class="notes-section">
+            <div class="notes-section-header">
+                <h3 class="notes-section-title">
+                    <ion-icon name="list-outline"></ion-icon>
+                    الملاحظات السابقة
+                </h3>
+                <span class="notes-count"><%= data.otherNotes.length %></span>
+            </div>
+
+            <% data.otherNotes.forEach(note => { %>
+                <div class="note-card">
+                    <div class="note-card-header">
+                        <span class="note-title">
+                            <ion-icon name="bookmark-outline"></ion-icon>
+                            <%= note.title %>
+                        </span>
+                        <span class="note-date">
+                            <ion-icon name="calendar-outline"></ion-icon>
+                            <%= note.Date %>
+                        </span>
+                    </div>
+                    <div class="note-card-body">
+                        <p class="note-content"><%= note.note %></p>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } else { %>
+        <!-- Empty State -->
+        <div class="empty-state">
+            <ion-icon name="document-outline"></ion-icon>
+            <h3>لا توجد ملاحظات</h3>
+            <p>لم يتم إضافة أي ملاحظات لهذا المريض بعد</p>
+        </div>
+    <% } %>
+</div>
+
+<%- include('../../layout/footer') -%>

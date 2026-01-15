@@ -1,0 +1,996 @@
+<%- include('../../layout/navbar') -%>
+
+<style>
+:root {
+    --primary: #007AFF;
+    --success: #34C759;
+    --warning: #FF9500;
+    --danger: #FF3B30;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-600: #4B5563;
+    --gray-800: #1F2937;
+    --gray-900: #111827;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: var(--gray-50);
+    font-family: "Tajawal", sans-serif;
+    direction: rtl;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Header */
+.page-header {
+    background: white;
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Progress Steps */
+.steps {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+    overflow-x: auto;
+    padding: 12px 0;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: white;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border: 2px solid transparent;
+}
+
+.step.active {
+    border-color: var(--primary);
+    background: rgba(0, 122, 255, 0.05);
+}
+
+.step-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.step.active .step-number {
+    background: var(--primary);
+    color: white;
+}
+
+.step.completed .step-number {
+    background: var(--success);
+    color: white;
+}
+
+.step-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.step.active .step-label {
+    color: var(--primary);
+}
+
+.step.completed .step-label {
+    color: var(--success);
+}
+
+/* Form Card */
+.form-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 32px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 24px;
+}
+
+.form-step {
+    display: none;
+}
+
+.form-step.active {
+    display: block;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 8px;
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: var(--danger);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    background: white;
+    transition: all 0.2s;
+    direction: rtl;
+    font-family: inherit;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Cards */
+.info-card {
+    background: var(--gray-50);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.info-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Status Options */
+.status-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+    .status-options {
+        grid-template-columns: 1fr;
+    }
+}
+
+.status-option {
+    padding: 16px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    font-weight: 500;
+}
+
+.status-option:hover {
+    border-color: var(--primary);
+    background: rgba(0, 122, 255, 0.05);
+}
+
+.status-option.selected {
+    border-color: var(--primary);
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--primary);
+}
+
+/* Course Selection */
+.course-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.course-option {
+    padding: 20px;
+    border: 2px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.course-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.course-option.selected {
+    border-color: var(--primary);
+    background: rgba(0, 122, 255, 0.1);
+}
+
+.course-sessions {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.course-label {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin-top: 4px;
+}
+
+.course-price {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-top: 8px;
+}
+
+/* Action Buttons */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn {
+    padding: 14px 32px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: #0056b3;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--gray-300);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+    background: #2da544;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Autocomplete */
+.autocomplete-wrapper {
+    position: relative;
+}
+
+.autocomplete-results {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: 0;
+    background: white;
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-sm);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+}
+
+.autocomplete-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.active {
+    background: rgba(0, 122, 255, 0.1);
+}
+
+/* Discount Section */
+.discount-section {
+    background: #FFF9E6;
+    border: 2px solid var(--warning);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 16px;
+}
+
+.discount-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.discount-toggle input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.discount-options {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--warning);
+}
+
+.discount-options.visible {
+    display: block;
+}
+
+.discount-input-group {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+}
+
+.discount-preview {
+    background: white;
+    padding: 16px;
+    border-radius: var(--radius-sm);
+    margin-top: 16px;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 16px;
+}
+
+.price-row.total {
+    border-top: 2px solid var(--gray-300);
+    margin-top: 8px;
+    padding-top: 12px;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+/* Loading State */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid white;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
+
+<div class="container">
+    <!-- Header -->
+    <div class="page-header">
+        <h1 class="page-title">إضافة مريض جديد</h1>
+        <p class="page-subtitle">أسهل وأسرع طريقة لإضافة مريض جديد</p>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="steps">
+        <div class="step active" onclick="goToStep(1)">
+            <div class="step-number">1</div>
+            <div class="step-label">البيانات الأساسية</div>
+        </div>
+        <div class="step" onclick="goToStep(2)">
+            <div class="step-number">2</div>
+            <div class="step-label">البيانات الإضافية</div>
+        </div>
+        <div class="step" onclick="goToStep(3)">
+            <div class="step-number">3</div>
+            <div class="step-label">العلاج</div>
+        </div>
+        <div class="step" onclick="goToStep(4)">
+            <div class="step-number">4</div>
+            <div class="step-label">التشخيص والملاحظات</div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <form id="patientForm" class="form-card" onsubmit="handleSubmit(event)">
+        <!-- Step 1: Essential Info -->
+        <div class="form-step active" id="step1">
+            <div class="info-card">
+                <div class="info-card-title">
+                    <ion-icon name="person"></ion-icon>
+                    المعلومات الأساسية
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label required">الاسم الكامل</label>
+                    <input type="text" class="form-input" name="name" required placeholder="أدخل الاسم الكامل">
+                </div>
+                <div class="form-group">
+                    <label class="form-label required">رقم الهاتف</label>
+                    <input type="tel" class="form-input" name="phone" required placeholder="07xxxxxxxx">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">تاريخ الميلاد</label>
+                    <input type="date" class="form-input" name="birthDate">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الجنس</label>
+                    <select class="form-select" name="gender">
+                        <option value="">اختر الجنس</option>
+                        <option value="ذكر">ذكر</option>
+                        <option value="انثى">انثى</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">العنوان</label>
+                <input type="text" class="form-input" name="address" placeholder="العنوان الكامل">
+            </div>
+        </div>
+
+        <!-- Step 2: Additional Info -->
+        <div class="form-step" id="step2">
+            <div class="info-card">
+                <div class="info-card-title">
+                    <ion-icon name="people"></ion-icon>
+                    المعلومات الإضافية
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">التحصيل الدراسي</label>
+                    <select class="form-select" name="study">
+                        <option value="">اختر المستوى</option>
+                        <option>يقرا و يكتب</option>
+                        <option>ابتدائي</option>
+                        <option>متوسط</option>
+                        <option>ثانوي</option>
+                        <option>دبلوم</option>
+                        <option>بكلوريوس</option>
+                        <option>ماجستير</option>
+                        <option>دكتوراة</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الحالة الاجتماعية</label>
+                    <select class="form-select" name="relationship">
+                        <option value="">اختر الحالة</option>
+                        <option>اعزب</option>
+                        <option>متزوج</option>
+                        <option>ارمل</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">عدد الأطفال</label>
+                    <input type="number" class="form-input" name="children" min="0" value="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">العمل</label>
+                    <input type="text" class="form-input" name="job" placeholder="المهنة">
+                </div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-title">
+                    <ion-icon name="fitness"></ion-icon>
+                    التقييم الأولي
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الجانب الصحي</label>
+                    <div class="status-options">
+                        <div class="status-option" data-value="جيد">جيد</div>
+                        <div class="status-option" data-value="متوسط">متوسط</div>
+                        <div class="status-option" data-value="ضعيف">ضعيف</div>
+                    </div>
+                    <input type="hidden" name="health">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Treatment -->
+        <div class="form-step" id="step3">
+            <div class="info-card">
+                <div class="info-card-title">
+                    <ion-icon name="medical"></ion-icon>
+                    خطة العلاج
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label required">اختر الكورس العلاجي</label>
+                <div class="course-selection">
+                    <% courses.forEach(course => { %>
+                        <div class="course-option" data-value="<%= course.sessions %>" onclick="selectCourse('<%= course.sessions %>', <%= course.price %>)">
+                            <div class="course-sessions"><%= course.sessions %></div>
+                            <div class="course-label">جلسة</div>
+                            <div class="course-price"><%= course.price %> د.ك</div>
+                        </div>
+                    <% }) %>
+                </div>
+                <input type="hidden" name="course" id="selectedCourse" required>
+                <input type="hidden" name="coursePrice" id="coursePrice" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">نوع الكورس</label>
+                    <select class="form-select" name="type">
+                        <option value="حضوري">حضوري</option>
+                        <option value="اونلاين">اونلاين</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">الإحالة إلى</label>
+                    <input type="text" class="form-input" name="sendTo" placeholder="اسم المرسل">
+                </div>
+            </div>
+
+            <!-- Discount Section -->
+            <div class="discount-section">
+                <label class="discount-toggle">
+                    <input type="checkbox" id="discountToggle" onchange="toggleDiscount()">
+                    <span style="font-weight: 600;">تطبيق خصم على الكورس</span>
+                </label>
+
+                <div class="discount-options" id="discountOptions">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">نوع الخصم</label>
+                            <select class="form-select" id="discountType" onchange="updateDiscountPreview()">
+                                <option value="percentage">نسبة مئوية</option>
+                                <option value="fixed">مبلغ ثابت</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">قيمة الخصم</label>
+                            <div class="discount-input-group">
+                                <input type="number" class="form-input" id="discountValue" oninput="updateDiscountPreview()" placeholder="0">
+                                <span id="discountUnit" style="padding: 14px; background: var(--gray-100); border-radius: var(--radius-sm); font-weight: 600;">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="discount-preview" id="discountPreview" style="display: none;">
+                        <div class="price-row">
+                            <span>السعر الأصلي:</span>
+                            <span id="originalPrice">0</span>
+                        </div>
+                        <div class="price-row" style="color: var(--danger);">
+                            <span>قيمة الخصم:</span>
+                            <span id="discountAmount">0</span>
+                        </div>
+                        <div class="price-row total">
+                            <span>السعر النهائي:</span>
+                            <span id="finalPrice">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Diagnosis -->
+        <div class="form-step" id="step4">
+            <div class="info-card">
+                <div class="info-card-title">
+                    <ion-icon name="clipboard"></ion-icon>
+                    التشخيص والملاحظات
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">تشخيص المعالج</label>
+                    <div class="autocomplete-wrapper">
+                        <input type="text" class="form-input" id="therapistDiagnose" name="therapist_diagnose"
+                               placeholder="ابدأ بكتابة التشخيص..." oninput="searchDiagnosis(this.value, 'therapist')">
+                        <div id="therapistResults" class="autocomplete-results" style="display: none;"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">تشخيص الطبيب</label>
+                    <div class="autocomplete-wrapper">
+                        <input type="text" class="form-input" id="doctorDiagnose" name="doctor_diagnose"
+                               placeholder="ابدأ بكتابة التشخيص..." oninput="searchDiagnosis(this.value, 'doctor')">
+                        <div id="doctorResults" class="autocomplete-results" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">ملاحظات نفسية</label>
+                <textarea class="form-textarea" name="psychoNote" placeholder="أي ملاحظات إضافية..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">الأدوية المستخدمة</label>
+                <textarea class="form-textarea" name="Notes" placeholder="الأدوية والجرعات..."></textarea>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-title">
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                    مراجعة سريعة
+                </div>
+                <p style="color: var(--gray-600); margin: 0;">راجع البيانات قبل الحفظ النهائي</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="prevBtn" onclick="prevStep()" style="display: none;">
+                <ion-icon name="arrow-back"></ion-icon>
+                السابق
+            </button>
+
+            <div style="display: flex; gap: 12px;">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+                    إلغاء
+                </button>
+                <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextStep()">
+                    التالي
+                    <ion-icon name="arrow-forward"></ion-icon>
+                </button>
+                <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
+                    <ion-icon name="checkmark"></ion-icon>
+                    حفظ المريض
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// State
+let currentStep = 1;
+const totalSteps = 4;
+let selectedCoursePrice = 0;
+
+// Step Navigation
+function goToStep(step) {
+    if (step < currentStep || validateCurrentStep()) {
+        document.querySelectorAll('.step').forEach((el, idx) => {
+            el.classList.remove('active', 'completed');
+            if (idx + 1 < step) el.classList.add('completed');
+            if (idx + 1 === step) el.classList.add('active');
+        });
+
+        document.querySelectorAll('.form-step').forEach((el, idx) => {
+            el.classList.remove('active');
+            if (idx + 1 === step) el.classList.add('active');
+        });
+
+        currentStep = step;
+        updateButtons();
+    }
+}
+
+function nextStep() {
+    if (validateCurrentStep() && currentStep < totalSteps) {
+        goToStep(currentStep + 1);
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        goToStep(currentStep - 1);
+    }
+}
+
+function updateButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const submitBtn = document.getElementById('submitBtn');
+
+    prevBtn.style.display = currentStep > 1 ? 'inline-flex' : 'none';
+    nextBtn.style.display = currentStep < totalSteps ? 'inline-flex' : 'none';
+    submitBtn.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
+}
+
+function validateCurrentStep() {
+    const currentStepEl = document.getElementById(`step${currentStep}`);
+    const requiredFields = currentStepEl.querySelectorAll('[required]');
+
+    for (let field of requiredFields) {
+        if (!field.value.trim()) {
+            field.focus();
+            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+    }
+    return true;
+}
+
+// Course Selection
+function selectCourse(sessions, price) {
+    document.querySelectorAll('.course-option').forEach(el => el.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+
+    document.getElementById('selectedCourse').value = sessions;
+    selectedCoursePrice = price;
+    document.getElementById('coursePrice').value = price;
+
+    updateDiscountPreview();
+}
+
+// Discount
+function toggleDiscount() {
+    const checkbox = document.getElementById('discountToggle');
+    const options = document.getElementById('discountOptions');
+    options.classList.toggle('visible', checkbox.checked);
+
+    if (!checkbox.checked) {
+        updateDiscountPreview();
+    }
+}
+
+function updateDiscountPreview() {
+    const toggle = document.getElementById('discountToggle');
+    if (!toggle.checked || !selectedCoursePrice) {
+        document.getElementById('discountPreview').style.display = 'none';
+        return;
+    }
+
+    const discountType = document.getElementById('discountType').value;
+    const discountValue = parseFloat(document.getElementById('discountValue').value) || 0;
+
+    const unit = discountType === 'percentage' ? '%' : 'د.ك';
+    document.getElementById('discountUnit').textContent = unit;
+
+    let discountAmount = 0;
+    if (discountType === 'percentage') {
+        discountAmount = (selectedCoursePrice * discountValue) / 100;
+    } else {
+        discountAmount = discountValue;
+    }
+
+    const finalPrice = selectedCoursePrice - discountAmount;
+
+    document.getElementById('originalPrice').textContent = selectedCoursePrice.toLocaleString() + ' د.ك';
+    document.getElementById('discountAmount').textContent = discountAmount.toLocaleString() + ' د.ك';
+    document.getElementById('finalPrice').textContent = finalPrice.toLocaleString() + ' د.ك';
+
+    document.getElementById('discountPreview').style.display = 'block';
+}
+
+// Status Selection
+document.querySelectorAll('.status-option').forEach(option => {
+    option.addEventListener('click', function() {
+        const group = this.parentElement;
+        group.querySelectorAll('.status-option').forEach(el => el.classList.remove('selected'));
+        this.classList.add('selected');
+        group.nextElementSibling.value = this.dataset.value;
+    });
+});
+
+// Diagnosis Autocomplete
+const diagnosisData = [
+    "الاكتئاب",
+    "القلق",
+    "اضطراب ثنائي القطب",
+    "الفصام",
+    "اضطراب الوسواس القهري",
+    "اضطراب panic",
+    "ADHD",
+    "التوحد",
+    "اضطرابات الأكل",
+    "اضطرابات النوم"
+];
+
+function searchDiagnosis(query, type) {
+    const resultsEl = document.getElementById(type + 'Results');
+    const inputEl = document.getElementById(type + 'Diagnose');
+
+    if (query.length < 2) {
+        resultsEl.style.display = 'none';
+        return;
+    }
+
+    const results = diagnosisData.filter(d => d.includes(query));
+    resultsEl.innerHTML = results.map(r =>
+        `<div class="autocomplete-item" onclick="selectDiagnosis('${r}', '${type}')">${r}</div>`
+    ).join('');
+
+    if (results.length > 0) {
+        resultsEl.style.display = 'block';
+    }
+}
+
+function selectDiagnosis(value, type) {
+    document.getElementById(type + 'Diagnose').value = value;
+    document.getElementById(type + 'Results').style.display = 'none';
+}
+
+// Submit
+async function handleSubmit(event) {
+    event.preventDefault();
+
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.classList.add('btn-loading');
+    submitBtn.disabled = true;
+
+    const formData = new FormData(event.target);
+
+    try {
+        const response = await fetch('/patient/add', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            window.location.href = '/dashboard?saved=1';
+        } else {
+            alert('حدث خطأ أثناء حفظ البيانات');
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('حدث خطأ غير متوقع');
+        submitBtn.classList.remove('btn-loading');
+        submitBtn.disabled = false;
+    }
+}
+
+// Auto-save
+let autoSaveTimer;
+document.querySelectorAll('#patientForm input, #patientForm select, #patientForm textarea').forEach(field => {
+    field.addEventListener('input', () => {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(() => {
+            const formData = new FormData(document.getElementById('patientForm'));
+            localStorage.setItem('patientDraft', JSON.stringify(Object.fromEntries(formData)));
+        }, 2000);
+    });
+});
+
+// Load draft
+window.addEventListener('load', () => {
+    const draft = localStorage.getItem('patientDraft');
+    if (draft) {
+        const data = JSON.parse(draft);
+        for (let [key, value] of Object.entries(data)) {
+            const field = document.querySelector(`[name="${key}"]`);
+            if (field) field.value = value;
+        }
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentStep < totalSteps) nextStep();
+        }
+    }
+});
+</script>
+
+<%- include('../../layout/footer') -%>

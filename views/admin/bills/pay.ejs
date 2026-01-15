@@ -1,48 +1,648 @@
 <%- include('../../layout/navbar') -%>
-    <script>
 
-        // Check if course has discount
-        <% if(course.discountType) { %>
-            Swal.fire({
-                icon: 'info',
-                title: 'فاتورة مخصومة',
-                html: `    <div style="text-align: center; direction: rtl;">
-                    <p style="margin: 10px 0;">
-                        <strong>السعر الأصلي:</strong> <%= course.originalPrice.toLocaleString() %> د.ك
-                    </p>
-                    <p style="margin: 10px 0; color: #5cb85c;">
-                        <strong>قيمة الخصم:</strong> <%= course.discountAmount.toLocaleString() %> د.ك
-                        (<%= course.discountType === 'percentage' ? course.discountValue + '%' : course.discountValue.toLocaleString() + ' د.ك' %>)
-                    </p>
-                    <p style="margin: 10px 0; font-size: 18px;">
-                        <strong>المبلغ المطلوب دفعه:</strong> <%= (course.price + course.left).toLocaleString() %> د.ك
-                    </p>
-        `,
-                showConfirmButton: false
-            });
-        <% } %>
+<style>
+    :root {
+        --primary: #22C55E;
+        --primary-dark: #16a34a;
+        --primary-light: rgba(34, 197, 94, 0.1);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --info: #3b82f6;
+        --success: #10b981;
+        --dark: #1f2937;
+        --light: #f9fafb;
+        --gray: #6b7280;
+        --gray-light: #e5e7eb;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --shadow-lg: rgba(0, 0, 0, 0.15);
+    }
 
-        Swal.fire({
-            icon: 'question',
-            showConfirmButton: false,
-            html: `    <div style="text-align: center;">
-        <form action="/bills/pay/<%= data._id%>/<%= course.code%>?_method=PUT" method="post">
-            <% if(course.discountType) { %>
-                <p style="margin-bottom: 10px; color: #5cb85c;">
-                    <strong>السعر بعد الخصم:</strong> <%= (course.price + course.left).toLocaleString() %> د.ك
-                </p>
+    .payment-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 30px 20px 100px 20px;
+        direction: rtl;
+    }
+
+    /* Header */
+    .payment-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .payment-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--dark);
+        margin: 0 0 8px 0;
+    }
+
+    .payment-subtitle {
+        font-size: 16px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Card */
+    .card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px var(--shadow-lg);
+        overflow: hidden;
+        margin-bottom: 24px;
+        border: 1px solid var(--gray-light);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        padding: 24px 32px;
+        text-align: center;
+    }
+
+    .card-header-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+    }
+
+    .card-header h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+    }
+
+    .card-header p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .card-body {
+        padding: 32px;
+    }
+
+    /* Patient Info */
+    .patient-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: var(--light);
+        border-radius: 12px;
+        margin-bottom: 24px;
+    }
+
+    .patient-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .patient-details h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--dark);
+        margin: 0 0 4px 0;
+    }
+
+    .patient-details p {
+        font-size: 14px;
+        color: var(--gray);
+        margin: 0;
+    }
+
+    /* Course Info */
+    .course-info {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .info-box {
+        padding: 16px;
+        background: var(--light);
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .info-box.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .info-box-label {
+        font-size: 12px;
+        color: var(--gray);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-box-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .info-box-value.highlight {
+        color: var(--primary);
+    }
+
+    .info-box-value.discount {
+        color: var(--success);
+    }
+
+    /* Discount Banner */
+    .discount-banner {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border: 2px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .discount-banner-icon {
+        font-size: 32px;
+        color: var(--success);
+        margin-bottom: 8px;
+    }
+
+    .discount-banner-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--success);
+        margin: 0 0 8px 0;
+    }
+
+    .discount-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 14px;
+    }
+
+    .discount-row.total {
+        border-top: 1px dashed #bbf7d0;
+        padding-top: 12px;
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .discount-label {
+        color: var(--gray);
+    }
+
+    .discount-value {
+        color: var(--dark);
+        font-weight: 600;
+    }
+
+    .discount-value.discount {
+        color: var(--success);
+    }
+
+    /* Form */
+    .payment-form {
+        margin-top: 32px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 8px;
+    }
+
+    .form-input-wrapper {
+        position: relative;
+    }
+
+    .form-input-wrapper ion-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 24px;
+        color: var(--gray);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 16px 50px 16px 16px;
+        border: 2px solid var(--gray-light);
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: center;
+        direction: rtl;
+        font-family: 'Tajawal', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+    }
+
+    .form-input.highlight {
+        background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        border-color: var(--success);
+        color: var(--success);
+        font-size: 24px;
+    }
+
+    .quick-amounts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 12px;
+    }
+
+    .quick-amount-btn {
+        padding: 12px;
+        border: 2px solid var(--gray-light);
+        background: white;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--dark);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .quick-amount-btn:hover {
+        border-color: var(--primary);
+        background: var(--primary-light);
+    }
+
+    .quick-amount-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    /* Buttons */
+    .form-actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 16px 32px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        direction: rtl;
+    }
+
+    .btn ion-icon {
+        font-size: 24px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--success), #059669);
+        color: white;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-secondary {
+        background: var(--gray-light);
+        color: var(--dark);
+    }
+
+    .btn-secondary:hover {
+        background: #d1d5db;
+    }
+
+    /* Summary */
+    .payment-summary {
+        background: var(--light);
+        border-radius: 12px;
+        padding: 20px;
+        margin-top: 24px;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--gray-light);
+    }
+
+    .summary-row:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        font-size: 14px;
+        color: var(--gray);
+    }
+
+    .summary-value {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .summary-value.highlight {
+        color: var(--primary);
+        font-size: 20px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .payment-container {
+            padding: 20px 16px 80px 16px;
+        }
+
+        .payment-title {
+            font-size: 22px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .course-info {
+            grid-template-columns: 1fr;
+        }
+
+        .quick-amounts {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-input {
+            font-size: 16px;
+        }
+
+        .form-input.highlight {
+            font-size: 20px;
+        }
+    }
+
+    /* Animations */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: slideIn 0.4s ease;
+    }
+</style>
+
+<div class="payment-container">
+    <!-- Header -->
+    <div class="payment-header">
+        <h1 class="payment-title">دفع فاتورة</h1>
+        <p class="payment-subtitle">إتمام عملية الدفع للكورس</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+        <div class="card-header">
+            <ion-icon class="card-header-icon" name="cash-outline"></ion-icon>
+            <h2>تفاصيل الدفع</h2>
+            <p>أدخل المبلغ المراد دفعه</p>
+        </div>
+
+        <div class="card-body">
+            <!-- Patient Info -->
+            <div class="patient-info">
+                <div class="patient-avatar">
+                    <%= data.name.charAt(0) %>
+                </div>
+                <div class="patient-details">
+                    <h3><%= data.name %></h3>
+                    <p>كود المريض: <%= data.code %></p>
+                </div>
+            </div>
+
+            <!-- Course Info -->
+            <div class="course-info">
+                <div class="info-box">
+                    <div class="info-box-label">الكورس</div>
+                    <div class="info-box-value highlight"><%= bill.sessions %></div>
+                </div>
+                <div class="info-box">
+                    <div class="info-box-label">تاريخ التسجيل</div>
+                    <div class="info-box-value"><%= bill.Date %></div>
+                </div>
+
+                <% if(bill.discountType) { %>
+                    <div class="info-box">
+                        <div class="info-box-label">السعر الأصلي</div>
+                        <div class="info-box-value" style="text-decoration: line-through; color: var(--gray);">
+                            <%= bill.originalPrice ? bill.originalPrice.toLocaleString() : (bill.price + bill.left).toLocaleString() %> د.ع
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <div class="info-box-label">الخصم</div>
+                        <div class="info-box-value discount">
+                            -<%= bill.discountAmount ? bill.discountAmount.toLocaleString() : '0' %> د.ع
+                        </div>
+                    </div>
+                <% } else { %>
+                    <div class="info-box">
+                        <div class="info-box-label">السعر</div>
+                        <div class="info-box-value"><%= (bill.price + bill.left).toLocaleString() %> د.ع</div>
+                    </div>
+                <% } %>
+
+                <div class="info-box">
+                    <div class="info-box-label">المتبقي</div>
+                    <div class="info-box-value" style="color: var(--danger);"><%= bill.left %> د.ع</div>
+                </div>
+                <div class="info-box">
+                    <div class="info-box-label">الإجمالي</div>
+                    <div class="info-box-value highlight"><%= (bill.price + bill.left).toLocaleString() %> د.ع</div>
+                </div>
+            </div>
+
+            <% if(bill.discountType) { %>
+            <!-- Discount Banner -->
+            <div class="discount-banner">
+                <ion-icon class="discount-banner-icon" name="pricetag"></ion-icon>
+                <h3 class="discount-banner-title">فاتورة مخصومة</h3>
+                <div class="discount-row">
+                    <span class="discount-label">نوع الخصم:</span>
+                    <span class="discount-value">
+                        <%= bill.discountType === 'percentage' ? bill.discountValue + '%' : bill.discountValue.toLocaleString() + ' د.ع' %>
+                    </span>
+                </div>
+                <div class="discount-row">
+                    <span class="discount-label">قيمة الخصم:</span>
+                    <span class="discount-value discount">-<%= bill.discountAmount.toLocaleString() %> د.ع</span>
+                </div>
+                <div class="discount-row total">
+                    <span class="discount-label">المبلغ المطلوب:</span>
+                    <span class="discount-value highlight"><%= (bill.price + bill.left).toLocaleString() %> د.ع</span>
+                </div>
+            </div>
             <% } %>
-            <input name="amount" type="number" placeholder="المبلغ المدفوع"
-                style="width: 300px; direction: rtl; border-radius: 5px; border-style: solid; border-width: 1px;"
-                value="<%= course.price + course.left %>">
-            <br><br>
-            <button
-                style="border: none; width: 120px; background-color: #5cb85c; color: #fff; border-radius: 5px; padding: 2px; box-shadow: 0 0 10px #00000044;">دفع</button>
-        </form>
-        <br>
-<button onclick="window.location.href='/bills/get/<%= data._id%>'"
-                style="border: none; width: 120px; background-color: #f0ad4e; color: #000; border-radius: 5px; padding: 2px; box-shadow: 0 0 10px #00000044;">الغاء</button>
-    </div>`
-        })
-    </script>
-    <%- include('../../layout/footer') -%>
+
+            <!-- Payment Form -->
+            <form class="payment-form" action="/bills/pay/<%= data._id %>/<%= bill.code %>?_method=PUT" method="post" id="paymentForm">
+                <div class="form-group">
+                    <label class="form-label">المبلغ المدفوع (د.ع)</label>
+                    <div class="form-input-wrapper">
+                        <ion-icon name="cash"></ion-icon>
+                        <input
+                            type="number"
+                            class="form-input <%= bill.discountType ? 'highlight' : '' %>"
+                            name="amount"
+                            id="amountInput"
+                            value="<%= bill.price + bill.left %>"
+                            required
+                            min="1"
+                            step="0.001"
+                        >
+                    </div>
+
+                    <div class="quick-amounts">
+                        <button type="button" class="quick-amount-btn" onclick="setAmount(<%= bill.price + bill.left %>)">
+                            <%= (bill.price + bill.left).toLocaleString() %> (الإجمالي)
+                        </button>
+                        <button type="button" class="quick-amount-btn" onclick="setAmount(<%= bill.left %>)">
+                            <%= bill.left %> (المتبقي)
+                        </button>
+                        <button type="button" class="quick-amount-btn" onclick="setAmount(<%= Math.ceil((bill.price + bill.left) / 2) %>)">
+                            <%= Math.ceil((bill.price + bill.left) / 2).toLocaleString() %> (النصف)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div class="payment-summary">
+                    <div class="summary-row">
+                        <span class="summary-label">المبلغ المدفوع</span>
+                        <span class="summary-value" id="paidAmount"><%= (bill.price + bill.left).toLocaleString() %> د.ع</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">المتبقي بعد الدفع</span>
+                        <span class="summary-value" id="remainingAmount">0 د.ع</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">حالة الفاتورة</span>
+                        <span class="summary-value" id="paymentStatus">مكتملة ✓</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <ion-icon name="checkmark-circle"></ion-icon>
+                        تأكيد الدفع
+                    </button>
+                    <a href="/bills/get/<%= data._id %>" class="btn btn-secondary">
+                        <ion-icon name="close-circle"></ion-icon>
+                        إلغاء
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const totalAmount = <%= bill.price + bill.left %>;
+const currentLeft = <%= bill.left %>;
+const currentPrice = <%= bill.price %>;
+
+function setAmount(amount) {
+    const input = document.getElementById('amountInput');
+    input.value = amount;
+    updateSummary(amount);
+
+    // Update active state
+    document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent.includes(amount.toLocaleString())) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+function updateSummary(amount) {
+    const remaining = currentLeft - (amount - currentPrice);
+    const paidEl = document.getElementById('paidAmount');
+    const remainingEl = document.getElementById('remainingAmount');
+    const statusEl = document.getElementById('paymentStatus');
+
+    paidEl.textContent = amount.toLocaleString() + ' د.ع';
+    remainingEl.textContent = remaining.toLocaleString() + ' د.ع';
+
+    if (remaining === 0) {
+        remainingEl.style.color = 'var(--success)';
+        statusEl.textContent = 'مكتملة ✓';
+        statusEl.style.color = 'var(--success)';
+    } else if (remaining < 0) {
+        remainingEl.style.color = 'var(--success)';
+        statusEl.textContent = 'مكتملة (دائن) ✓';
+        statusEl.style.color = 'var(--success)';
+    } else {
+        remainingEl.style.color = 'var(--danger)';
+        statusEl.textContent = 'غير مكتملة';
+        statusEl.style.color = 'var(--warning)';
+    }
+}
+
+// Update summary on input change
+document.getElementById('amountInput').addEventListener('input', function() {
+    const amount = parseFloat(this.value) || 0;
+    updateSummary(amount);
+
+    // Remove active state from quick amount buttons
+    document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+});
+
+// Initialize summary on page load
+updateSummary(totalAmount);
+
+// Set initial active state
+document.querySelector('.quick-amount-btn').classList.add('active');
+</script>
+
+<%- include('../../layout/footer') -%>
