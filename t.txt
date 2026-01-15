@@ -1,0 +1,25 @@
+router.get('/qrcode/:code/download', async (req, res) => {
+    const code = req.params.code;
+    const data = await Patient.findOne({ code: code });
+
+    try {
+        const buffer = await QRCode.toBuffer(`http://142.93.171.214/patient/get-by-code/${code}`, {
+            type: 'png',
+            width: 300,
+            errorCorrectionLevel: 'H'
+        });
+
+        const fileName = `${data.name}-${code}.png`;
+        const encodedFileName = encodeURIComponent(fileName); // ترميز الاسم لدعم العربية
+
+        res.set({
+            'Content-Type': 'image/png',
+            'Content-Disposition': `attachment; filename*=UTF-8''${encodedFileName}`
+        });
+
+        res.send(buffer);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Failed to generate QR code.');
+    }
+});

@@ -16,6 +16,7 @@ const exercise = require('./routes/exercise')
 const fees = require('./routes/fees')
 const expenses = require('./routes/expenses')
 const analysis = require('./routes/analysis')
+const dates = require('./routes/dates')
 
 let port = 3000;
 app.set('view engine', 'ejs')
@@ -42,6 +43,7 @@ app.use('/exercise', exercise)
 app.use('/fees', fees)
 app.use('/expenses', expenses)
 app.use('/analysis', analysis)
+app.use('/dates', dates)
 
 app.listen(port, (err) => {
     if(err) throw err

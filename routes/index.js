@@ -3,8 +3,9 @@ const router = express.Router()
 const isAdminMiddleWare = require('../middlewares/isAdmin')
 const moment = require('moment')
 const Patient = require('../models/Patient')
-
-router.use(isAdminMiddleWare)
+const Course = require('../models/Course')
+const Reservation = require('../models/Reservation')
+const AvailableDate = require('../models/AvailableDate')
 
 // Helper function to parse Arabic date format
 function parseArabicDate(arabicDate) {
@@ -15,6 +16,89 @@ function parseArabicDate(arabicDate) {
   }
   return null
 }
+
+// ==================== PUBLIC ROUTES (No Auth Required) ====================
+
+// Public homepage
+router.get('/', async (req, res) => {
+  try {
+    // Get statistics for homepage
+    const allPatients = await Patient.find({})
+    const totalPatients = allPatients.length
+    const activePatients = allPatients.filter(p => p.inCourse === true).length
+    const malePatients = allPatients.filter(p => p.gender === 'ذكر').length
+    const femalePatients = allPatients.filter(p => p.gender === 'أنثى').length
+
+    // Get all courses
+    const courses = await Course.find({})
+
+    // Get available dates for reservation
+    const availableDates = await AvailableDate.find({ isAvailable: true }).sort({ date: 1 })
+
+    res.render('home/index', {
+      totalPatients,
+      activePatients,
+      malePatients,
+      femalePatients,
+      courses,
+      availableDates,
+      page: 'home'
+    })
+  } catch (error) {
+    console.error('Homepage error:', error)
+    res.status(500).send('خطأ في تحميل الصفحة')
+  }
+})
+
+// Handle reservation form submission
+router.post('/reservation', async (req, res) => {
+  try {
+    const { name, birthDate, gender, phone, type, selectedDate, selectedTime, notes } = req.body
+
+    const reservation = new Reservation({
+      name,
+      birthDate,
+      gender,
+      phone,
+      type,
+      selectedDate,
+      selectedTime,
+      notes: notes || ''
+    })
+
+    await reservation.save()
+
+    res.json({
+      success: true,
+      message: 'تم إرسال طلب الحجز بنجاح! سنتواصل معك قريباً لتأكيد الموعد.'
+    })
+  } catch (error) {
+    console.error('Reservation error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'حدث خطأ أثناء إرسال طلب الحجز. يرجى المحاولة مرة أخرى.'
+    })
+  }
+})
+
+// API endpoint to get available dates for a specific date
+router.get('/api/available-dates/:date', async (req, res) => {
+  try {
+    const date = await AvailableDate.findOne({ date: req.params.date, isAvailable: true })
+    if (date) {
+      res.json({ success: true, timeSlots: date.timeSlots })
+    } else {
+      res.json({ success: false, message: 'التاريخ غير متاح' })
+    }
+  } catch (error) {
+    console.error('Error fetching time slots:', error)
+    res.status(500).json({ success: false, error: 'Failed to fetch time slots' })
+  }
+})
+
+// ==================== PROTECTED ROUTES (Auth Required) ====================
+
+router.use(isAdminMiddleWare)
 
 // Calculate real statistics from database
 async function getDashboardStats() {
