@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الحجوزات</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .reservations-page {
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+            border-bottom: 3px solid #3B82F6;
+            padding-bottom: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .stat-icon.total { background: #DBEAFE; color: #3B82F6; }
+        .stat-icon.today { background: #D1FAE5; color: #10B981; }
+        .stat-icon.pending { background: #FEF3C7; color: #F59E0B; }
+        .stat-icon.confirmed { background: #E0E7FF; color: #6366F1; }
+
+        .stat-content h3 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1F2937;
+            margin: 0;
+        }
+
+        .stat-content p {
+            font-size: 14px;
+            color: #6B7280;
+            margin: 0;
+        }
+
+        /* Filters */
+        .filters-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #3B82F6;
+        }
+
+        /* Table */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow-x: auto;
+        }
+
+        .reservations-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .reservations-table th {
+            background: #3B82F6;
+            color: white;
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .reservations-table th:first-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .reservations-table th:last-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .reservations-table td {
+            padding: 14px 12px;
+            text-align: center;
+            border-bottom: 1px solid #E5E7EB;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .reservations-table tr:hover {
+            background: #F9FAFB;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending { background: #FEF3C7; color: #B45309; }
+        .status-confirmed { background: #D1FAE5; color: #047857; }
+        .status-cancelled { background: #FEE2E2; color: #DC2626; }
+        .status-completed { background: #DBEAFE; color: #1D4ED8; }
+        .status-no-show { background: #E5E7EB; color: #4B5563; }
+
+        /* Type Badges */
+        .type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .type-حضوري { background: #E0E7FF; color: #4338CA; }
+        .type-اونلاين { background: #ECFDF5; color: #059669; }
+
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .action-btn.edit { background: #DBEAFE; color: #2563EB; }
+        .action-btn.delete { background: #FEE2E2; color: #DC2626; }
+        .action-btn.view { background: #E0E7FF; color: #6366F1; }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1F2937;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6B7280;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Form in Modal */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6B7280;
+        }
+
+        .empty-state ion-icon {
+            font-size: 64px;
+            color: #D1D5DB;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-row {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .reservations-table {
+                font-size: 12px;
+            }
+
+            .reservations-table th,
+            .reservations-table td {
+                padding: 10px 6px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../../layout/navbar') -%>
+
+    <div class="reservations-page">
+        <div class="page-header">
+            <h1 class="page-title">إدارة الحجوزات</h1>
+            <div class="header-actions">
+                <a href="/admin-reservations/calendar" class="btn btn-secondary">
+                    <ion-icon name="calendar"></ion-icon>
+                    التقويم
+                </a>
+                <button class="btn btn-primary" onclick="openAddModal()">
+                    <ion-icon name="add"></ion-icon>
+                    إضافة حجز
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <ion-icon name="calendar"></ion-icon>
+                </div>
+                <div class="stat-content">
+                    <h3><%= stats.total %></h3>
+                    <p>إجمالي الحجوزات</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon today">
+                    <ion-icon name="today"></ion-icon>
+                </div>
+                <div class="stat-content">
+                    <h3><%= stats.today %></h3>
+                    <p>حجوزات اليوم</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pending">
+                    <ion-icon name="time"></ion-icon>
+                </div>
+                <div class="stat-content">
+                    <h3><%= stats.pending %></h3>
+                    <p>قيد الانتظار</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon confirmed">
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                </div>
+                <div class="stat-content">
+                    <h3><%= stats.confirmed %></h3>
+                    <p>مؤكدة</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>الحالة</label>
+                    <select id="filterStatus" onchange="filterReservations()">
+                        <option value="all">الكل</option>
+                        <option value="pending">قيد الانتظار</option>
+                        <option value="confirmed">مؤكدة</option>
+                        <option value="completed">مكتملة</option>
+                        <option value="cancelled">ملغية</option>
+                        <option value="no-show">لم يحضر</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>النوع</label>
+                    <select id="filterType" onchange="filterReservations()">
+                        <option value="all">الكل</option>
+                        <option value="حضوري">حضوري</option>
+                        <option value="اونلاين">اونلاين</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>التاريخ</label>
+                    <input type="text" id="filterDate" placeholder="DD/MM/YYYY" onchange="filterReservations()">
+                </div>
+                <div class="filter-group">
+                    <label>البحث بالاسم أو الهاتف</label>
+                    <input type="text" id="filterSearch" placeholder="بحث..." oninput="filterReservations()">
+                </div>
+                <div class="filter-group" style="flex: 0;">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-secondary" onclick="resetFilters()">
+                        <ion-icon name="refresh"></ion-icon>
+                        إعادة تعيين
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-card">
+            <% if (reservations && reservations.length > 0) { %>
+                <table class="reservations-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>الهاتف</th>
+                            <th>التاريخ</th>
+                            <th>الوقت</th>
+                            <th>النوع</th>
+                            <th>الحالة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationsTable">
+                        <% reservations.forEach(r => { %>
+                            <tr data-id="<%= r._id %>" 
+                                data-status="<%= r.status %>" 
+                                data-type="<%= r.type %>"
+                                data-date="<%= r.selectedDate %>"
+                                data-name="<%= r.name %>"
+                                data-phone="<%= r.phone %>">
+                                <td><%= r.name %></td>
+                                <td dir="ltr"><%= r.phone %></td>
+                                <td><%= r.selectedDate %></td>
+                                <td><%= r.selectedTime %></td>
+                                <td><span class="type-badge type-<%= r.type %>"><%= r.type %></span></td>
+                                <td>
+                                    <select class="status-select" onchange="updateStatus('<%= r._id %>', this.value)" 
+                                            style="padding: 4px 8px; border-radius: 6px; border: 1px solid #E5E7EB; font-size: 12px;">
+                                        <option value="pending" <%= r.status === 'pending' ? 'selected' : '' %>>قيد الانتظار</option>
+                                        <option value="confirmed" <%= r.status === 'confirmed' ? 'selected' : '' %>>مؤكدة</option>
+                                        <option value="completed" <%= r.status === 'completed' ? 'selected' : '' %>>مكتملة</option>
+                                        <option value="cancelled" <%= r.status === 'cancelled' ? 'selected' : '' %>>ملغية</option>
+                                        <option value="no-show" <%= r.status === 'no-show' ? 'selected' : '' %>>لم يحضر</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="action-btn view" onclick="viewReservation('<%= r._id %>')" title="عرض">
+                                            <ion-icon name="eye"></ion-icon>
+                                        </button>
+                                        <button class="action-btn edit" onclick="editReservation('<%= r._id %>')" title="تعديل">
+                                            <ion-icon name="create"></ion-icon>
+                                        </button>
+                                        <button class="action-btn delete" onclick="deleteReservation('<%= r._id %>')" title="حذف">
+                                            <ion-icon name="trash"></ion-icon>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="empty-state">
+                    <ion-icon name="calendar-outline"></ion-icon>
+                    <h3>لا توجد حجوزات</h3>
+                    <p>لم يتم العثور على أي حجوزات بعد</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="reservationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">إضافة حجز جديد</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="reservationForm">
+                    <input type="hidden" id="reservationId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>الاسم الكامل *</label>
+                            <input type="text" id="formName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الهاتف *</label>
+                            <input type="tel" id="formPhone" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>تاريخ الميلاد *</label>
+                            <input type="date" id="formBirthDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>الجنس *</label>
+                            <select id="formGender" required>
+                                <option value="">اختر</option>
+                                <option value="ذكر">ذكر</option>
+                                <option value="أنثى">أنثى</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>نوع الاستشارة *</label>
+                            <select id="formType" required>
+                                <option value="حضوري">حضوري</option>
+                                <option value="اونلاين">اونلاين</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>الحالة</label>
+                            <select id="formStatus">
+                                <option value="confirmed">مؤكدة</option>
+                                <option value="pending">قيد الانتظار</option>
+                                <option value="completed">مكتملة</option>
+                                <option value="cancelled">ملغية</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>التاريخ *</label>
+                            <input type="text" id="formDate" placeholder="DD/MM/YYYY" required>
+                        </div>
+                        <div class="form-group">
+                            <label>الوقت *</label>
+                            <select id="formTime" required>
+                                <option value="">اختر التاريخ أولاً</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات المريض</label>
+                        <textarea id="formNotes" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>ملاحظات الإدارة</label>
+                        <textarea id="formAdminNotes" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+                <button class="btn btn-primary" onclick="saveReservation()">حفظ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div class="modal-overlay" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>تفاصيل الحجز</h3>
+                <button class="modal-close" onclick="closeViewModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="viewModalBody">
+                <!-- Content loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeViewModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../../layout/footer') -%>
+
+    <script>
+        // Filter reservations
+        function filterReservations() {
+            const status = document.getElementById('filterStatus').value;
+            const type = document.getElementById('filterType').value;
+            const date = document.getElementById('filterDate').value;
+            const search = document.getElementById('filterSearch').value.toLowerCase();
+
+            document.querySelectorAll('#reservationsTable tr').forEach(row => {
+                const rowStatus = row.dataset.status;
+                const rowType = row.dataset.type;
+                const rowDate = row.dataset.date;
+                const rowName = row.dataset.name?.toLowerCase() || '';
+                const rowPhone = row.dataset.phone?.toLowerCase() || '';
+
+                let show = true;
+
+                if (status !== 'all' && rowStatus !== status) show = false;
+                if (type !== 'all' && rowType !== type) show = false;
+                if (date && rowDate !== date) show = false;
+                if (search && !rowName.includes(search) && !rowPhone.includes(search)) show = false;
+
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        function resetFilters() {
+            document.getElementById('filterStatus').value = 'all';
+            document.getElementById('filterType').value = 'all';
+            document.getElementById('filterDate').value = '';
+            document.getElementById('filterSearch').value = '';
+            filterReservations();
+        }
+
+        // Modal functions
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = 'إضافة حجز جديد';
+            document.getElementById('reservationId').value = '';
+            document.getElementById('reservationForm').reset();
+            document.getElementById('reservationModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('reservationModal').classList.remove('active');
+        }
+
+        function closeViewModal() {
+            document.getElementById('viewModal').classList.remove('active');
+        }
+
+        // Update status
+        async function updateStatus(id, status) {
+            try {
+                const response = await fetch(`/admin-reservations/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم التحديث',
+                        text: 'تم تحديث حالة الحجز بنجاح',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    // Update the data attribute
+                    document.querySelector(`tr[data-id="${id}"]`).dataset.status = status;
+                } else {
+                    Swal.fire('خطأ', result.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('خطأ', 'حدث خطأ في التحديث', 'error');
+            }
+        }
+
+        // View reservation
+        async function viewReservation(id) {
+            try {
+                const response = await fetch(`/admin-reservations/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const r = result.reservation;
+                    const statusAr = {
+                        'pending': 'قيد الانتظار',
+                        'confirmed': 'مؤكدة',
+                        'completed': 'مكتملة',
+                        'cancelled': 'ملغية',
+                        'no-show': 'لم يحضر'
+                    };
+
+                    document.getElementById('viewModalBody').innerHTML = `
+                        <div style="display: grid; gap: 16px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div><strong>الاسم:</strong> ${r.name}</div>
+                                <div><strong>الهاتف:</strong> <span dir="ltr">${r.phone}</span></div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div><strong>تاريخ الميلاد:</strong> ${r.birthDate}</div>
+                                <div><strong>الجنس:</strong> ${r.gender}</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div><strong>التاريخ:</strong> ${r.selectedDate}</div>
+                                <div><strong>الوقت:</strong> ${r.selectedTime}</div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div><strong>النوع:</strong> ${r.type}</div>
+                                <div><strong>الحالة:</strong> ${statusAr[r.status] || r.status}</div>
+                            </div>
+                            <div><strong>المصدر:</strong> ${r.source === 'online' ? 'حجز أونلاين' : r.source === 'admin' ? 'إضافة يدوية' : 'هاتف'}</div>
+                            ${r.notes ? `<div><strong>ملاحظات المريض:</strong> ${r.notes}</div>` : ''}
+                            ${r.adminNotes ? `<div><strong>ملاحظات الإدارة:</strong> ${r.adminNotes}</div>` : ''}
+                            <div><strong>تاريخ الإنشاء:</strong> ${new Date(r.createdAt).toLocaleString('ar-IQ')}</div>
+                        </div>
+                    `;
+                    document.getElementById('viewModal').classList.add('active');
+                }
+            } catch (error) {
+                Swal.fire('خطأ', 'حدث خطأ في جلب البيانات', 'error');
+            }
+        }
+
+        // Edit reservation
+        async function editReservation(id) {
+            try {
+                const response = await fetch(`/admin-reservations/${id}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const r = result.reservation;
+                    document.getElementById('modalTitle').textContent = 'تعديل الحجز';
+                    document.getElementById('reservationId').value = r._id;
+                    document.getElementById('formName').value = r.name;
+                    document.getElementById('formPhone').value = r.phone;
+                    document.getElementById('formBirthDate').value = r.birthDate;
+                    document.getElementById('formGender').value = r.gender;
+                    document.getElementById('formType').value = r.type;
+                    document.getElementById('formStatus').value = r.status;
+                    document.getElementById('formDate').value = r.selectedDate;
+                    document.getElementById('formNotes').value = r.notes || '';
+                    document.getElementById('formAdminNotes').value = r.adminNotes || '';
+
+                    // Load time slots for the date
+                    await loadTimeSlots(r.selectedDate, r.selectedTime);
+
+                    document.getElementById('reservationModal').classList.add('active');
+                }
+            } catch (error) {
+                Swal.fire('خطأ', 'حدث خطأ في جلب البيانات', 'error');
+            }
+        }
+
+        // Load time slots
+        async function loadTimeSlots(date, selectedTime = null) {
+            const timeSelect = document.getElementById('formTime');
+            timeSelect.innerHTML = '<option value="">جاري التحميل...</option>';
+
+            try {
+                const response = await fetch(`/reservation/available-slots/${date}`);
+                const result = await response.json();
+
+                timeSelect.innerHTML = '<option value="">اختر الوقت</option>';
+
+                if (result.success && result.slots) {
+                    result.slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value = slot;
+                        option.textContent = slot;
+                        if (slot === selectedTime) option.selected = true;
+                        timeSelect.appendChild(option);
+                    });
+
+                    // Add selected time if not in available slots (for editing)
+                    if (selectedTime && !result.slots.includes(selectedTime)) {
+                        const option = document.createElement('option');
+                        option.value = selectedTime;
+                        option.textContent = selectedTime + ' (الموعد الحالي)';
+                        option.selected = true;
+                        timeSelect.appendChild(option);
+                    }
+                }
+            } catch (error) {
+                timeSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+            }
+        }
+
+        // Date change handler
+        document.getElementById('formDate').addEventListener('change', function() {
+            loadTimeSlots(this.value);
+        });
+
+        // Save reservation
+        async function saveReservation() {
+            const id = document.getElementById('reservationId').value;
+            const data = {
+                name: document.getElementById('formName').value,
+                phone: document.getElementById('formPhone').value,
+                birthDate: document.getElementById('formBirthDate').value,
+                gender: document.getElementById('formGender').value,
+                type: document.getElementById('formType').value,
+                status: document.getElementById('formStatus').value,
+                selectedDate: document.getElementById('formDate').value,
+                selectedTime: document.getElementById('formTime').value,
+                notes: document.getElementById('formNotes').value,
+                adminNotes: document.getElementById('formAdminNotes').value
+            };
+
+            if (!data.name || !data.phone || !data.selectedDate || !data.selectedTime) {
+                Swal.fire('تنبيه', 'يرجى ملء جميع الحقول المطلوبة', 'warning');
+                return;
+            }
+
+            try {
+                const url = id ? `/admin-reservations/${id}` : '/admin-reservations/add';
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الحفظ',
+                        text: result.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('خطأ', result.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('خطأ', 'حدث خطأ في الحفظ', 'error');
+            }
+        }
+
+        // Delete reservation
+        async function deleteReservation(id) {
+            const result = await Swal.fire({
+                title: 'تأكيد الحذف',
+                text: 'هل أنت متأكد من حذف هذا الحجز؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin-reservations/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        document.querySelector(`tr[data-id="${id}"]`).remove();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم الحذف',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire('خطأ', data.message, 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('خطأ', 'حدث خطأ في الحذف', 'error');
+                }
+            }
+        }
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

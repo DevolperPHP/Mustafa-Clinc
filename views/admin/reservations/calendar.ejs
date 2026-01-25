@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تقويم الحجوزات</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .calendar-page {
+            padding: 20px;
+            direction: rtl;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+            border-bottom: 3px solid #3B82F6;
+            padding-bottom: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Main Layout */
+        .calendar-layout {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .calendar-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Calendar Card */
+        .calendar-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .calendar-nav button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            background: #F3F4F6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .calendar-nav button:hover {
+            background: #E5E7EB;
+        }
+
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+
+        .calendar-weekday {
+            padding: 12px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #6B7280;
+            background: #F9FAFB;
+            border-radius: 8px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: #F9FAFB;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            border-color: #3B82F6;
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        .calendar-day.today {
+            background: #DBEAFE;
+            border-color: #3B82F6;
+        }
+
+        .calendar-day.has-availability {
+            background: #D1FAE5;
+        }
+
+        .calendar-day.has-reservations {
+            background: #FEF3C7;
+        }
+
+        .calendar-day.selected {
+            background: #3B82F6;
+            color: white;
+        }
+
+        .calendar-day.selected .day-number {
+            color: white;
+        }
+
+        .day-number {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .day-indicators {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .indicator-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .indicator-dot.available { background: #10B981; }
+        .indicator-dot.reserved { background: #F59E0B; }
+
+        /* Sidebar */
+        .sidebar-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1F2937;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        /* Add Date Range Form */
+        .add-range-form {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* Date Details */
+        .date-details {
+            display: none;
+        }
+
+        .date-details.active {
+            display: block;
+        }
+
+        .selected-date-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .selected-date-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1F2937;
+        }
+
+        .time-slots-list {
+            margin-bottom: 20px;
+        }
+
+        .time-slot-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #F9FAFB;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .time-slot-item.booked {
+            background: #FEF3C7;
+        }
+
+        .time-slot-time {
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .time-slot-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .time-slot-status.available {
+            background: #D1FAE5;
+            color: #047857;
+        }
+
+        .time-slot-status.booked {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        .reservations-list {
+            margin-top: 20px;
+        }
+
+        .reservation-item {
+            background: #F9FAFB;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .reservation-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .reservation-item-name {
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .reservation-item-time {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .reservation-item-details {
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.available { background: #D1FAE5; }
+        .legend-color.reserved { background: #FEF3C7; }
+        .legend-color.today { background: #DBEAFE; border: 2px solid #3B82F6; }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .quick-action-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .quick-action-btn:hover {
+            border-color: #3B82F6;
+            background: #F0F9FF;
+        }
+
+        .quick-action-btn ion-icon {
+            font-size: 24px;
+            color: #3B82F6;
+            display: block;
+            margin: 0 auto 4px;
+        }
+
+        .quick-action-btn span {
+            font-size: 12px;
+            color: #6B7280;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../../layout/navbar') -%>
+
+    <div class="calendar-page">
+        <div class="page-header">
+            <h1 class="page-title">تقويم المواعيد</h1>
+            <div class="header-actions">
+                <a href="/admin-reservations" class="btn btn-secondary">
+                    <ion-icon name="list"></ion-icon>
+                    قائمة الحجوزات
+                </a>
+            </div>
+        </div>
+
+        <div class="calendar-layout">
+            <!-- Calendar -->
+            <div class="calendar-card">
+                <div class="calendar-header">
+                    <div class="calendar-nav">
+                        <button onclick="changeMonth(-1)">
+                            <ion-icon name="chevron-forward"></ion-icon>
+                        </button>
+                        <button onclick="changeMonth(1)">
+                            <ion-icon name="chevron-back"></ion-icon>
+                        </button>
+                    </div>
+                    <h2 class="calendar-title" id="calendarTitle"></h2>
+                    <button class="btn btn-sm btn-secondary" onclick="goToToday()">اليوم</button>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Generated by JavaScript -->
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color today"></div>
+                        <span>اليوم</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color available"></div>
+                        <span>متاح</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color reserved"></div>
+                        <span>يوجد حجوزات</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar-card">
+                <!-- Add Date Range -->
+                <div class="add-range-form">
+                    <h3 class="sidebar-title">إضافة مواعيد جديدة</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>من تاريخ</label>
+                            <input type="date" id="startDate">
+                        </div>
+                        <div class="form-group">
+                            <label>إلى تاريخ</label>
+                            <input type="date" id="endDate">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>من الساعة</label>
+                            <select id="startTime">
+                                <option value="09:00">9:00 ص</option>
+                                <option value="10:00">10:00 ص</option>
+                                <option value="11:00">11:00 ص</option>
+                                <option value="12:00">12:00 م</option>
+                                <option value="13:00">1:00 م</option>
+                                <option value="14:00">2:00 م</option>
+                                <option value="15:00" selected>3:00 م</option>
+                                <option value="16:00">4:00 م</option>
+                                <option value="17:00">5:00 م</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>إلى الساعة</label>
+                            <select id="endTime">
+                                <option value="17:00">5:00 م</option>
+                                <option value="18:00">6:00 م</option>
+                                <option value="19:00">7:00 م</option>
+                                <option value="20:00">8:00 م</option>
+                                <option value="21:00" selected>9:00 م</option>
+                                <option value="22:00">10:00 م</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>مدة الجلسة</label>
+                        <select id="sessionDuration">
+                            <option value="30" selected>30 دقيقة</option>
+                            <option value="45">45 دقيقة</option>
+                            <option value="60">60 دقيقة</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="excludeFridays" checked>
+                            <label for="excludeFridays">استثناء يوم الجمعة</label>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success" onclick="addDateRange()">
+                        <ion-icon name="add-circle"></ion-icon>
+                        إضافة المواعيد
+                    </button>
+                </div>
+
+                <!-- Selected Date Details -->
+                <div class="date-details" id="dateDetails">
+                    <div class="selected-date-header">
+                        <h3 class="selected-date-title" id="selectedDateTitle">-</h3>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSelectedDate()" id="deleteDateBtn" style="display: none;">
+                            <ion-icon name="trash"></ion-icon>
+                        </button>
+                    </div>
+
+                    <div id="dateContent">
+                        <p style="color: #6B7280; text-align: center; padding: 20px;">
+                            اختر تاريخاً من التقويم لعرض التفاصيل
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../../layout/footer') -%>
+
+    <script>
+        // Data from server
+        const availableDates = <%- JSON.stringify(availableDates || []) %>;
+        const reservations = <%- JSON.stringify(reservations || []) %>;
+
+        // Create lookup maps
+        const dateMap = {};
+        availableDates.forEach(d => {
+            dateMap[d.date] = d;
+        });
+
+        const reservationMap = {};
+        reservations.forEach(r => {
+            if (!reservationMap[r.selectedDate]) {
+                reservationMap[r.selectedDate] = [];
+            }
+            reservationMap[r.selectedDate].push(r);
+        });
+
+        // Calendar state
+        let currentDate = new Date();
+        let currentMonth = <%= currentMonth %> - 1;
+        let currentYear = <%= currentYear %>;
+        let selectedDate = null;
+        let selectedDateId = null;
+
+        const arabicMonths = [
+            'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+        ];
+
+        const arabicWeekdays = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const title = document.getElementById('calendarTitle');
+
+            title.textContent = `${arabicMonths[currentMonth]} ${currentYear}`;
+
+            // Clear grid
+            grid.innerHTML = '';
+
+            // Add weekday headers
+            arabicWeekdays.forEach(day => {
+                const dayEl = document.createElement('div');
+                dayEl.className = 'calendar-weekday';
+                dayEl.textContent = day;
+                grid.appendChild(dayEl);
+            });
+
+            // Get first day of month and number of days
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const startDay = firstDay.getDay();
+
+            // Get today
+            const today = new Date();
+            const todayStr = formatDate(today);
+
+            // Previous month days
+            const prevMonthLastDay = new Date(currentYear, currentMonth, 0).getDate();
+            for (let i = startDay - 1; i >= 0; i--) {
+                const dayEl = createDayElement(prevMonthLastDay - i, true);
+                grid.appendChild(dayEl);
+            }
+
+            // Current month days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = formatDate(new Date(currentYear, currentMonth, day));
+                const dayEl = createDayElement(day, false, dateStr, dateStr === todayStr);
+                grid.appendChild(dayEl);
+            }
+
+            // Next month days
+            const totalCells = grid.children.length;
+            const remaining = 42 - totalCells; // 6 rows * 7 days
+            for (let i = 1; i <= remaining; i++) {
+                const dayEl = createDayElement(i, true);
+                grid.appendChild(dayEl);
+            }
+        }
+
+        function createDayElement(day, isOtherMonth, dateStr = null, isToday = false) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'calendar-day';
+            
+            if (isOtherMonth) {
+                dayEl.classList.add('other-month');
+            }
+            
+            if (isToday) {
+                dayEl.classList.add('today');
+            }
+
+            if (dateStr) {
+                dayEl.dataset.date = dateStr;
+                dayEl.onclick = () => selectDate(dateStr);
+
+                // Check if date has availability or reservations
+                const hasAvailability = dateMap[dateStr] && dateMap[dateStr].isAvailable;
+                const hasReservations = reservationMap[dateStr] && reservationMap[dateStr].length > 0;
+
+                if (hasAvailability && !hasReservations) {
+                    dayEl.classList.add('has-availability');
+                } else if (hasReservations) {
+                    dayEl.classList.add('has-reservations');
+                }
+
+                // Add indicators
+                if (hasAvailability || hasReservations) {
+                    const indicators = document.createElement('div');
+                    indicators.className = 'day-indicators';
+                    
+                    if (hasAvailability) {
+                        const dot = document.createElement('div');
+                        dot.className = 'indicator-dot available';
+                        indicators.appendChild(dot);
+                    }
+                    
+                    if (hasReservations) {
+                        const dot = document.createElement('div');
+                        dot.className = 'indicator-dot reserved';
+                        indicators.appendChild(dot);
+                    }
+                    
+                    dayEl.appendChild(indicators);
+                }
+
+                if (dateStr === selectedDate) {
+                    dayEl.classList.add('selected');
+                }
+            }
+
+            const numberEl = document.createElement('div');
+            numberEl.className = 'day-number';
+            numberEl.textContent = day;
+            dayEl.insertBefore(numberEl, dayEl.firstChild);
+
+            return dayEl;
+        }
+
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function goToToday() {
+            const today = new Date();
+            currentMonth = today.getMonth();
+            currentYear = today.getFullYear();
+            renderCalendar();
+            selectDate(formatDate(today));
+        }
+
+        function selectDate(dateStr) {
+            selectedDate = dateStr;
+            selectedDateId = dateMap[dateStr]?._id || null;
+            
+            // Update calendar selection
+            document.querySelectorAll('.calendar-day').forEach(el => {
+                el.classList.remove('selected');
+                if (el.dataset.date === dateStr) {
+                    el.classList.add('selected');
+                }
+            });
+
+            // Show date details
+            document.getElementById('dateDetails').classList.add('active');
+            document.getElementById('selectedDateTitle').textContent = dateStr;
+            
+            const dateInfo = dateMap[dateStr];
+            const dateReservations = reservationMap[dateStr] || [];
+            const content = document.getElementById('dateContent');
+            const deleteBtn = document.getElementById('deleteDateBtn');
+
+            if (dateInfo) {
+                deleteBtn.style.display = 'block';
+                
+                // Get booked times
+                const bookedTimes = dateReservations.map(r => r.selectedTime);
+                
+                let html = '<div class="time-slots-list">';
+                html += '<h4 style="font-size: 14px; margin-bottom: 12px; color: #374151;">الأوقات المتاحة</h4>';
+                
+                dateInfo.timeSlots.forEach(slot => {
+                    const isBooked = bookedTimes.includes(slot);
+                    html += `
+                        <div class="time-slot-item ${isBooked ? 'booked' : ''}">
+                            <span class="time-slot-time">${slot}</span>
+                            <span class="time-slot-status ${isBooked ? 'booked' : 'available'}">
+                                ${isBooked ? 'محجوز' : 'متاح'}
+                            </span>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+
+                if (dateReservations.length > 0) {
+                    html += '<div class="reservations-list">';
+                    html += '<h4 style="font-size: 14px; margin-bottom: 12px; color: #374151;">الحجوزات</h4>';
+                    
+                    dateReservations.forEach(r => {
+                        html += `
+                            <div class="reservation-item">
+                                <div class="reservation-item-header">
+                                    <span class="reservation-item-name">${r.name}</span>
+                                    <span class="reservation-item-time">${r.selectedTime}</span>
+                                </div>
+                                <div class="reservation-item-details">
+                                    ${r.phone} - ${r.type}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // Add toggle availability button
+                html += `
+                    <button class="btn ${dateInfo.isAvailable ? 'btn-danger' : 'btn-success'}" 
+                            onclick="toggleAvailability('${dateInfo._id}')" style="margin-top: 16px;">
+                        ${dateInfo.isAvailable ? 'تعطيل هذا التاريخ' : 'تفعيل هذا التاريخ'}
+                    </button>
+                `;
+
+                content.innerHTML = html;
+            } else {
+                deleteBtn.style.display = 'none';
+                content.innerHTML = `
+                    <p style="color: #6B7280; text-align: center; padding: 20px;">
+                        هذا التاريخ غير مضاف للمواعيد المتاحة
+                    </p>
+                    <button class="btn btn-primary" onclick="addSingleDate('${dateStr}')">
+                        <ion-icon name="add-circle"></ion-icon>
+                        إضافة هذا التاريخ
+                    </button>
+                `;
+            }
+        }
+
+        async function addDateRange() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const sessionDuration = document.getElementById('sessionDuration').value;
+            const excludeFridays = document.getElementById('excludeFridays').checked;
+
+            if (!startDate || !endDate) {
+                Swal.fire('تنبيه', 'يرجى تحديد نطاق التواريخ', 'warning');
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin-reservations/dates/add-range', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        startDate,
+                        endDate,
+                        startTime,
+                        endTime,
+                        sessionDuration,
+                        excludeFridays
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: result.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('خطأ', result.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('خطأ', 'حدث خطأ في الإضافة', 'error');
+            }
+        }
+
+        async function addSingleDate(dateStr) {
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const sessionDuration = document.getElementById('sessionDuration').value;
+
+            try {
+                const response = await fetch('/admin-reservations/dates/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: dateStr,
+                        startTime,
+                        endTime,
+                        sessionDuration
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تمت الإضافة',
+                        text: 'تم إضافة التاريخ بنجاح',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('خطأ', result.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('خطأ', 'حدث خطأ في الإضافة', 'error');
+            }
+        }
+
+        async function toggleAvailability(id) {
+            try {
+                const response = await fetch(`/admin-reservations/dates/${id}/toggle`, {
+                    method: 'PUT'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: result.message,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('خطأ', result.message, 'error');
+                }
+            } catch (error) {
+                Swal.fire('خطأ', 'حدث خطأ', 'error');
+            }
+        }
+
+        async function deleteSelectedDate() {
+            if (!selectedDateId) return;
+
+            const result = await Swal.fire({
+                title: 'تأكيد الحذف',
+                text: 'هل أنت متأكد من حذف هذا التاريخ؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#DC2626',
+                cancelButtonColor: '#6B7280',
+                confirmButtonText: 'نعم، احذف',
+                cancelButtonText: 'إلغاء'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`/admin-reservations/dates/${selectedDateId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'تم الحذف',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('خطأ', data.message, 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('خطأ', 'حدث خطأ في الحذف', 'error');
+                }
+            }
+        }
+
+        // Initialize
+        renderCalendar();
+    </script>
+</body>
+
+</html>

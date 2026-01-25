@@ -1142,7 +1142,1011 @@ section {
     }
 }
 
+/* ==================== SERVICES SECTION ==================== */
+.services-section {
+    background: var(--bg-white);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.service-card {
+    background: var(--bg-white);
+    border: 1px solid var(--bg-light);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+
+.service-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.service-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--spacing-md);
+    border-radius: var(--radius-full);
+    background: var(--primary-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.service-icon ion-icon {
+    font-size: 32px;
+    color: var(--primary);
+}
+
+.service-card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-sm);
+}
+
+.service-card p {
+    font-size: 14px;
+    color: var(--text-gray);
+    line-height: 1.6;
+}
+
+/* ==================== TESTIMONIALS SECTION ==================== */
+.testimonials-section {
+    background: var(--bg-gray);
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.testimonial-card {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.testimonial-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.testimonial-rating {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--spacing-md);
+}
+
+.testimonial-rating ion-icon {
+    font-size: 20px;
+    color: #FFA500;
+}
+
+.testimonial-text {
+    font-size: 15px;
+    color: var(--text-gray);
+    line-height: 1.8;
+    margin-bottom: var(--spacing-lg);
+    font-style: italic;
+}
+
+.testimonial-author {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.author-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.author-title {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* ==================== ABOUT THERAPIST SECTION ==================== */
+.about-therapist-section {
+    background: var(--bg-white);
+}
+
+.about-therapist-content {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: var(--spacing-2xl);
+    align-items: center;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.therapist-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.therapist-image-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.therapist-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    animation: badge-pulse 2s ease-in-out infinite;
+}
+
+.therapist-badge ion-icon {
+    font-size: 18px;
+    color: white;
+}
+
+.therapist-badge span {
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+}
+
+@keyframes badge-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.therapist-decoration {
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    background: linear-gradient(135deg, var(--primary-lighter) 0%, rgba(99, 102, 241, 0.1) 100%);
+    border-radius: 32px;
+    z-index: -1;
+    animation: decoration-float 3s ease-in-out infinite;
+}
+
+@keyframes decoration-float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(2deg);
+    }
+}
+
+.therapist-image-wrapper img {
+    position: relative;
+    width: 360px;
+    height: 360px;
+    object-fit: cover;
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1;
+    transition: all var(--transition-normal);
+}
+
+.therapist-image-wrapper:hover img {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-glow);
+}
+
+.therapist-image-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 370px;
+    height: 370px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-blue) 100%);
+    border-radius: 28px;
+    z-index: -2;
+    opacity: 0.2;
+    transform: rotate(2deg);
+    animation: float-before-new 4s ease-in-out infinite;
+}
+
+@keyframes float-before-new {
+    0%, 100% {
+        transform: rotate(2deg) translateY(0);
+    }
+    50% {
+        transform: rotate(2deg) translateY(-8px);
+    }
+}
+
+.therapist-image-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 380px;
+    height: 380px;
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--primary-light) 100%);
+    border-radius: 32px;
+    z-index: -3;
+    opacity: 0.12;
+    transform: rotate(-2deg);
+    animation: float-after-new 5s ease-in-out infinite;
+}
+
+@keyframes float-after-new {
+    0%, 100% {
+        transform: rotate(-2deg) translateY(0);
+    }
+    50% {
+        transform: rotate(-2deg) translateY(-12px);
+    }
+}
+
+.therapist-info {
+    padding: var(--spacing-lg);
+}
+
+.therapist-info .section-title {
+    margin-bottom: var(--spacing-xs);
+}
+
+.therapist-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.therapist-university {
+    font-size: 15px;
+    color: var(--text-gray);
+    margin-bottom: var(--spacing-lg);
+}
+
+.therapist-about {
+    margin-bottom: var(--spacing-lg);
+}
+
+.therapist-about p {
+    font-size: 15px;
+    color: var(--text-gray);
+    line-height: 1.8;
+    margin-bottom: var(--spacing-md);
+}
+
+.therapist-credentials {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.credential-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 14px;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.credential-item ion-icon {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+/* ==================== FAQ SECTION ==================== */
+.faq-section {
+    background: var(--bg-gray);
+}
+
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.faq-item {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-normal);
+}
+
+.faq-item:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.faq-question {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.faq-question ion-icon {
+    font-size: 24px;
+    color: var(--primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.faq-question h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.faq-answer p {
+    font-size: 14px;
+    color: var(--text-gray);
+    line-height: 1.7;
+    padding-right: 34px;
+}
+
+/* ==================== LOCATION SECTION ==================== */
+.location-section {
+    background: var(--bg-white);
+}
+
+.location-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-2xl);
+    align-items: start;
+}
+
+.location-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.location-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--bg-gray);
+    border-radius: var(--radius-sm);
+}
+
+.location-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: var(--primary-lighter);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.location-icon ion-icon {
+    font-size: 22px;
+    color: var(--primary);
+}
+
+.location-text h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+}
+
+.location-text p {
+    font-size: 14px;
+    color: var(--text-gray);
+}
+
+.working-hours {
+    background: var(--bg-gray);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+}
+
+.working-hours h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-md);
+}
+
+.hours-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.hours-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--bg-light);
+}
+
+.hours-item:last-child {
+    border-bottom: none;
+}
+
+.hours-item .day {
+    font-size: 14px;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.hours-item .time {
+    font-size: 14px;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.location-map {
+    position: sticky;
+    top: 100px;
+}
+
+.location-map iframe {
+    box-shadow: var(--shadow-md);
+}
+
+/* ==================== WHATSAPP FLOATING BUTTON ==================== */
+.whatsapp-float {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    width: 60px;
+    height: 60px;
+    background: #25D366;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+    transition: all var(--transition-normal);
+    z-index: 9999;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+}
+
+.whatsapp-float ion-icon {
+    font-size: 32px;
+}
+
+/* ==================== RESPONSIVE DESIGN FOR NEW SECTIONS ==================== */
+@media (max-width: 1024px) {
+    .about-therapist-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .therapist-image {
+        order: 1;
+    }
+
+    .therapist-info {
+        order: 2;
+    }
+
+    .location-content {
+        grid-template-columns: 1fr;
+    }
+
+    .location-map {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .services-grid,
+    .testimonials-grid,
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .therapist-badge {
+        top: -5px;
+        right: -5px;
+        padding: 8px 14px;
+    }
+
+    .therapist-badge ion-icon {
+        font-size: 16px;
+    }
+
+    .therapist-badge span {
+        font-size: 12px;
+    }
+
+    .therapist-decoration {
+        width: 300px;
+        height: 300px;
+    }
+
+    .therapist-image-wrapper img {
+        width: 280px;
+        height: 280px;
+    }
+
+    .therapist-image-wrapper::before {
+        width: 290px;
+        height: 290px;
+    }
+
+    .therapist-image-wrapper::after {
+        width: 300px;
+        height: 300px;
+    }
+
+    .whatsapp-float {
+        bottom: 20px;
+        left: 20px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .whatsapp-float ion-icon {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 480px) {
+    .service-card,
+    .testimonial-card,
+    .faq-item {
+        padding: var(--spacing-md);
+    }
+
+    .therapist-badge {
+        top: -3px;
+        right: -3px;
+        padding: 6px 12px;
+    }
+
+    .therapist-badge ion-icon {
+        font-size: 14px;
+    }
+
+    .therapist-badge span {
+        font-size: 11px;
+    }
+
+    .therapist-decoration {
+        width: 240px;
+        height: 240px;
+    }
+
+    .therapist-image-wrapper img {
+        width: 220px;
+        height: 220px;
+    }
+
+    .therapist-image-wrapper::before {
+        width: 230px;
+        height: 230px;
+    }
+
+    .therapist-image-wrapper::after {
+        width: 240px;
+        height: 240px;
+    }
+
+    .about-therapist-content {
+        gap: var(--spacing-lg);
+    }
+}
+
 /* ==================== UTILITY CLASSES ==================== */
 .text-center {
     text-align: center;
+}
+
+/* ==================== RESERVATION STEPS & OTP STYLES ==================== */
+.reservation-steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md) 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    opacity: 0.5;
+    transition: all var(--transition-normal);
+}
+
+.step.active {
+    opacity: 1;
+}
+
+.step.completed {
+    opacity: 1;
+}
+
+.step.completed .step-number {
+    background: #22C55E;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: var(--bg-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-gray);
+    transition: all var(--transition-normal);
+}
+
+.step.active .step-number {
+    background: var(--primary);
+    color: white;
+}
+
+.step-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-gray);
+}
+
+.step.active .step-label {
+    color: var(--primary);
+}
+
+.step-line {
+    width: 80px;
+    height: 2px;
+    background: var(--bg-light);
+    margin: 0 var(--spacing-sm);
+}
+
+/* Time Slots Container */
+.time-slots-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: var(--spacing-md);
+    background: var(--bg-white);
+    border: 1px solid var(--bg-light);
+    border-radius: var(--radius-sm);
+    min-height: 60px;
+    align-items: center;
+}
+
+.time-slots-placeholder,
+.time-slots-loading,
+.time-slots-empty,
+.time-slots-error {
+    width: 100%;
+    text-align: center;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.time-slots-loading ion-icon {
+    margin-left: 8px;
+}
+
+.time-slots-error {
+    color: #EF4444;
+}
+
+.time-slot-btn {
+    padding: 10px 18px;
+    background: var(--bg-gray);
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.time-slot-btn:hover {
+    border-color: var(--primary);
+    background: var(--primary-lighter);
+}
+
+.time-slot-btn.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.form-hint {
+    font-size: 12px;
+    color: var(--text-light);
+    margin-top: 4px;
+}
+
+/* OTP Verification Step */
+.otp-verification-step {
+    background: var(--bg-gray);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.otp-header {
+    margin-bottom: var(--spacing-lg);
+}
+
+.otp-icon {
+    font-size: 48px;
+    color: var(--primary);
+    margin-bottom: var(--spacing-md);
+}
+
+.otp-header h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-xs);
+}
+
+.otp-header p {
+    font-size: 14px;
+    color: var(--text-gray);
+}
+
+.otp-header span {
+    font-weight: 600;
+    color: var(--primary);
+    direction: ltr;
+    display: inline-block;
+}
+
+.otp-input-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: var(--spacing-md);
+    direction: ltr;
+}
+
+.otp-input {
+    width: 50px;
+    height: 60px;
+    border: 2px solid var(--bg-light);
+    border-radius: var(--radius-sm);
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    font-family: inherit;
+    transition: all var(--transition-fast);
+}
+
+.otp-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.otp-timer {
+    font-size: 14px;
+    color: var(--text-gray);
+    margin-bottom: var(--spacing-md);
+}
+
+.otp-timer #otpCountdown {
+    font-weight: 700;
+    color: var(--primary);
+    direction: ltr;
+    display: inline-block;
+}
+
+.otp-error {
+    background: #FEE2E2;
+    color: #DC2626;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    margin-bottom: var(--spacing-md);
+}
+
+.otp-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.otp-actions .btn {
+    min-width: 250px;
+}
+
+.btn-link {
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    font-size: 14px;
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    transition: color var(--transition-fast);
+}
+
+.btn-link:hover {
+    color: var(--primary);
+}
+
+/* Success Step */
+.success-step {
+    background: var(--bg-gray);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.success-icon {
+    margin-bottom: var(--spacing-md);
+}
+
+.success-icon ion-icon {
+    font-size: 80px;
+    color: #22C55E;
+}
+
+.success-step h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: var(--spacing-lg);
+}
+
+.reservation-summary {
+    background: var(--bg-white);
+    border-radius: var(--radius-sm);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.summary-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--bg-light);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.summary-item ion-icon {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.summary-item span {
+    font-size: 15px;
+    color: var(--text-dark);
+}
+
+.success-message {
+    font-size: 14px;
+    color: var(--text-gray);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Button Loader */
+.btn-loader {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Secondary Button */
+.btn-secondary {
+    background: var(--bg-light);
+    color: var(--text-dark);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--bg-gray);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments for reservation */
+@media (max-width: 768px) {
+    .reservation-steps {
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+    }
+    
+    .step-line {
+        width: 40px;
+    }
+    
+    .step-number {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+    
+    .step-label {
+        font-size: 12px;
+    }
+    
+    .otp-input-container {
+        gap: 8px;
+    }
+    
+    .otp-input {
+        width: 42px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .otp-actions .btn {
+        min-width: 100%;
+    }
+    
+    .time-slot-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .otp-input {
+        width: 36px;
+        height: 44px;
+        font-size: 18px;
+    }
 }

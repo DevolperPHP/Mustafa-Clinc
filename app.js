@@ -17,11 +17,14 @@ const fees = require('./routes/fees')
 const expenses = require('./routes/expenses')
 const analysis = require('./routes/analysis')
 const dates = require('./routes/dates')
+const reservation = require('./routes/reservation')
+const adminReservations = require('./routes/admin-reservations')
 
 let port = 3000;
 app.set('view engine', 'ejs')
 
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 app.use(express.static("public"))
 app.use(cookieParsre())
 app.use(methodOverride("_method"))
@@ -44,6 +47,8 @@ app.use('/fees', fees)
 app.use('/expenses', expenses)
 app.use('/analysis', analysis)
 app.use('/dates', dates)
+app.use('/reservation', reservation)
+app.use('/admin-reservations', adminReservations)
 
 app.listen(port, (err) => {
     if(err) throw err

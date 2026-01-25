@@ -769,6 +769,10 @@
                     <ion-icon name="cash"></ion-icon>
                     <span>المصاريف</span>
                 </a>
+                <a href="/admin-reservations" class="nav-link <%= typeof page !== 'undefined' && page === 'reservations' ? 'active' : '' %>">
+                    <ion-icon name="calendar-number"></ion-icon>
+                    <span>الحجوزات</span>
+                </a>
             </div>
             <% } %>
 
@@ -853,6 +857,11 @@
             <a href="/expenses" class="mobile-nav-item" onclick="closeMobileMenu()">
                 <ion-icon name="cash"></ion-icon>
                 <span>المصاريف</span>
+            </a>
+
+            <a href="/admin-reservations" class="mobile-nav-item" onclick="closeMobileMenu()">
+                <ion-icon name="calendar-number"></ion-icon>
+                <span>الحجوزات</span>
             </a>
         </div>
 
