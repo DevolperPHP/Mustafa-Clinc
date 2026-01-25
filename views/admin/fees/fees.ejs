@@ -1,4 +1,4 @@
-<%- include('../../layout/navbar') -%>
+<%- include('../../layout/sidebar-start') -%>
 
     <% if(suc.length> 0){%>
         <script>
@@ -152,4 +152,4 @@
                 const data = "<%= names %>".split(",");
                 autocomplete(document.getElementById("myInput"), data);
             </script>
-            <%- include('../../layout/footer') -%>
+            <%- include('../../layout/sidebar-end') -%>

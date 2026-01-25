@@ -1,0 +1,100 @@
+    </main>
+
+    <script>
+        // Sidebar Toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const isMobile = window.innerWidth <= 1024;
+
+            if (isMobile) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+            } else {
+                sidebar.classList.toggle('collapsed');
+                document.body.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            }
+        }
+
+        // Restore sidebar state
+        if (localStorage.getItem('sidebarCollapsed') === 'true' && window.innerWidth > 1024) {
+            document.getElementById('sidebar').classList.add('collapsed');
+            document.body.classList.add('sidebar-collapsed');
+        }
+
+        // Search Modal
+        function openSearch() {
+            const modal = document.getElementById('searchModal');
+            const input = document.getElementById('searchInput');
+            modal.classList.add('show');
+            input.value = '';
+            input.focus();
+        }
+
+        function closeSearch() {
+            document.getElementById('searchModal').classList.remove('show');
+        }
+
+        // Search with debounce
+        let searchTimeout;
+        document.getElementById('searchInput')?.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+
+            if (query.length < 2) {
+                document.getElementById('searchResults').innerHTML = '';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                fetch(`/patient/api/patients?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const results = document.getElementById('searchResults');
+                        if (data.patients && data.patients.length > 0) {
+                            results.innerHTML = data.patients.map(p => `
+                                <div class="search-result-item" onclick="window.location.href='/patient/get-by-id/${p._id}'">
+                                    <div class="search-result-icon">
+                                        <ion-icon name="person"></ion-icon>
+                                    </div>
+                                    <div class="search-result-info">
+                                        <h4>${p.name}</h4>
+                                        <p>${p.phone || 'لا يوجد هاتف'}</p>
+                                    </div>
+                                </div>
+                            `).join('');
+                        } else {
+                            results.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--gray-400);"><ion-icon name="search-outline" style="font-size: 48px; display: block; margin: 0 auto 12px;"></ion-icon><p>لا توجد نتائج</p></div>';
+                        }
+                    })
+                    .catch(err => console.error('Search error:', err));
+            }, 300);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                openSearch();
+            }
+            if (e.key === 'Escape') {
+                closeSearch();
+            }
+        });
+
+        // Handle responsive
+        window.addEventListener('resize', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+
+            if (window.innerWidth > 1024) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
+</body>
+</html>

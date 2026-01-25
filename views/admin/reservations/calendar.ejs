@@ -1,458 +1,451 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<%- include('../../layout/sidebar-start') -%>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تقويم الحجوزات</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        .calendar-page {
-            padding: 0;
-            direction: rtl;
-        }
+<style>
+    .calendar-page {
+        padding: 0;
+        direction: rtl;
+    }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
 
-        .page-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--gray-900);
-            border-bottom: 3px solid #3B82F6;
-            padding-bottom: 8px;
-        }
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--gray-900);
+        border-bottom: 3px solid #3B82F6;
+        padding-bottom: 8px;
+    }
 
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
+    .header-actions {
+        display: flex;
+        gap: 12px;
+    }
 
-        /* Main Layout */
+    /* Main Layout */
+    .calendar-layout {
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 24px;
+    }
+
+    @media (max-width: 1024px) {
         .calendar-layout {
-            display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 24px;
+            grid-template-columns: 1fr;
         }
-
-        @media (max-width: 1024px) {
-            .calendar-layout {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Calendar Card */
-        .calendar-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .calendar-nav {
-            display: flex;
-            gap: 8px;
-        }
-
-        .calendar-nav button {
-            width: 40px;
-            height: 40px;
-            border: none;
-            border-radius: 8px;
-            background: #F3F4F6;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .calendar-nav button:hover {
-            background: #E5E7EB;
-        }
-
-        .calendar-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #1F2937;
-        }
-
-        /* Calendar Grid */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 4px;
-        }
-
-        .calendar-weekday {
-            padding: 12px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #6B7280;
-            background: #F9FAFB;
-            border-radius: 8px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            background: #F9FAFB;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 8px;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            border-color: #3B82F6;
-        }
-
-        .calendar-day.other-month {
-            opacity: 0.3;
-        }
-
-        .calendar-day.today {
-            background: #DBEAFE;
-            border-color: #3B82F6;
-        }
-
-        .calendar-day.has-availability {
-            background: #D1FAE5;
-        }
-
-        .calendar-day.has-reservations {
-            background: #FEF3C7;
-        }
-
-        .calendar-day.selected {
-            background: #3B82F6;
-            color: white;
-        }
-
-        .calendar-day.selected .day-number {
-            color: white;
-        }
-
-        .day-number {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1F2937;
-        }
-
-        .day-indicators {
-            display: flex;
-            gap: 4px;
-            margin-top: 4px;
-        }
-
-        .indicator-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-        }
-
-        .indicator-dot.available { background: #10B981; }
-        .indicator-dot.reserved { background: #F59E0B; }
-
-        /* Sidebar */
-        .sidebar-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1F2937;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #E5E7EB;
-        }
-
-        /* Add Date Range Form */
-        .add-range-form {
-            margin-bottom: 24px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid #E5E7EB;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1.5px solid #E5E7EB;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-            width: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: white;
-        }
-
-        .btn-danger {
-            background: #EF4444;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #F3F4F6;
-            color: #374151;
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-
-        /* Date Details */
-        .date-details {
-            display: none;
-        }
-
-        .date-details.active {
-            display: block;
-        }
-
-        .selected-date-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .selected-date-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1F2937;
-        }
-
-        .time-slots-list {
-            margin-bottom: 20px;
-        }
-
-        .time-slot-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #F9FAFB;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .time-slot-item.booked {
-            background: #FEF3C7;
-        }
-
-        .time-slot-time {
-            font-weight: 600;
-            color: #1F2937;
-        }
-
-        .time-slot-status {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
-        }
-
-        .time-slot-status.available {
-            background: #D1FAE5;
-            color: #047857;
-        }
-
-        .time-slot-status.booked {
-            background: #FEE2E2;
-            color: #DC2626;
-        }
-
-        .reservations-list {
-            margin-top: 20px;
-        }
-
-        .reservation-item {
-            background: #F9FAFB;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 8px;
-        }
-
-        .reservation-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .reservation-item-name {
-            font-weight: 600;
-            color: #1F2937;
-        }
-
-        .reservation-item-time {
-            font-size: 12px;
-            color: #6B7280;
-        }
-
-        .reservation-item-details {
-            font-size: 13px;
-            color: #6B7280;
-        }
-
-        /* Legend */
-        .legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #E5E7EB;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: #6B7280;
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-        }
-
-        .legend-color.available { background: #D1FAE5; }
-        .legend-color.reserved { background: #FEF3C7; }
-        .legend-color.today { background: #DBEAFE; border: 2px solid #3B82F6; }
-
-        /* Quick Actions */
-        .quick-actions {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-
-        .quick-action-btn {
-            flex: 1;
-            padding: 10px;
-            border: 2px solid #E5E7EB;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .quick-action-btn:hover {
-            border-color: #3B82F6;
-            background: #F0F9FF;
-        }
-
-        .quick-action-btn ion-icon {
-            font-size: 24px;
-            color: #3B82F6;
-            display: block;
-            margin: 0 auto 4px;
-        }
-
-        .quick-action-btn span {
-            font-size: 12px;
-            color: #6B7280;
-        }
-    </style>
-</head>
-
-<body>
-    <%- include('../../layout/sidebar') -%>
-
-    <main class="main-content">
-    <div class="calendar-page">
+    }
+
+    /* Calendar Card */
+    .calendar-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .calendar-nav {
+        display: flex;
+        gap: 8px;
+    }
+
+    .calendar-nav button {
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 8px;
+        background: #F3F4F6;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .calendar-nav button:hover {
+        background: #E5E7EB;
+    }
+
+    .calendar-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1F2937;
+    }
+
+    /* Calendar Grid */
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 4px;
+    }
+
+    .calendar-weekday {
+        padding: 12px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: #6B7280;
+        background: #F9FAFB;
+        border-radius: 8px;
+    }
+
+    .calendar-day {
+        aspect-ratio: 1;
+        border: 2px solid transparent;
+        border-radius: 12px;
+        background: #F9FAFB;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .calendar-day:hover {
+        border-color: #3B82F6;
+    }
+
+    .calendar-day.other-month {
+        opacity: 0.3;
+    }
+
+    .calendar-day.today {
+        background: #DBEAFE;
+        border-color: #3B82F6;
+    }
+
+    .calendar-day.has-availability {
+        background: #D1FAE5;
+    }
+
+    .calendar-day.has-reservations {
+        background: #FEF3C7;
+    }
+
+    .calendar-day.selected {
+        background: #3B82F6;
+        color: white;
+    }
+
+    .calendar-day.selected .day-number {
+        color: white;
+    }
+
+    .day-number {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1F2937;
+    }
+
+    .day-indicators {
+        display: flex;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
+    .indicator-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
+
+    .indicator-dot.available { background: #10B981; }
+    .indicator-dot.reserved { background: #F59E0B; }
+
+    /* Sidebar Card - renamed to avoid conflict */
+    .sidebar-panel {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .sidebar-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1F2937;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #E5E7EB;
+    }
+
+    /* Add Date Range Form */
+    .add-range-form {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #E5E7EB;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-full {
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+
+    .btn-danger {
+        background: #EF4444;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #F3F4F6;
+        color: #374151;
+    }
+
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+
+    /* Date Details */
+    .date-details {
+        display: none;
+    }
+
+    .date-details.active {
+        display: block;
+    }
+
+    .selected-date-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .selected-date-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1F2937;
+    }
+
+    .time-slots-list {
+        margin-bottom: 20px;
+    }
+
+    .time-slot-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: #F9FAFB;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+
+    .time-slot-item.booked {
+        background: #FEF3C7;
+    }
+
+    .time-slot-time {
+        font-weight: 600;
+        color: #1F2937;
+    }
+
+    .time-slot-status {
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 12px;
+    }
+
+    .time-slot-status.available {
+        background: #D1FAE5;
+        color: #047857;
+    }
+
+    .time-slot-status.booked {
+        background: #FEE2E2;
+        color: #DC2626;
+    }
+
+    .reservations-list {
+        margin-top: 20px;
+    }
+
+    .reservation-item {
+        background: #F9FAFB;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .reservation-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .reservation-item-name {
+        font-weight: 600;
+        color: #1F2937;
+    }
+
+    .reservation-item-time {
+        font-size: 12px;
+        color: #6B7280;
+    }
+
+    .reservation-item-details {
+        font-size: 13px;
+        color: #6B7280;
+    }
+
+    /* Legend */
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #E5E7EB;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #6B7280;
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+    }
+
+    .legend-color.available { background: #D1FAE5; }
+    .legend-color.reserved { background: #FEF3C7; }
+    .legend-color.today { background: #DBEAFE; border: 2px solid #3B82F6; }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+    .quick-action-btn {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #E5E7EB;
+        border-radius: 8px;
+        background: white;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .quick-action-btn:hover {
+        border-color: #3B82F6;
+        background: #F0F9FF;
+    }
+
+    .quick-action-btn ion-icon {
+        font-size: 24px;
+        color: #3B82F6;
+        display: block;
+        margin: 0 auto 4px;
+    }
+
+    .quick-action-btn span {
+        font-size: 12px;
+        color: #6B7280;
+    }
+</style>
+
+<div class="calendar-page">
         <div class="page-header">
             <h1 class="page-title">تقويم المواعيد</h1>
             <div class="header-actions">
@@ -499,8 +492,8 @@
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="sidebar-card">
+            <!-- Sidebar Panel -->
+            <div class="sidebar-panel">
                 <!-- Add Date Range -->
                 <div class="add-range-form">
                     <h3 class="sidebar-title">إضافة مواعيد جديدة</h3>
@@ -584,7 +577,6 @@
             </div>
         </div>
     </div>
-    </main>
 
     <script>
         // Data from server
@@ -993,6 +985,5 @@
         // Initialize
         renderCalendar();
     </script>
-</body>
 
-</html>
+<%- include('../../layout/sidebar-end') -%>
