@@ -1,29 +1,6 @@
     </main>
 
     <script>
-        // Sidebar Toggle
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobileOverlay');
-            const isMobile = window.innerWidth <= 1024;
-
-            if (isMobile) {
-                sidebar.classList.toggle('show');
-                overlay.classList.toggle('show');
-                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
-            } else {
-                sidebar.classList.toggle('collapsed');
-                document.body.classList.toggle('sidebar-collapsed');
-                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-            }
-        }
-
-        // Restore sidebar state
-        if (localStorage.getItem('sidebarCollapsed') === 'true' && window.innerWidth > 1024) {
-            document.getElementById('sidebar').classList.add('collapsed');
-            document.body.classList.add('sidebar-collapsed');
-        }
-
         // Search Modal
         function openSearch() {
             const modal = document.getElementById('searchModal');
@@ -37,10 +14,10 @@
             document.getElementById('searchModal').classList.remove('show');
         }
 
-        // Search with debounce
-        let searchTimeout;
+        // Search with debounce (renamed to avoid conflict with dashboard searchTimeout)
+        let sidebarSearchTimeout;
         document.getElementById('searchInput')?.addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
+            clearTimeout(sidebarSearchTimeout);
             const query = e.target.value.trim();
 
             if (query.length < 2) {
@@ -48,7 +25,7 @@
                 return;
             }
 
-            searchTimeout = setTimeout(() => {
+            sidebarSearchTimeout = setTimeout(() => {
                 fetch(`/patient/api/patients?q=${encodeURIComponent(query)}`)
                     .then(res => res.json())
                     .then(data => {

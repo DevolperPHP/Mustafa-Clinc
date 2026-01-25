@@ -154,7 +154,7 @@
         .nav-section-title {
             font-size: 11px;
             font-weight: 600;
-            color: var(--gray-400);
+            color: #fff;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             padding: 8px 12px;
@@ -642,6 +642,33 @@
 </head>
 
 <body>
+    <script>
+        // Sidebar Toggle (defined early for inline onclick handlers)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const isMobile = window.innerWidth <= 1024;
+
+            if (isMobile) {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+            } else {
+                sidebar.classList.toggle('collapsed');
+                document.body.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            }
+        }
+
+        // Restore sidebar state
+        if (localStorage.getItem('sidebarCollapsed') === 'true' && window.innerWidth > 1024) {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('sidebar').classList.add('collapsed');
+                document.body.classList.add('sidebar-collapsed');
+            });
+        }
+    </script>
+
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
