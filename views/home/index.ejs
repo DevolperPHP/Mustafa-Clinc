@@ -875,6 +875,23 @@
                     clearInterval(otpTimer);
                     clearInterval(resendTimer);
 
+                    // Show SweetAlert success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم تأكيد الحجز بنجاح!',
+                        html: `
+                            <div style="text-align: right; direction: rtl; padding: 10px 0;">
+                                <p style="margin-bottom: 12px;"><strong>الاسم:</strong> ${result.reservation.name}</p>
+                                <p style="margin-bottom: 12px;"><strong>التاريخ:</strong> ${result.reservation.date}</p>
+                                <p style="margin-bottom: 12px;"><strong>الوقت:</strong> ${result.reservation.time}</p>
+                                <p style="margin-bottom: 0;"><strong>نوع الاستشارة:</strong> ${result.reservation.type}</p>
+                            </div>
+                        `,
+                        confirmButtonText: 'حسناً',
+                        confirmButtonColor: '#22C55E',
+                        allowOutsideClick: false
+                    });
+
                     // Show success step
                     otpVerificationStep.style.display = 'none';
                     successStep.style.display = 'block';
